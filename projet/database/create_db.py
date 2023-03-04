@@ -34,17 +34,25 @@ def metadata_pull(path) :
     -------
     metadata : list
         List of the header's name of the metadata.
+    data : numpy array
+        Array of metadata value for each image.
         
     """
-    path_meta = path + "/celeba/list_attr_celeba.txt"
-    with open(path_meta, "r") as file:
+    path_data = path + "/celeba/list_attr_celeba.txt"
+    with open(path_data, "r") as file:
         print(file.readline())
         metadata = file.readline()
 
     metadata = metadata.split(" ")
-    return metadata
+    
+    data = np.loadtxt(path_data, dtype = str, skiprows = 2)
+    
+    #Test choice
+    data = data[0:10]
+    
+    return metadata, data
 
-def create_meta_table(cursor, path_of_metadata) :
+def create_meta_table(cursor, metadata) :
     """
     Create the table of metadata in the database
 
@@ -56,9 +64,6 @@ def create_meta_table(cursor, path_of_metadata) :
         Path of the downloaded dataset.
     
     """
-    # Retrieve metadata :
-    metadata = metadata_pull(path_of_metadata)
-
     # Start the create table line :
     table_str = "[id] INTEGER PRIMARY KEY, "
     for el in metadata :
@@ -66,7 +71,31 @@ def create_meta_table(cursor, path_of_metadata) :
     table_str = table_str[:-2] # We retrieve the last 2 as there is no more data to append
 
     com_line = "CREATE TABLE IF NOT EXISTS portrait (%s)" %(table_str)
-    cursor.execute(comm)
+    cursor.execute(com_line)
+
+def insert_data(cursor, dataset) :
+    """
+    Insert data in the table
+
+    Take
+    -------
+    cursor : database.cursor
+        Cursor for the database
+    dataset : numpy.array
+        Contain thevalue of metadatas of the dataset
+    
+    """
+    # Add the index column to the dataset
+    dataset = np.insert(dataset, 0, list(range(0,len(dataset))), axis = 1)
+    
+    # Transform Dataset into tuple to provide for the cursor
+    list_data = []
+    for i in range(len(dataset)) :
+        list_data.append(tuple(dataset[i]))
+
+    # Insert data in the table
+    cursor.executemany("INSERT INTO portrait VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", list_data)
+    print('We have inserted', cursor.rowcount, 'records to the table.') # Testing possibility ?
 
 def create_database(path_of_metadata) :
     """
@@ -76,6 +105,8 @@ def create_database(path_of_metadata) :
     -------
     path : str
         Path of the downloaded dataset.
+    dataset : numpy.array
+        Contain the metadatas of the dataset
     
     Returns
     -------
@@ -86,22 +117,23 @@ def create_database(path_of_metadata) :
 
     con = sqlite3.connect('project_db')
     cursor = con.cursor()
+    
+    # Retrieve datas :
+    metadata, dataset = metadata_pull(path_of_metadata)
 
-    create_meta_table(cursor, path_of_metadata)
+    create_meta_table(cursor, metadata)
+
+    insert_data(cursor, dataset)
 
     return cursor
 
 
 path = get_dataset_path()
 
+#Download dataset
 first_data = torchvision.datasets.CelebA(root = path, transform = transforms.PILToTensor(), download = True)
 
-path_atr = path + "/celeba/list_attr_celeba.txt"
+db_cursor = create_database(path)
 
-# Uniquement le fichier attribut :
-data = np.loadtxt(path_atr, dtype = str, skiprows = 2)
-
-data = data[0:10]
-
-db_cursor = create_database(path_of_metadata)
-
+res = db_cursor.execute("SELECT * FROM portrait")
+test = res.fetchall()
