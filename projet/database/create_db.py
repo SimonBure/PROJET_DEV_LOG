@@ -23,7 +23,7 @@ def get_dataset_path() :
 
 def metadata_pull(path) :
     """
-    Get the metadata's name for creaiting the table in the database
+    Get the metadata's name for creating the table in the database
 
     Take
     -------
@@ -46,18 +46,15 @@ def metadata_pull(path) :
 
 def create_meta_table(cursor, path_of_metadata) :
     """
-    Get the metadata's name for creaiting the table in the database
+    Create the table of metadata in the database
 
     Take
     -------
+    cursor : database.cursor
+        Cursor for the database
     path : str
         Path of the downloaded dataset.
     
-    Returns
-    -------
-    metadata : list
-        List of the header's name of the metadata.
-        
     """
     # Retrieve metadata :
     metadata = metadata_pull(path_of_metadata)
@@ -73,7 +70,7 @@ def create_meta_table(cursor, path_of_metadata) :
 
 def create_database(path_of_metadata) :
     """
-    Get the metadata's name for creaiting the table in the database
+    Create the database needed for the project. Insert dataset CelebA from : <insert url ?>
 
     Take
     -------
