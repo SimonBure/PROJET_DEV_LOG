@@ -7,6 +7,20 @@ import torchvision.datasets
 import torchvision.transforms as transforms
 
 
+def get_sub_sys() :
+    """
+    As pathway are different in each computer, search for sub-sytem type
+    
+    Returns
+    -------
+    sys[0] : str
+        Name of sub-system.
+        
+    """
+    sys = platform.uname() # Collect system data
+    return sys[0]
+
+
 def get_dataset_path() :
     """
     As pathway are different in each computer, compute actual pathway to store data in
@@ -15,12 +29,12 @@ def get_dataset_path() :
     Returns
     -------
     path : str
-        Path of the dataset donload.
+        Path of the dataset download.
         
     """
     path = os.getcwd()  # Collect the path
-    sys = platform.uname() # Collect system data
-    if sys[0] == "Windows" :
+    sys = get_sub_sys() # Collect system data
+    if sys == "Windows" :
         path += "\img_dataset" # Windows style path
     else :
         path += "/img_dataset" # Linux/Mac style path
@@ -43,7 +57,14 @@ def metadata_pull(path) :
         Array of metadata value for each image.
         
     """
-    path_data = path + "/celeba/list_attr_celeba.txt"
+    
+    sys = get_sub_sys() # Collect system data
+    if sys == "Windows" :
+        path_data = path + "/celeba/list_attr_celeba.txt" # Windows style path
+    else :
+        path_data = path + "\celeba\list_attr_celeba.txt" # Linux/Mac style path
+        
+    
     with open(path_data, "r") as file:
         print(file.readline())
         metadata = file.readline()
@@ -75,10 +96,10 @@ def create_meta_table(cursor, metadata) :
         table_str += " [%s] TEXT, " %(el)
     table_str = table_str[:-2] # We retrieve the last 2 as there is no more data to append
 
-    com_line = "CREATE TABLE IF NOT EXISTS portrait (%s)" %(table_str)
+    com_line = "CREATE TABLE IF NOT EXISTS portrait (%s);" %(table_str)
     cursor.execute(com_line)
 
-def insert_data(cursor, dataset) :
+def insert_data(cursor, connect, dataset) :
     """
     Insert data in the table
 
@@ -97,10 +118,13 @@ def insert_data(cursor, dataset) :
     list_data = []
     for i in range(len(dataset)) :
         list_data.append(tuple(dataset[i]))
+        
+    print(list_data)
 
     # Insert data in the table
     cursor.executemany("INSERT INTO portrait VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", list_data)
     print('We have inserted', cursor.rowcount, 'records to the table.') # Testing possibility ?
+    connect.commit()
 
 def create_database(path_of_metadata) :
     """
@@ -128,17 +152,67 @@ def create_database(path_of_metadata) :
 
     create_meta_table(cursor, metadata)
 
-    insert_data(cursor, dataset)
+    insert_data(cursor, con, dataset)
 
-    return cursor
 
+def get_database_cursor() :
+    """
+    Create the database's cursor
+    
+    Returns
+    -------
+    cursor : database.cursor
+        Cursor for communicating with the database
+    connect : database.connector
+        Connector of the database
+    """
+    connect = sqlite3.connect('project_db')
+    cursor = connect.cursor()
+    return cursor, connect
+
+def request_data_by_id(numbers) :
+    """
+    Made a request that pull numbers id asked
+    
+    Take
+    -------
+    numbers : int, list, tuple or 1D array
+        id's image of database to pull
+    
+    Returns
+    -------
+    querry : str, list of str
+        filename of the selected id number
+    
+    """    
+    cursor, con = get_database_cursor()
+    
+    if type(numbers) == int :
+        res = cursor.execute("SELECT [5_o_Clock_Shadow] FROM portrait WHERE id = %s" %(numbers))
+        querry = res.fetchall()[0][0]
+    elif type(numbers) == list :
+        querry =  []
+        for id in numbers :
+            res = cursor.execute("SELECT [5_o_Clock_Shadow] FROM portrait WHERE id = %s" %(id))
+            querry.append(res.fetchall()[0][0])
+            
+    return querry
 
 path = get_dataset_path()
 
 #Download dataset
 #first_data = torchvision.datasets.CelebA(root = path, transform = transforms.PILToTensor(), download = True)
 
-db_cursor = create_database(path)
+create_database(path)
 
-res = db_cursor.execute("SELECT * FROM portrait")
+numbers = [1,3,6]
+
+print(request_data_by_id(numbers))
+
+db_cursor, con = get_database_cursor()
+
+querry = "SELECT * FROM portrait"
+res = db_cursor.execute(querry)
 test = res.fetchall()
+print(test)
+
