@@ -1,6 +1,7 @@
 import sqlite3
 import numpy as np
 import os
+import platform
 
 import torchvision.datasets
 import torchvision.transforms as transforms
@@ -17,8 +18,12 @@ def get_dataset_path() :
         Path of the dataset donload.
         
     """
-    path = os.getcwd()
-    path += "\img_dataset"
+    path = os.getcwd()  # Collect the path
+    sys = platform.uname() # Collect system data
+    if sys[0] == "Windows" :
+        path += "\img_dataset" # Windows style path
+    else :
+        path += "/img_dataset" # Linux/Mac style path
     return path
 
 def metadata_pull(path) :
@@ -131,7 +136,7 @@ def create_database(path_of_metadata) :
 path = get_dataset_path()
 
 #Download dataset
-first_data = torchvision.datasets.CelebA(root = path, transform = transforms.PILToTensor(), download = True)
+#first_data = torchvision.datasets.CelebA(root = path, transform = transforms.PILToTensor(), download = True)
 
 db_cursor = create_database(path)
 
