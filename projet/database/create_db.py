@@ -240,6 +240,9 @@ def request_data_by_metadata(array, path) :
 
 path = get_dataset_path()
 
+# Download dataset
+first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
+
 create_database(path)
 
 numbers = [1, 3, 6]
