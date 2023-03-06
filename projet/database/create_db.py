@@ -60,9 +60,9 @@ def metadata_pull(path) :
     
     sys = get_sub_sys() # Collect system data
     if sys == "Windows" :
-        path_data = path + "/celeba/list_attr_celeba.txt" # Windows style path
+        path_data = path + "\celeba\list_attr_celeba.txt" # Windows style path
     else :
-        path_data = path + "\celeba\list_attr_celeba.txt" # Linux/Mac style path
+        path_data = path + "/celeba/list_attr_celeba.txt" # Linux/Mac style path
         
     
     with open(path_data, "r") as file:
@@ -189,14 +189,16 @@ def request_data_by_id(numbers) :
     
     if type(numbers) == int :
         res = cursor.execute("SELECT [5_o_Clock_Shadow] FROM portrait WHERE id = %s" %(numbers))
-        querry = res.fetchall()[0][0]
-    elif type(numbers) == list :
+        querry = str(res.fetchall()[0])[2:-3]
+    else :
         querry =  []
         for id in numbers :
             res = cursor.execute("SELECT [5_o_Clock_Shadow] FROM portrait WHERE id = %s" %(id))
-            querry.append(res.fetchall()[0][0])
+            querry.append(str(res.fetchall()[0])[2:-3])
             
+        
     return querry
+
 
 path = get_dataset_path()
 
@@ -205,9 +207,12 @@ path = get_dataset_path()
 
 create_database(path)
 
-numbers = [1,3,6]
+numbers = np.array([1,3,6])
 
 print(request_data_by_id(numbers))
+
+meta = np.full((1,42),1)
+print(request_data_by_metadata(meta, path))
 
 db_cursor, con = get_database_cursor()
 
