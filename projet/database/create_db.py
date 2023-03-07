@@ -65,7 +65,7 @@ def metadata_pull(path):
         path_data = path + "/celeba/list_attr_celeba.txt"  # Linux/Mac style path
 
     with open(path_data, "r") as file:
-        print(file.readline())
+        file.readline()
         metadata = file.readline()
 
     metadata = metadata.split(" ")
@@ -91,8 +91,8 @@ def create_meta_table(cursor, metadata):
 
     """
     # Start the create table line :
-    table_str = "[id] INTEGER PRIMARY KEY, "
-    for el in metadata:
+    table_str = "[id] INTEGER PRIMARY KEY, [name] TEXT,"
+    for el in metadata[:-1] : # Because last = empty, img name ?
         table_str += " [%s] TEXT, " % (el)
     # We retrieve the last 2 as there is no more data to append
     table_str = table_str[:-2]
@@ -120,8 +120,6 @@ def insert_data(cursor, connect, dataset):
     list_data = []
     for i in range(len(dataset)):
         list_data.append(tuple(dataset[i]))
-
-    print(list_data)
 
     # Insert data in the table
     cursor.executemany(
@@ -194,12 +192,12 @@ def request_data_by_id(numbers):
     cursor, con = get_database_cursor()
 
     if type(numbers) == int :
-        res = cursor.execute("SELECT [5_o_Clock_Shadow] FROM portrait WHERE id = %s" %(numbers))
+        res = cursor.execute("SELECT [name] FROM portrait WHERE id = %s" %(numbers))
         querry = str(res.fetchall()[0])[2:-3]
     else :
         querry =  []
         for id in numbers :
-            res = cursor.execute("SELECT [5_o_Clock_Shadow] FROM portrait WHERE id = %s" %(id))
+            res = cursor.execute("SELECT [name] FROM portrait WHERE id = %s" %(id))
             querry.append(str(res.fetchall()[0])[2:-3])
             
         
@@ -227,13 +225,14 @@ def request_data_by_metadata(array, path) :
     metadata, data = metadata_pull(path)
     
     where_str = ""
-    for data in metadata[1:-1] : # Because 1 = image name and last = empty
-        where_str += "[%s] = ? AND" %(data)
+    for data in metadata[:-1] : # Because last = empty, img name ?
+        where_str += "[%s] = ? AND " %(data)
     where_str = where_str[:-4]
     print(where_str)
     
     
-    res = cursor.execute("SELECT * FROM portrait WHERE %s" %(where_str), list(array))
+    
+    res = cursor.execute("SELECT * FROM portrait WHERE %s" %(where_str), tuple(map(tuple, meta))[0])
     #querry = str(res.fetchall()[0])[2:-3]
     querry = res.fetchall()     
     return querry
@@ -241,13 +240,15 @@ def request_data_by_metadata(array, path) :
 path = get_dataset_path()
 
 # Download dataset
-first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
+if not os.path.exists(path + "/celeba") : # Prevent from requesting again
+    first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
 
 create_database(path)
 
 numbers = [1, 3, 6]
 
-meta = np.full((1,42),1)
+meta = [-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1]
+
 print(request_data_by_metadata(meta, path))
 
 print(request_data_by_id(numbers))
