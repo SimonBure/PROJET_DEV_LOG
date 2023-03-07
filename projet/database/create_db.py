@@ -228,11 +228,8 @@ def request_data_by_metadata(array, path) :
     for data in metadata[:-1] : # Because last = empty, img name ?
         where_str += "[%s] = ? AND " %(data)
     where_str = where_str[:-4]
-    print(where_str)
     
-    
-    
-    res = cursor.execute("SELECT * FROM portrait WHERE %s" %(where_str), tuple(map(tuple, meta))[0])
+    res = cursor.execute("SELECT * FROM portrait WHERE %s" %(where_str), tuple(array))
     #querry = str(res.fetchall()[0])[2:-3]
     querry = res.fetchall()     
     return querry
@@ -247,7 +244,7 @@ create_database(path)
 
 numbers = [1, 3, 6]
 
-meta = [-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,-1,-1,1]
+meta = ["-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1","-1","1","-1","-1","1","-1","-1","-1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1"]
 
 print(request_data_by_metadata(meta, path))
 
