@@ -190,15 +190,18 @@ def request_data_by_id(numbers):
 
     """
     cursor, con = get_database_cursor()
+    path = get_dataset_path()
 
     if type(numbers) == int :
         res = cursor.execute("SELECT [name] FROM portrait WHERE id = %s" %(numbers))
-        querry = str(res.fetchall()[0])[2:-3]
+        name = str(res.fetchall()[0])[2:-3]
+        querry = img_name_to_path(path, name)
     else :
         querry =  []
         for id in numbers :
             res = cursor.execute("SELECT [name] FROM portrait WHERE id = %s" %(id))
-            querry.append(str(res.fetchall()[0])[2:-3])
+            name = str(res.fetchall()[0])[2:-3]
+            querry.append(img_name_to_path(path, name))
             
         
     return querry
@@ -234,25 +237,32 @@ def request_data_by_metadata(array, path) :
     querry = res.fetchall()     
     return querry
 
-path = get_dataset_path()
 
-# Download dataset
-if not os.path.exists(path + "/celeba") : # Prevent from requesting again
-    first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
+def img_name_to_path(path, name) :
+    
+    return path + "/celeba/img_align_celeba/" + name
 
-create_database(path)
+if __name__ == '__main__':
 
-numbers = [1, 3, 6]
+    path = get_dataset_path()
 
-meta = ["-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1","-1","1","-1","-1","1","-1","-1","-1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1"]
+    # Download dataset
+    if not os.path.exists(path + "/celeba") : # Prevent from requesting again
+        first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
 
-print(request_data_by_metadata(meta, path))
+    create_database(path)
 
-print(request_data_by_id(numbers))
+    numbers = [1, 3, 6]
 
-db_cursor, con = get_database_cursor()
+    meta = ["-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1","-1","1","-1","-1","1","-1","-1","-1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1"]
 
-querry = "SELECT * FROM portrait"
-res = db_cursor.execute(querry)
-test = res.fetchall()
-print(test)
+    print(request_data_by_metadata(meta, path))
+
+    print(request_data_by_id(numbers))
+
+    db_cursor, con = get_database_cursor()
+
+    querry = "SELECT * FROM portrait"
+    res = db_cursor.execute(querry)
+    test = res.fetchall()
+    print(test)

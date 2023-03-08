@@ -4,9 +4,9 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 from tkinter.messagebox import *
 from tkinter import ttk
-!pip install torchvision
+#!pip install torchvision
 from PIL import ImageTk, Image
-from create_db import *
+from create_db import get_database_cursor, get_dataset_path, request_data_by_id
 
 
 ################################################# FENETRE 1 #########################################################
@@ -195,11 +195,7 @@ def f3():
     frame.pack()
     frame.place(anchor='center', relx=0.5, rely=0.5)
 
-    '''
-    # récupérer le path vers l'image
-    path=get_dataset_path()
-    first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
-
+    
     chemin = request_data_by_id(3)
 
     #Create an object of tkinter ImageTk
@@ -208,7 +204,6 @@ def f3():
     #Create a Label Widget to display the Image
     label = Label(frame, image = img)
     label.pack()
-    '''
 
 
     labelChoix = tk.Label(f3_img, text = " Veuillez cocher les trois images les plus justes:", font='Helvetica 16 bold')
