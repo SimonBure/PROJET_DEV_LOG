@@ -1,5 +1,7 @@
 .idea/
 docs/
+projet/__pycache__/
 projet/interface/__pycache__/
+projet/database/__pycache__/
 projet/img_dataset
-project_db
+env/

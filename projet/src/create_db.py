@@ -92,7 +92,7 @@ def create_meta_table(cursor, metadata):
     """
     # Start the create table line :
     table_str = "[id] INTEGER PRIMARY KEY, [name] TEXT,"
-    for el in metadata[:-1] : # Because last = empty, img name ?
+    for el in metadata[:-1]:  # Because last = empty, img name ?
         table_str += " [%s] TEXT, " % (el)
     # We retrieve the last 2 as there is no more data to append
     table_str = table_str[:-2]
@@ -192,53 +192,56 @@ def request_data_by_id(numbers):
     cursor, con = get_database_cursor()
     path = get_dataset_path()
 
-    if type(numbers) == int :
-        res = cursor.execute("SELECT [name] FROM portrait WHERE id = %s" %(numbers))
+    if type(numbers) == int:
+        res = cursor.execute(
+            "SELECT [name] FROM portrait WHERE id = %s" % (numbers))
         name = str(res.fetchall()[0])[2:-3]
         querry = img_name_to_path(path, name)
-    else :
-        querry =  []
-        for id in numbers :
-            res = cursor.execute("SELECT [name] FROM portrait WHERE id = %s" %(id))
+    else:
+        querry = []
+        for id in numbers:
+            res = cursor.execute(
+                "SELECT [name] FROM portrait WHERE id = %s" % (id))
             name = str(res.fetchall()[0])[2:-3]
             querry.append(img_name_to_path(path, name))
-            
-        
+
     return querry
 
-def request_data_by_metadata(array, path) :
+
+def request_data_by_metadata(array, path):
     """
     Made a request that pull numbers id asked
-    
+
     Take
     -------
     array : 1D array
         metadata array of 0 and 1
     path : str
         path of metadata
-    
+
     Returns
     -------
     querry : str, list of str
         filename of possible img according to metadata gave
-    
-    """    
+
+    """
     cursor, con = get_database_cursor()
-    
+
     metadata, data = metadata_pull(path)
-    
+
     where_str = ""
-    for data in metadata[:-1] : # Because last = empty, img name ?
-        where_str += "[%s] = ? AND " %(data)
+    for data in metadata[:-1]:  # Because last = empty, img name ?
+        where_str += "[%s] = ? AND " % (data)
     where_str = where_str[:-4]
-    
-    res = cursor.execute("SELECT * FROM portrait WHERE %s" %(where_str), tuple(array))
+
+    res = cursor.execute("SELECT * FROM portrait WHERE %s" %
+                         (where_str), tuple(array))
     #querry = str(res.fetchall()[0])[2:-3]
-    querry = res.fetchall()     
+    querry = res.fetchall()
     return querry
 
 
-def img_name_to_path(path, name) :
+def img_name_to_path(path, name):
     """
     Convert image name into image path to display
 
@@ -250,7 +253,8 @@ def img_name_to_path(path, name) :
     """
     return path + "/celeba/img_align_celeba/" + name
 
-def print_database() :
+
+def print_database():
     """
     Debug function see what is inside database
 
@@ -261,25 +265,27 @@ def print_database() :
 
     """
     cursor, con = get_database_cursor()
-    
+
     res = cursor.execute("SELECT * FROM portrait")
     querry = res.fetchall()
     return querry
-    
-    
+
+
 if __name__ == '__main__':
 
     path = get_dataset_path()
 
     # Download dataset
-    if not os.path.exists(path + "/celeba") : # Prevent from requesting again
-        first_data = torchvision.datasets.CelebA(root=path, transform=transforms.PILToTensor(), download=True)
+    if not os.path.exists(path + "/celeba"):  # Prevent from requesting again
+        first_data = torchvision.datasets.CelebA(
+            root=path, transform=transforms.PILToTensor(), download=True)
 
     create_database(path)
 
     numbers = [1, 3, 6]
 
-    meta = ["-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1","-1","1","-1","-1","1","-1","-1","-1","-1","-1","-1","1","-1","-1","-1","-1","-1","-1","-1","1"]
+    meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
+            "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
 
     print(request_data_by_metadata(meta, path))
 

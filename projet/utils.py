@@ -16,6 +16,7 @@ def get_sub_sys():
     sys = platform.uname()  # Collect system data
     return sys[0]
 
+
 def get_path():
     """
     As pathway are different in each computer, compute actual pathway to store data in
