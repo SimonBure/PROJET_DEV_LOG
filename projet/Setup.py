@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
+import utils
 
 # Generate environement of the program
 
-def create_folders() :
+def create_folders(path) :
     """
     Create folders needed for the program
     """
-    path = os.getcwd()
-    path = os.path.join(path, "Env_prog")
-    print("ui")
-        
-    
+
     """
     Database Folder, will contain :
         database
@@ -43,5 +41,11 @@ def create_folders() :
     create_path = os.path.join(path, "Auto_encoder", "gen_img")
     os.makedirs(create_path)
     
-create_folders()
-  
+create_folders(utils.get_path())
+
+def remove_env_prog(path) : 
+    
+    shutil.rmtree(path)
+    
+    
+remove_env_prog(utils.get_path())
