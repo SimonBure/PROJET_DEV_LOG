@@ -1,54 +1,15 @@
 # -*- coding: utf-8 -*-
-import os
-import shutil
 import utils
 
 # Generate environement of the program
 
+test = input("Créer environnement ? (Y/N)")
 
-def create_folders(path):
-    """
-    Create folders needed for the program
-    """
+if test == "Y" :
+    utils.create_folders()
+    
+test2 = input("Détruire environnemnt ? (Y/N)")
 
-    """
-    Database Folder, will contain :
-        database
-        img_dataset folder
-            img + attribute selection
-    """
-    create_path = os.path.join(path, "Database", "img_dataset")
-    os.makedirs(create_path)
+if test2 == "Y" :
+    utils.remove_env_prog()
 
-    """
-    Result Folder, will contain :
-        Output of the program
-    """
-    create_path = os.path.join(path, "Result")
-    os.makedirs(create_path)
-
-    """
-    Interface Folder, will contain :
-        logo.png
-    """
-    create_path = os.path.join(path, "Interface")
-    os.makedirs(create_path)
-
-    """
-    Auto-encoder Folder, will contain :
-        gen_img
-            .img
-    """
-    create_path = os.path.join(path, "Auto_encoder", "gen_img")
-    os.makedirs(create_path)
-
-
-create_folders(utils.get_path())
-
-
-def remove_env_prog(path):
-
-    shutil.rmtree(path)
-
-
-# remove_env_prog(utils.get_path())
