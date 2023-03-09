@@ -26,25 +26,20 @@ def f1():
     def aide():
         """
         Evenement associé au bouton Help: affichage d'un panneau aide suite à un clic sur le boutton Aide
-
         """
-        showinfo('Titre 2', 'Sprint 1 : interface graphique minimaliste capable de récupérer et afficher des images de la base de données')
+        showinfo('Aide', 'Sprint 1 : interface graphique minimaliste capable de récupérer et afficher des images de la base de données')
 
     def openf2():
         """
         Evenement associé au boutton Start: destruction de la fenetre courante et ouverture de la fenetre 2
-
         """
         f1_acc.destroy()
         f2()
 
 
-
     frame = Frame(f1_acc, width=800, height=400)
     frame.pack()
     frame.place(anchor='center', relx=0.5, rely=0.37)
-    f1_acc.wm_state(newstate="zoomed")
-
 
     canvas = Canvas(f1_acc, width=1800, height=100, bg='ivory')
     canvas.pack(side=TOP, padx=5, pady=5)
@@ -52,26 +47,23 @@ def f1():
     txt = canvas.create_text(750, 75, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
 
 
-    boutS=Button(f1_acc, text="Commencer", font='Arial 20', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', padx=5, pady=5, command = openf2)
-    boutS.place(x=470, y = 500)
+    boutS=Button(f1_acc, text="Commencer", font='Arial 13', borderwidth = 4, bg = '#BDECB6', padx=5, pady=5, command = openf2)
+    boutS.place(anchor=tk.S, relheight=0.15, relwidth=0.15, relx=0.5, rely = 0.9)
 
-    boutH = Button(text='Aide', command=aide, font='Arial 10', height=2, width=20,borderwidth=4, bg = "#D2B48C")
-    boutH.place(x=560, y = 400)
+    boutH = Button(text='Aide', command=aide, font='Arial 13',borderwidth=4, bg = "#D2B48C")
+    boutH.place(anchor=tk.N, relheight=0.15, relwidth=0.15, relx=0.5, rely= 0.6)
 
-
+    '''
     label = Label(f1_acc, text="Version 1 - 09.03.23", bg="white")
     label.pack()
 
 
-    photo = ImageTk.PhotoImage(master = f1_acc,file="logo.PNG")
+    photo = ImageTk.PhotoImage(master = f1_acc,file="logo.png")
 
-    label = Label(frame, image = photo)
-    label.pack()
-
-    canvas = Canvas(f1_acc,width=350, height=200, bg = 'white')
+    canvas = Canvas(f1_acc, bg = 'yellow')
     canvas.create_image(0, 0, anchor=NW, image=photo)
     canvas.pack()
-
+    '''
 
     f1_acc.mainloop()
 
@@ -92,7 +84,6 @@ def f2():
     def openf3():
         """
         Evenement associé au bouton Envoyer: destruction de la fenetre courante et ouverture de la fenetre 3
-
         """
         f2_flr.destroy()
         f3()
@@ -103,11 +94,9 @@ def f2():
     def recup_genre():
         """
         Evenement : recuperer la valeur saisie par l'utilisateur dans le widget
-
         Returns
         -------
         <type>
-
         """
         genre = value.get()
         return(genre)
@@ -195,7 +184,7 @@ def f3():
     frame.pack()
     frame.place(anchor='center', relx=0.5, rely=0.5)
 
-    
+
     chemin = request_data_by_id(3)
 
     #Create an object of tkinter ImageTk
@@ -248,14 +237,12 @@ def f4():
     def quit():
         """
         Evenement associé au menu Quitter: destruction de la fenetre courante
-
         """
         f4_xprt.destroy()
 
     def openf1():
         """
         Evenement associé au menu Nouveau: destruction de la fenetre courante et ouverture de la fenetre 1
-
         """
         f4_xprt.destroy()
         f1()
