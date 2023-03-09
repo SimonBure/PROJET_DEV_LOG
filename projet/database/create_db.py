@@ -239,9 +239,34 @@ def request_data_by_metadata(array, path) :
 
 
 def img_name_to_path(path, name) :
-    
+    """
+    Convert image name into image path to display
+
+    Returns
+    -------
+    path : str
+        Path of the image.
+
+    """
     return path + "/celeba/img_align_celeba/" + name
 
+def print_database() :
+    """
+    Debug function see what is inside database
+
+    Returns
+    -------
+    path : str
+        Path of the image.
+
+    """
+    cursor, con = get_database_cursor()
+    
+    res = cursor.execute("SELECT * FROM portrait")
+    querry = res.fetchall()
+    return querry
+    
+    
 if __name__ == '__main__':
 
     path = get_dataset_path()
@@ -266,3 +291,4 @@ if __name__ == '__main__':
     res = db_cursor.execute(querry)
     test = res.fetchall()
     print(test)
+    print(print_database())
