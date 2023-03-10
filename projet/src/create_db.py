@@ -2,26 +2,14 @@ import sqlite3
 import numpy as np
 import os
 import platform
+import utils
 
 import torchvision.datasets
 import torchvision.transforms as transforms
 
 
-def get_sub_sys():
-    """
-    As pathway are different in each computer, search for sub-sytem type
 
-    Returns
-    -------
-    sys[0] : str
-        Name of sub-system.
-
-    """
-    sys = platform.uname()  # Collect system data
-    return sys[0]
-
-
-def get_dataset_path():
+def get_database_path():
     """
     As pathway are different in each computer, compute actual pathway to store data in
     a known path
@@ -32,16 +20,12 @@ def get_dataset_path():
         Path of the dataset download.
 
     """
-    path = os.getcwd()  # Collect the path
-    sys = get_sub_sys()  # Collect system data
-    if sys == "Windows":
-        path += "\img_dataset"  # Windows style path
-    else:
-        path += "/img_dataset"  # Linux/Mac style path
-    return path
+    path = utils.get_path("Database")
+    data_loc = os.path.join(path, "project.db")
+    return data_loc
 
 
-def metadata_pull(path):
+def metadata_pull():
     """
     Get the metadata's name for creating the table in the database
 
@@ -58,11 +42,8 @@ def metadata_pull(path):
         Array of metadata value for each image.
 
     """
-    sys = get_sub_sys()  # Collect system data
-    if sys == "Windows":
-        path_data = path + "\celeba\list_attr_celeba.txt"  # Windows style path
-    else:
-        path_data = path + "/celeba/list_attr_celeba.txt"  # Linux/Mac style path
+    path = utils.get_path("Img")
+    path_data = os.path.join(path, "celeba", "list_attr_celeba.txt")
 
     with open(path_data, "r") as file:
         file.readline()
@@ -129,7 +110,7 @@ def insert_data(cursor, connect, dataset):
     connect.commit()
 
 
-def create_database(path_of_metadata):
+def create_database():
     """
     Create the database needed for the project. Insert dataset CelebA from : <insert url ?>
 
@@ -145,13 +126,11 @@ def create_database(path_of_metadata):
     cursor : database.cursor
         Cursor for communicating with the database
     """
-    sqlite3.connect('project_db')
-
-    con = sqlite3.connect('project_db')
+    con = sqlite3.connect(r"%s" %(get_database_path()))
     cursor = con.cursor()
 
     # Retrieve datas :
-    metadata, dataset = metadata_pull(path_of_metadata)
+    metadata, dataset = metadata_pull()
 
     create_meta_table(cursor, metadata)
 
@@ -169,7 +148,7 @@ def get_database_cursor():
     connect : database.connector
         Connector of the database
     """
-    connect = sqlite3.connect('project_db')
+    connect = sqlite3.connect(get_database_path())
     cursor = connect.cursor()
     return cursor, connect
 
@@ -190,7 +169,7 @@ def request_data_by_id(numbers):
 
     """
     cursor, con = get_database_cursor()
-    path = get_dataset_path()
+    path = utils.get_path("Database")
 
     if type(numbers) == int:
         res = cursor.execute(
@@ -208,7 +187,7 @@ def request_data_by_id(numbers):
     return querry
 
 
-def request_data_by_metadata(array, path):
+def request_data_by_metadata(array):
     """
     Made a request that pull numbers id asked
 
@@ -226,8 +205,9 @@ def request_data_by_metadata(array, path):
 
     """
     cursor, con = get_database_cursor()
+    path = utils.get_path("Database")
 
-    metadata, data = metadata_pull(path)
+    metadata, data = metadata_pull()
 
     where_str = ""
     for data in metadata[:-1]:  # Because last = empty, img name ?
@@ -251,7 +231,7 @@ def img_name_to_path(path, name):
         Path of the image.
 
     """
-    return path + "/celeba/img_align_celeba/" + name
+    return os.path.join(path, "img_dataset", "celeba", "img_align_celeba","%s" %(name))
 
 
 def print_database():
@@ -272,22 +252,20 @@ def print_database():
 
 
 if __name__ == '__main__':
-
-    path = get_dataset_path()
+    
+    path = utils.get_path("Img")
 
     # Download dataset
-    if not os.path.exists(path + "/celeba"):  # Prevent from requesting again
-        first_data = torchvision.datasets.CelebA(
-            root=path, transform=transforms.PILToTensor(), download=True)
+    if not os.path.exists(os.path.join(path, "img_dataset", "celeba")):  # Prevent from requesting again
+        torchvision.datasets.CelebA(root=path, download=True)
 
-    create_database(path)
+    create_database()
 
     numbers = [1, 3, 6]
 
-    meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-            "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
+    meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
 
-    print(request_data_by_metadata(meta, path))
+    print(request_data_by_metadata(meta))
 
     print(request_data_by_id(numbers))
 
