@@ -60,7 +60,7 @@ def create_folders():
         img_dataset folder
             img + attribute selection
     """
-    create_path = os.path.join(path, "Database", "img_dataset")
+    create_path = os.path.join(path, "Database", "img_dataset", "celeba")
     os.makedirs(create_path)
 
     """
