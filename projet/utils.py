@@ -29,13 +29,15 @@ def get_path(where):
         Path of the dataset download.
 
     """
-    path = os.getcwd()
+    path = os.path.dirname(os.path.realpath(__file__))
     if where == "Env" :
         path = os.path.join(path, "env")
     elif where == "Database" :
         path = os.path.join(path, "env", "Database")
+    elif where == "Img" : 
+        path = os.path.join(path, "env", "Database", "img_dataset")
     elif where == "Interface" :
-        path = os.path.join(path, "env", "Database")
+        path = os.path.join(path, "env", "Inteface")
     elif where == "Encoder" :
         path = os.path.join(path, "env", "Auto_encoder")
     elif where == "Result" :
