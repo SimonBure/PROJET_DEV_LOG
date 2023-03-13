@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import src.create_db as db
-import utils
+import src.utils as utils
 import shutil
 import sys
 import os
 import wget
 import zipfile
-
 
 
 test = input("Need to download file ? (Y/N)")
@@ -27,7 +26,6 @@ if test == "Y":
     add_path = utils.get_path("Other")
     add_path = os.path.join(add_path, "src")
     sys.path.append(add_path)
-    
 
 
 # Generate environement of the program
@@ -54,7 +52,7 @@ if test == "Y":
     test = input("Créer database ? (Y/N)")
     if test == "Y":
         db.create_database()
-        
+
         img = db.request_data_by_id(1)
         print(img)
 
