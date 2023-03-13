@@ -12,6 +12,7 @@ if test == "Y":
     add_path = utils.get_path("Other")
     add_path = os.path.join(add_path, "src")
     sys.path.append(add_path)
+    
 
 
 # Generate environement of the program
@@ -37,6 +38,9 @@ if test == "Y":
     test = input("Créer database ? (Y/N)")
     if test == "Y":
         db.create_database()
+        
+        img = db.request_data_by_id(1)
+        print(img)
 
 
 test2 = input("Détruire environnemnt ? (Y/N)")
