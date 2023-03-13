@@ -1,11 +1,7 @@
 import sqlite3
 import numpy as np
 import os
-import platform
 import utils
-
-import torchvision.datasets
-import torchvision.transforms as transforms
 
 
 def get_database_path():
@@ -256,8 +252,8 @@ if __name__ == '__main__':
 
     # Download dataset
     # Prevent from requesting again
-    if not os.path.exists(os.path.join(path, "img_dataset", "celeba")):
-        torchvision.datasets.CelebA(root=path, download=True)
+    # if not os.path.exists(os.path.join(path, "img_dataset", "celeba")):
+    #     torchvision.datasets.CelebA(root=path, download=True)
 
     create_database()
 
