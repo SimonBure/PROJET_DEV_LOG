@@ -4,6 +4,21 @@ import utils
 import shutil
 import sys
 import os
+import wget
+import zipfile
+
+
+
+test = input("Need to download file ? (Y/N)")
+if test == "Y":
+    add_path = utils.get_path("Other")
+    add_path = os.path.join(add_path, "temp", "list_attr_celeba.txt")
+    url = "https://filesender.renater.fr/download.php?token=80050e2e-f52b-44ed-8bad-ff4d77649cb3&files_ids=22772324"
+    wget.download(url, add_path)
+    url2 = "https://filesender.renater.fr/download.php?token=80050e2e-f52b-44ed-8bad-ff4d77649cb3&files_ids=22772325"
+    add_path = utils.get_path("Other")
+    add_path = os.path.join(add_path, "temp", "img_align_celeba.zip")
+    wget.download(url2, out=add_path)
 
 
 test = input("First time launching setup ? (Y/N)")
@@ -30,10 +45,11 @@ if test == "Y":
     shutil.copy(path, dst)
 
     path = utils.get_path("Other")
-    path = os.path.join(path, "temp", "img_align_celeba")
+    path = os.path.join(path, "temp", "img_align_celeba.zip")
     dst = utils.get_path("Img")
-    dst = os.path.join(dst, "celeba", "img_align_celeba")
-    shutil.copytree(path, dst)
+    dst = os.path.join(dst, "celeba")
+    with zipfile.ZipFile(path, 'r') as zip_ref:
+        zip_ref.extractall(dst)
 
     test = input("Créer database ? (Y/N)")
     if test == "Y":
