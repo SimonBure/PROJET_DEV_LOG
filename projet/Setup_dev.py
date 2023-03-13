@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import src.create_db as db
-import src.utils as utils
+import utils
 import shutil
 import sys
 import os

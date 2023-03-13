@@ -8,7 +8,6 @@ import torchvision.datasets
 import torchvision.transforms as transforms
 
 
-
 def get_database_path():
     """
     As pathway are different in each computer, compute actual pathway to store data in
@@ -126,7 +125,7 @@ def create_database():
     cursor : database.cursor
         Cursor for communicating with the database
     """
-    con = sqlite3.connect(r"%s" %(get_database_path()))
+    con = sqlite3.connect(r"%s" % (get_database_path()))
     cursor = con.cursor()
 
     # Retrieve datas :
@@ -231,7 +230,7 @@ def img_name_to_path(path, name):
         Path of the image.
 
     """
-    return os.path.join(path, "img_dataset", "celeba", "img_align_celeba","%s" %(name))
+    return os.path.join(path, "img_dataset", "celeba", "img_align_celeba", "%s" % (name))
 
 
 def print_database():
@@ -252,18 +251,20 @@ def print_database():
 
 
 if __name__ == '__main__':
-    
+
     path = utils.get_path("Img")
 
     # Download dataset
-    if not os.path.exists(os.path.join(path, "img_dataset", "celeba")):  # Prevent from requesting again
+    # Prevent from requesting again
+    if not os.path.exists(os.path.join(path, "img_dataset", "celeba")):
         torchvision.datasets.CelebA(root=path, download=True)
 
     create_database()
 
     numbers = [1, 3, 6]
 
-    meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
+    meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
+            "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
 
     print(request_data_by_metadata(meta))
 
