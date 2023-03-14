@@ -4,7 +4,9 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 from tkinter.messagebox import *
 from tkinter import ttk
-from PIL import ImageTk, Image
+import sys
+import os
+import utils
 
 ################################################# FENETRE 1 #########################################################
 def f1():
@@ -271,11 +273,18 @@ def f3():
         elif(pass4==FALSE):
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
             
+    # GET IMAGE : UTILS
+    directory_test = utils.get_path("../", "Encoder")    
+    print(directory_test)
+    path1 = directory_test+"/base_im.png"
+    print(path1)
+    path2 = directory_test+"/recon_im.png"
+    
     
     frame = Frame(f3_img, width=200, height=200)
     frame.pack()
     frame.place(anchor='center', relx=0.10, rely=0.4)
-    img = Image.open("idkit.png")
+    img = Image.open(path1)
     resized_image= img.resize((200,200), Image.ANTIALIAS)
     new_image= ImageTk.PhotoImage(resized_image)
     label = Label(frame, image = new_image)
@@ -284,7 +293,7 @@ def f3():
     frame2 = Frame(f3_img, width=200, height=200)
     frame2.pack()
     frame2.place(anchor='center', relx=0.3, rely=0.4)
-    img2 = Image.open("idkit.png")
+    img2 = Image.open(path2)
     resized_image2= img2.resize((200,200), Image.ANTIALIAS)
     new_image2= ImageTk.PhotoImage(resized_image2)
     label2 = Label(frame2, image = new_image2)
