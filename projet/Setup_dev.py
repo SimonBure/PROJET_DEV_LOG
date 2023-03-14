@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import src.create_db as db
+import src.main_f as main
 import utils
 import shutil
 import sys
@@ -11,7 +12,7 @@ env_path = os.path.dirname(os.path.realpath(__file__))
 
 
 test = input("Need to download file ? (Y/N)")
-if test == "Y":
+if test == "Y" or test == "y":
     add_path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
     url = "https://filesender.renater.fr/download.php?token=80050e2e-f52b-44ed-8bad-ff4d77649cb3&files_ids=22772324"
     wget.download(url, add_path)
@@ -21,7 +22,7 @@ if test == "Y":
 
 
 test = input("First time launching setup ? (Y/N)")
-if test == "Y":
+if test == "Y" or test == "y":
     sys.path.append(env_path)
     add_path = os.path.join(env_path, "src")
     sys.path.append(add_path)
@@ -31,7 +32,7 @@ if test == "Y":
 
 test = input("Créer environnement ? (Y/N)")
 
-if test == "Y":
+if test == "Y" or test == "y":
     utils.create_folders()
 
     # Temp as no option for downloading dataset exist
@@ -52,8 +53,13 @@ if test == "Y":
         img = db.request_data_by_id(1)
         print(img)
 
+test = input("Lancer programme ? (Y/N)")
+
+if test == "Y" or test == "y" :
+    main.f1()
+
 
 test2 = input("Détruire environnemnt ? (Y/N)")
 
-if test2 == "Y":
+if test2 == "Y" or test == "y":
     utils.remove_env_prog(env_path)
