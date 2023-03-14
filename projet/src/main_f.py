@@ -5,7 +5,7 @@ from PIL import ImageTk, Image
 from tkinter.messagebox import *
 from tkinter import ttk
 from PIL import ImageTk, Image
-from create_db import get_database_cursor, get_database_path, request_data_by_id
+#from create_db import get_database_cursor, get_database_path, request_data_by_id
 
 
 ################################################# FENETRE 1 #########################################################
@@ -34,49 +34,31 @@ def f1():
         """
         f1_acc.destroy()
         f2()
+    
+    framelogo = Frame(f1_acc, width=400, height=400)
+    framelogo.pack()
+    framelogo.place(anchor='center', relx=0.5, rely=0.45)
+    logo = Image.open("idkit.png")
+    logo_resized= logo.resize((400,400), Image.ANTIALIAS)
+    new_logo= ImageTk.PhotoImage(logo_resized)
+    label_imagee = Label(framelogo, image = new_logo)
+    label_imagee.pack() 
 
-
-    frame = Frame(f1_acc, width=800, height=400)
-    frame.pack()
-    frame.place(anchor='center', relx=0.5, rely=0.37)
-
-    canvas = Canvas(f1_acc, width=1800, height=100, bg='ivory')
-    canvas.pack(side=TOP, padx=5, pady=5)
-    txtitre = canvas.create_text(500, 60, text="IdKey", font="Arial 50 italic", fill="green")
-    txt = canvas.create_text(750, 75, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
+    canvas = Canvas(f1_acc, width=400, height=100, bg='ivory')
+    canvas.place(anchor='center', relx=0.5, rely=0.15)
+    txtitre = canvas.create_text(200, 45, text="IdKit", font="Arial 50 italic", fill="green")
+    txt = canvas.create_text(200, 85, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
 
 
     boutS=Button(f1_acc, text="Commencer", font='Arial 13', borderwidth = 4, bg = '#BDECB6', padx=5, pady=5, command = openf2)
-    boutS.place(anchor=tk.S, relheight=0.15, relwidth=0.15, relx=0.5, rely = 0.9)
+    boutS.place(anchor=tk.W, relheight=0.1, relwidth=0.15, relx=0.3, rely = 0.8)
 
     boutH = Button(text='Aide', command=aide, font='Arial 13',borderwidth=4, bg = "#D2B48C")
-    boutH.place(anchor=tk.N, relheight=0.15, relwidth=0.15, relx=0.5, rely= 0.6)
+    boutH.place(anchor=tk.E, relheight=0.1, relwidth=0.15, relx=0.7, rely= 0.8)
+
+
     
-    '''
-    frame = Frame(f1_acc, width=600, height=400)
-    frame.pack()
-    frame.place(anchor='center', relx=0.5, rely=0.5)
-    labelimg = Label(frame, image = logo)
-    labelimg.pack()
-    '''
-    '''
-    label = Label(f1_acc, text="Version 1 - 14.03.23", bg="white")
-    label.pack()
-
-    logo = ImageTk.PhotoImage(Image.open("img.png"))
-
-    canvas = Canvas(f1_acc, bg = 'yellow')
-    canvas.create_image(30, 200, anchor=NW, image=logo)
-    canvas.pack()
-    '''
-    '''
-    logo = tk.PhotoImage(file="img.png") 
-    frame_logo = tk.Frame(f1_acc, width=1100, height = 700,)
-    frame_logo.pack()
-    label_logo = tk.Label(frame_logo, image=logo)
-    label_logo.pack()
-    '''
-
+    
     f1_acc.mainloop()
 
 
@@ -102,7 +84,6 @@ def f2():
         <int>
         """
         rbg = vari.get()
-        print(rbg)
         return(rbg)
     
     def recup_RB_age():
@@ -113,7 +94,6 @@ def f2():
         <int>
         """
         rba = valeur.get( )
-        print(rba)
         return(rba)
     
     def recup_RB_peau():
@@ -124,7 +104,6 @@ def f2():
         <int>
         """
         rbp = value.get()
-        print(rbp)
         return(rbp)
     
     def recup_valCBX(menucombo):
@@ -237,6 +216,7 @@ def f2():
     boutLun.pack()
     boutMoust.pack()
     boutHat.pack()
+    
 
     f2_flr.mainloop()
 
@@ -299,20 +279,51 @@ def f3():
             showinfo('ATTENTION', 'Veuillez ne sélectionner que 3 images')
             
       
-    frame = Frame(f3_img, width=600, height=400)
+    
+    frame = Frame(f3_img, width=200, height=200)
     frame.pack()
-    frame.place(anchor='center', relx=0.5, rely=0.5)
+    frame.place(anchor='center', relx=0.10, rely=0.4)
+    img = Image.open("idkit.png")
+    resized_image= img.resize((200,200), Image.ANTIALIAS)
+    new_image= ImageTk.PhotoImage(resized_image)
+    label = Label(frame, image = new_image)
+    label.pack()   
 
+    frame2 = Frame(f3_img, width=200, height=200)
+    frame2.pack()
+    frame2.place(anchor='center', relx=0.3, rely=0.4)
+    img2 = Image.open("idkit.png")
+    resized_image2= img2.resize((200,200), Image.ANTIALIAS)
+    new_image2= ImageTk.PhotoImage(resized_image2)
+    label2 = Label(frame2, image = new_image2)
+    label2.pack()   
     
-    chemin = create_db.request_data_by_id(3)
-
-    #Create an object of tkinter ImageTk
-    img = ImageTk.PhotoImage(master = f3_img, file = chemin)
-
-    #Create a Label Widget to display the Image
-    label = Label(frame, image = img)
-    label.pack()
+    frame3 = Frame(f3_img, width=200, height=200)
+    frame3.pack()
+    frame3.place(anchor='center', relx=0.5, rely=0.4)
+    img3 = Image.open("idkit.png")
+    resized_image3= img3.resize((200,200), Image.ANTIALIAS)
+    new_image3= ImageTk.PhotoImage(resized_image3)
+    label3 = Label(frame3, image = new_image3)
+    label3.pack()   
     
+    frame4 = Frame(f3_img, width=200, height=200)
+    frame4.pack()
+    frame4.place(anchor='center', relx=0.7, rely=0.4)
+    img4 = Image.open("idkit.png")
+    resized_image4= img4.resize((200,200), Image.ANTIALIAS)
+    new_image4= ImageTk.PhotoImage(resized_image4)
+    label4 = Label(frame4, image = new_image4)
+    label4.pack() 
+    
+    frame5 = Frame(f3_img, width=200, height=200)
+    frame5.pack()
+    frame5.place(anchor='center', relx=0.9, rely=0.4)
+    img5 = Image.open("idkit.png")
+    resized_image5= img5.resize((200,200), Image.ANTIALIAS)
+    new_image5= ImageTk.PhotoImage(resized_image5)
+    label5 = Label(frame5, image = new_image5)
+    label5.pack() 
 
     labelChoix = tk.Label(f3_img, text = " Veuillez cocher les trois images les plus justes:", font='Helvetica 16 bold')
     labelChoix.pack()
@@ -329,14 +340,14 @@ def f3():
     b4 = Checkbutton(f3_img, text="image 4", font='Helvetica 12', variable=vb4, onvalue=1, offvalue=0, command = recup_valCheckB)
     b5 = Checkbutton(f3_img, text="image 5", font='Helvetica 12', variable=vb5, onvalue=1, offvalue=0, command = recup_valCheckB)
     
-    b1.pack()
-    b2.pack()
-    b3.pack()
-    b4.pack()
-    b5.pack()
+    b1.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.10, rely= 0.05)
+    b2.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.30, rely= 0.05)
+    b3.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.50, rely= 0.05)
+    b4.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.70, rely= 0.05)
+    b5.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.90, rely= 0.05)
 
     boutVal=Button(f3_img, text="Valider", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command = openf4)
-    boutVal.pack()
+    boutVal.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.7)
 
 
     f3_img.mainloop()

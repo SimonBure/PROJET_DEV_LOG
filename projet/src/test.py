@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,14 +7,17 @@ from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_olivetti_faces
-import utils
+#import utils
 
-path=utils.get_path("Encoder")
+path="."#utils.get_path("Encoder")
 
 faces = fetch_olivetti_faces()
-x_train = faces.images[:299]
-x_test = faces.images[300:]
+norm_faces = faces.data.astype('float32')/255
+x_train, x_test = train_test_split(norm_faces, test_size=0.3, random_state=42)
+#x_train = faces.images[:249]
+#x_test = faces.images[250:]
 transform=transforms.ToTensor()
+revtrans=transforms.ToPILImage()
 
 class Autoencoder(nn.Module):
     def __init__(self):
@@ -42,17 +46,41 @@ class Autoencoder(nn.Module):
         decoded = self.decoder(encoded)
         return decoded
 
+def encode(model, img):
+    """
+    Encodes an input image using the given PyTorch model.
+    Parameters:
+        model (nn.Module): Neural networt model.
+        img (PIL.Image): PIL Image object representing the input image.
 
-# Note: nn.MaxPool2d -> use nn.MaxUnpool2d, or use different kernelsize, stride etc to compensate...
-# Input [-1, +1] -> use nn.Tanh
+    Returns:
+        torch.Tensor: Tensor representing the encoded representation of the input image.
+    """
+    transform=transforms.ToTensor()
+    timg = transform(img)
+    recon = model.encoder(timg)
+    return recon
 
-model = Autoencoder()
-#loss_fn = lambda x, y: 1 - F.ssim(x, y, data_range=1, size_average=True)
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+def decode(model, tensor):
+    """
+    Decodes a tensor representation of an image using the given PyTorch model.
+    Parameters:
+        model (nn.Module): Neural networt model.
+        tensor (torch.Tensor): Tensor representing the encoded representation of an image.
+
+    Returns:
+        PIL.Image: PIL Image object representing the decoded image.
+    """
+    rev_transform=transforms.ToPILImage()
+    decoded_tensor = model.decoder(tensor)
+    img = rev_transform(decoded_tensor)
+    return img
+
 
 def overfitting(x_train, x_test, num_epoch):
     list_train, list_test = [], []
+    model=Autoencoder()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
     for epoch in range(num_epoch):
         for img in x_train:
             timg=transform(img)
@@ -75,33 +103,48 @@ def overfitting(x_train, x_test, num_epoch):
     plt.plot(range(num_epoch),list_test,color="blue")
     plt.savefig(path+"/overfit.png")
 
-overfitting(x_train, x_test, 20)
-
-flag=False
-if flag==True:
-    num_epochs = 7
-    #outputs = []
+def training(data, num_epochs):
+    """
+    Trains an Autoencoder model on the provided dataset for a specified number of epochs.
+    Parameters:
+        data (numpy.ndarray): Dataset containing the images to be used for training.
+        num_epochs (int): The number of epochs to train the model for.
+    Returns:
+        Autoencoder: Trained Autoencoder model.
+    """
+    model = Autoencoder()
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
     for epoch in range(num_epochs):
-        for img in faces.images:
+        for img in data:
             timg=transform(img)
             recon = model(timg)
             loss = criterion(recon, timg)
-
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
         print(f'Epoch:{epoch+1}, Loss:{loss.item():.4f}')
-        #outputs.append((epoch, img, recon))
+    return model
 
+def save_model(model,name_file):
+    torch.save(model.state_dict(), name_file)
 
+def load_model(model,name_file):
+    model = Autoencoder()
+    model.load_state_dict(torch.load(name_file))
+    return model
 
-    enco_im=transform(faces.images[0])
-    revtrans=transforms.ToPILImage()
-    im=revtrans(enco_im)
+def save_fig(im):
     plt.imshow(im)
+    plt.savefig(path+"/recon_im.png")
+
+flag=2
+if flag==0:
+
+    model = training(faces.images, 10)
+    enco_im = encode(model, faces.images[0])
+    plt.imshow(faces.images[0])
     plt.savefig(path+"/base_im.png")
-    en=model.encoder(enco_im)
 
     """
     en1=en.clone()
@@ -113,7 +156,10 @@ if flag==True:
     plt.savefig(path+"/modif_im.png")
     """
 
-    de=model.decoder(en)
-    deco_im=revtrans(de)
+    deco_im=decode(model, enco_im)
     plt.imshow(deco_im)
     plt.savefig(path+"/recon_im.png")
+
+if flag==1:
+    overfitting(x_train, x_test, 30)
+
