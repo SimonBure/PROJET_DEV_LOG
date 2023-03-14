@@ -4,7 +4,7 @@ import os
 import utils
 
 
-def get_database_path():
+def get_database_path(env_path):
     """
     Retrieve access to database to query her
 
@@ -14,12 +14,12 @@ def get_database_path():
         Path of the dataset download.
 
     """
-    path = utils.get_path("Database")
+    path = utils.get_path(env_path, "Database")
     data_loc = os.path.join(path, "project.db")
     return data_loc
 
 
-def metadata_pull():
+def metadata_pull(env_path):
     """
     Get the metadata's name for creating the table in the database
 
@@ -36,7 +36,7 @@ def metadata_pull():
         Array of metadata value for each image.
 
     """
-    path = utils.get_path("Img")
+    path = utils.get_path(env_path, "Img")
     path_data = os.path.join(path, "celeba", "list_attr_celeba.txt")
 
     with open(path_data, "r") as file:
@@ -106,23 +106,23 @@ def insert_data(cursor, connect, dataset):
     connect.commit()
 
 
-def create_database():
+def create_database(env_path):
     """
     Create the database needed for the project. Insert CelebA dataset from personal link
 
     """
-    con = sqlite3.connect(r"%s" % (get_database_path()))
+    con = sqlite3.connect(r"%s" % (get_database_path(env_path)))
     cursor = con.cursor()
 
     # Retrieve datas :
-    metadata, dataset = metadata_pull()
+    metadata, dataset = metadata_pull(env_path)
 
     create_meta_table(cursor, metadata)
 
     insert_data(cursor, con, dataset)
 
 
-def get_database_cursor():
+def get_database_cursor(env_path):
     """
     Create the database's cursor
 
@@ -133,12 +133,12 @@ def get_database_cursor():
     connect : database.connector
         Connector of the database
     """
-    connect = sqlite3.connect(get_database_path())
+    connect = sqlite3.connect(get_database_path(env_path))
     cursor = connect.cursor()
     return cursor, connect
 
 
-def request_data_by_id(numbers):
+def request_data_by_id(env_path, numbers):
     """
     Made a request that pull numbers id asked
 
@@ -153,8 +153,8 @@ def request_data_by_id(numbers):
         filename of the selected id number
 
     """
-    cursor, con = get_database_cursor()
-    path = utils.get_path("Database")
+    cursor, con = get_database_cursor(env_path)
+    path = utils.get_path(env_path, "Database")
 
     if type(numbers) == int:
         res = cursor.execute(
@@ -172,7 +172,7 @@ def request_data_by_id(numbers):
     return querry
 
 
-def request_data_by_metadata(array):
+def request_data_by_metadata(env_path, array):
     """
     Made a request that pull data according to metadatas
 
@@ -189,10 +189,10 @@ def request_data_by_metadata(array):
         filename of possible img according to metadata gave
 
     """
-    cursor, con = get_database_cursor()
-    path = utils.get_path("Database")
+    cursor, con = get_database_cursor(env_path)
+    path = utils.get_path(env_path, "Database")
 
-    metadata, data = metadata_pull()
+    metadata, data = metadata_pull(env_path)
 
     where_str = ""
     for data in metadata[:-1]:  # Because last = empty, img name ?
@@ -226,7 +226,7 @@ def img_name_to_path(path, name):
     return os.path.join(path, "img_dataset", "celeba", "img_align_celeba", "%s" % (name))
 
 
-def print_database():
+def print_database(env_path):
     """
     Debug function see what is inside database
 
@@ -236,7 +236,7 @@ def print_database():
         All rows and lines of the dataset
 
     """
-    cursor, con = get_database_cursor()
+    cursor, con = get_database_cursor(env_path)
 
     res = cursor.execute("SELECT * FROM portrait")
     querry = res.fetchall()
@@ -245,21 +245,23 @@ def print_database():
 
 if __name__ == '__main__':
     
-    if os.path.exists(utils.get_path("Database")) :
-        if os.path.exists(get_database_path()) :
+    env_path = "../"
+    
+    if os.path.exists(utils.get_path(env_path, "Database")) :
+        if os.path.exists(get_database_path(env_path)) :
             print("Database already exist")
         else :
-            create_database()   
+            create_database(env_path)   
 
     numbers = [1, 3, 6]
 
     meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
             "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
 
-    print(request_data_by_metadata(meta))
+    print(request_data_by_metadata(env_path, meta))
     
-    print(request_data_by_id(2))
+    print(request_data_by_id(env_path, 2))
 
-    print(request_data_by_id(numbers))
+    print(request_data_by_id(env_path, numbers))
 
-    print(print_database())
+    print(print_database(env_path))
