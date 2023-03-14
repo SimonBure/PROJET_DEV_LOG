@@ -1,0 +1,7 @@
+Setup\_dev module
+=================
+
+.. automodule:: Setup_dev
+   :members:
+   :undoc-members:
+   :show-inheritance:

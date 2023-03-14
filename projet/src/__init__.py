@@ -1,7 +1,8 @@
 import os
 import sys
 
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(currentdir)
-sys.path.append(parentdir)
+# Make the import works properly for different modules and submodules
+# Adding current directory to the PYTHONPATH
+sys.path.append(os.path.dirname(__file__))
+# Adding directory above this one to the PYTHONPATH
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))

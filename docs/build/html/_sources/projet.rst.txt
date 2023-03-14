@@ -1,0 +1,21 @@
+projet package
+==============
+
+Submodules
+----------
+
+projet.main module
+------------------
+
+.. automodule:: projet.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: projet
+   :members:
+   :undoc-members:
+   :show-inheritance:

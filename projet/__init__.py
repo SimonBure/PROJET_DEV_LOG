@@ -1,5 +1,6 @@
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(os.path.realpath("src"))
+# Make the import works properly for different modules and submodules
+# Adding current directory to the PYTHONPATH
+sys.path.append(os.path.dirname(__file__))

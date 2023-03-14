@@ -1,9 +1,9 @@
 .idea/
-docs/
+docs/source
+docs/build/doctrees
+docs/Makefile
+docs/make.bat
 projet/__pycache__/
-projet/interface/__pycache__/
-projet/database/__pycache__/
-projet/img_dataset
 projet/src/__pycache__
 env/
 projet/temp
