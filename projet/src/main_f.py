@@ -5,8 +5,6 @@ from PIL import ImageTk, Image
 from tkinter.messagebox import *
 from tkinter import ttk
 from PIL import ImageTk, Image
-#from create_db import get_database_cursor, get_database_path, request_data_by_id
-
 
 ################################################# FENETRE 1 #########################################################
 def f1():
@@ -38,16 +36,14 @@ def f1():
     framelogo = Frame(f1_acc, width=400, height=400)
     framelogo.pack()
     framelogo.place(anchor='center', relx=0.5, rely=0.45)
-    logo = Image.open("idkit.png")
-    logo_resized= logo.resize((400,400), Image.ANTIALIAS)
-    new_logo= ImageTk.PhotoImage(logo_resized)
-    label_imagee = Label(framelogo, image = new_logo)
+    logo = ImageTk.PhotoImage(Image.open("idkit.png"))
+    label_imagee = Label(framelogo, image = logo)
     label_imagee.pack() 
 
-    canvas = Canvas(f1_acc, width=400, height=100, bg='ivory')
-    canvas.place(anchor='center', relx=0.5, rely=0.15)
-    txtitre = canvas.create_text(200, 45, text="IdKit", font="Arial 50 italic", fill="green")
-    txt = canvas.create_text(200, 85, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
+    canvas = Canvas(f1_acc, width=1800, height=100, bg='ivory')
+    canvas.pack(side=TOP, padx=5, pady=5)
+    txtitre = canvas.create_text(500, 60, text="IdKit", font="Arial 50 italic", fill="green")
+    txt = canvas.create_text(750, 75, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
 
 
     boutS=Button(f1_acc, text="Commencer", font='Arial 13', borderwidth = 4, bg = '#BDECB6', padx=5, pady=5, command = openf2)
@@ -74,8 +70,6 @@ def f2():
     w, h = f2_flr.winfo_screenwidth(), f2_flr.winfo_screenheight()
     f2_flr.geometry("%dx%d" % (w, h))
     
-
-# PB  : ecraser la valeur pour ne prendre que la valeur finale cliquée par l'utilisateur (s'il change d'avis)
     def recup_RB_genre():
         """
         Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Button genre
@@ -109,7 +103,10 @@ def f2():
     def recup_valCBX(menucombo):
         """
         Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Combobox cheveux
-        Returns
+        Parametrs : 
+        -------
+        Le 
+        Returns :
         -------
         <string>
         """
@@ -380,7 +377,14 @@ def f4():
         """
         f4_xprt.destroy()
         f1()
+ 
 
+    frame_final = Frame(f4_xprt, width=400, height=400)
+    frame_final.pack()
+    frame_final.place(anchor='center', relx=0.5, rely=0.45)
+    img_finale = ImageTk.PhotoImage(Image.open("idkit.png"))
+    label_final = Label(frame_final, image = img_finale)
+    label_final.pack() 
 
     menubar = Menu(f4_xprt)
 
