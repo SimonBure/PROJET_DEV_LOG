@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_olivetti_faces
 #import utils
 
-path="."#utils.get_path("Encoder")
+path=utils.get_path("Encoder")
 
 faces = fetch_olivetti_faces()
 norm_faces = faces.data.astype('float32')/255
