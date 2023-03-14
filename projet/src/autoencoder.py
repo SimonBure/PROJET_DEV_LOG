@@ -7,9 +7,8 @@ from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_olivetti_faces
-#import utils
-
-path=utils.get_path("Encoder")
+import utils
+import os
 
 faces = fetch_olivetti_faces()
 norm_faces = faces.data.astype('float32')/255
@@ -152,7 +151,7 @@ def load_model(name_file):
     model.load_state_dict(torch.load(name_file))
     return model
 
-def save_fig(im, path):
+def save_fig(im, path, img_type):
     """
     Saves a matplotlib image object to a file in the specified path.
 
@@ -161,7 +160,7 @@ def save_fig(im, path):
         path (str): The path to save the image to.
     """
     plt.imshow(im)
-    plt.savefig(path+"/recon_im.png")
+    plt.savefig(os.path.join(path, img_type))
 
 def save_encoded_im(tensor, name_file):
     """
@@ -187,27 +186,33 @@ def load_encoded_im(name_file):
     return tensor
 
 
+def launch_encoder(env_path):
+    path=utils.get_path(env_path,"Encoder")
 
-flag=0
-if flag==0:
+    flag=0
+    if flag==0:
 
-    model = training(faces.images, 10)
-    enco_im = encode(model, faces.images[0])
-    save_fig(faces.images[0], "base_im.png")
+        model = training(faces.images, 10)
+        enco_im = encode(model, faces.images[0])
+        save_fig(faces.images[0], path, "base_im.png")
 
-    """
-    en1=en.clone()
-    en1[0]=en1[0]/10
-    print(en1==en)
-    de=model.decoder(en1)
-    deco_im=revtrans(de)
-    plt.imshow(deco_im)
-    plt.savefig(path+"/modif_im.png")
-    """
+        """
+        en1=en.clone()
+        en1[0]=en1[0]/10
+        print(en1==en)
+        de=model.decoder(en1)
+        deco_im=revtrans(de)
+        plt.imshow(deco_im)
+        plt.savefig(path+"/modif_im.png")
+        """
 
-    deco_im=decode(model, enco_im)
-    save_fig(deco_im,"recon_im.png")
+        deco_im=decode(model, enco_im)
+        save_fig(deco_im, path, "recon_im.png")
 
-if flag==1:
-    overfitting(x_train, x_test, 30)
+    if flag==1:
+        overfitting(x_train, x_test, 30)
+
+
+if __name__ == '__main__':
+    launch_encoder("../")
 

@@ -7,9 +7,11 @@ from tkinter import ttk
 import sys
 import os
 import utils
+import create_db
+import utils
 
 ################################################# FENETRE 1 #########################################################
-def f1():
+def f1(env_path):
 
     """
     Création de la fenetre 1 depuis l'execution de main.py
@@ -33,12 +35,15 @@ def f1():
         Evenement associé au boutton Start: destruction de la fenetre courante et ouverture de la fenetre 2
         """
         f1_acc.destroy()
-        f2()
+        f2(env_path)
+        
+    logo_path = utils.get_path(env_path, "Temp")
+    logo_path = os.path.join(logo_path, "idkit.png")
     
     framelogo = Frame(f1_acc, width=400, height=400)
     framelogo.pack()
     framelogo.place(anchor='center', relx=0.5, rely=0.45)
-    logo = ImageTk.PhotoImage(Image.open("idkit.png"))
+    logo = ImageTk.PhotoImage(Image.open(logo_path))
     label_imagee = Label(framelogo, image = logo)
     label_imagee.pack() 
 
@@ -62,7 +67,7 @@ def f1():
 
 ################################################# FENETRE 2 #########################################################
 
-def f2():
+def f2(env_path):
 
     """
     Création de la fenetre 2 depuis l'execution de openf2
@@ -145,7 +150,7 @@ def f2():
             stop = TRUE
         return stop
 
-    def openf3():
+    def openf3(env_path):
         """
         Evenement associé au bouton Envoyer: destruction de la fenetre courante et ouverture de la fenetre 3
         """
@@ -153,13 +158,13 @@ def f2():
         test = verif_reponses()
         if test==FALSE:
             f2_flr.destroy()
-            f3()
+            f3(env_path)
         elif(test==TRUE):
             showinfo('ATTENTION', 'Veuillez remplir tous les champs')
 
 
 
-    boutSend=Button(f2_flr, text="Envoyer", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command=openf3)
+    boutSend=Button(f2_flr, text="Envoyer", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= lambda : openf3(env_path))
     boutSend.place(anchor=tk.N, relheight=0.07, relwidth=0.10, relx=0.5, rely= 0.7)
 
     labelT = Label(f2_flr, text="Ce formulaire vise à affiner la base de données pour vous présenter les solutions les plus pertinentes dans un temps minimal", bg="white", font = "Arial 14 italic")
@@ -221,7 +226,7 @@ def f2():
 
 ################################################# FENETRE 3 #########################################################
 
-def f3():
+def f3(env_path):
     """
     Création de la fenetre 3 depuis l'execution de openf3
     """
@@ -262,23 +267,23 @@ def f3():
             stop = TRUE 
         return stop
     
-    def openf4():
+    def openf4(env_path):
         """
         Evenement associé au bouton Valider: destruction de la fenetre courante et ouverture de la fenetre 4
         """
         pass4 = verif_rep()
         if pass4==TRUE:
             f3_img.destroy()
-            f4()
+            f4(env_path)
         elif(pass4==FALSE):
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
             
     # GET IMAGE : UTILS
-    directory_test = utils.get_path("../", "Encoder")    
+    directory_test = utils.get_path(env_path, "Encoder")    
     print(directory_test)
-    path1 = directory_test+"/base_im.png"
+    path1 = os.path.join(directory_test, "base_im.png")
     print(path1)
-    path2 = directory_test+"/recon_im.png"
+    path2 = os.path.join(directory_test, "recon_im.png")
     
     
     frame = Frame(f3_img, width=200, height=200)
@@ -288,12 +293,15 @@ def f3():
     resized_image= img.resize((200,200), Image.ANTIALIAS)
     new_image= ImageTk.PhotoImage(resized_image)
     label = Label(frame, image = new_image)
-    label.pack()   
+    label.pack()  
+    
+    # Retrieve 5 images
+    img_list = create_db.request_data_by_id(env_path, [0,1,2,3,4])
 
     frame2 = Frame(f3_img, width=200, height=200)
     frame2.pack()
     frame2.place(anchor='center', relx=0.3, rely=0.4)
-    img2 = Image.open(path2)
+    img2 = Image.open(img_list[1])
     resized_image2= img2.resize((200,200), Image.ANTIALIAS)
     new_image2= ImageTk.PhotoImage(resized_image2)
     label2 = Label(frame2, image = new_image2)
@@ -302,7 +310,7 @@ def f3():
     frame3 = Frame(f3_img, width=200, height=200)
     frame3.pack()
     frame3.place(anchor='center', relx=0.5, rely=0.4)
-    img3 = Image.open("idkit.png")
+    img3 = Image.open(img_list[2])
     resized_image3= img3.resize((200,200), Image.ANTIALIAS)
     new_image3= ImageTk.PhotoImage(resized_image3)
     label3 = Label(frame3, image = new_image3)
@@ -311,7 +319,7 @@ def f3():
     frame4 = Frame(f3_img, width=200, height=200)
     frame4.pack()
     frame4.place(anchor='center', relx=0.7, rely=0.4)
-    img4 = Image.open("idkit.png")
+    img4 = Image.open(img_list[3])
     resized_image4= img4.resize((200,200), Image.ANTIALIAS)
     new_image4= ImageTk.PhotoImage(resized_image4)
     label4 = Label(frame4, image = new_image4)
@@ -320,7 +328,7 @@ def f3():
     frame5 = Frame(f3_img, width=200, height=200)
     frame5.pack()
     frame5.place(anchor='center', relx=0.9, rely=0.4)
-    img5 = Image.open("idkit.png")
+    img5 = Image.open(img_list[4])
     resized_image5= img5.resize((200,200), Image.ANTIALIAS)
     new_image5= ImageTk.PhotoImage(resized_image5)
     label5 = Label(frame5, image = new_image5)
@@ -347,7 +355,7 @@ def f3():
     b4.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.70, rely= 0.05)
     b5.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.90, rely= 0.05)
 
-    boutVal=Button(f3_img, text="Valider", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command = openf4)
+    boutVal=Button(f3_img, text="Valider", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command = lambda : openf4(env_path))
     boutVal.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.7)
 
 
@@ -355,7 +363,7 @@ def f3():
 
 ################################################# FENETRE 4 #########################################################
 
-def f4():
+def f4(env_path):
     """
     Création de la fenetre 4 depuis l'execution de openf4
     """
@@ -381,12 +389,14 @@ def f4():
         """
         f4_xprt.destroy()
         f1()
- 
+        
+    directory_test = utils.get_path(env_path, "Encoder")    
+    path2 = os.path.join(directory_test,"recon_im.png")
 
     frame_final = Frame(f4_xprt, width=400, height=400)
     frame_final.pack()
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
-    img_finale = ImageTk.PhotoImage(Image.open("idkit.png"))
+    img_finale = ImageTk.PhotoImage(Image.open(path2))
     label_final = Label(frame_final, image = img_finale)
     label_final.pack() 
 
@@ -407,4 +417,4 @@ def f4():
 
 
 if __name__ == '__main__':
-    f1()
+    f1("../")

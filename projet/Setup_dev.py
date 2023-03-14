@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import src.create_db as db
 import src.main_f as main
+import src.autoencoder as auto
 import utils
 import shutil
 import sys
@@ -57,11 +58,15 @@ if test == "Y" or test == "y":
 
         img = db.request_data_by_id(env_path, 1)
         print(img)
+    
+    test = input("Lancer Autoencodeur ? (Y/N)")
+    if test == "Y" or test == "y":
+        auto.launch_encoder(env_path)
 
 test = input("Lancer programme ? (Y/N)")
 
 if test == "Y" or test == "y":
-    main.f1()
+    main.f1(env_path)
 
 
 test2 = input("Détruire environnemnt ? (Y/N)")
