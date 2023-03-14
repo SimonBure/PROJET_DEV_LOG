@@ -4,9 +4,8 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 from tkinter.messagebox import *
 from tkinter import ttk
-!pip install torchvision
 from PIL import ImageTk, Image
-#from create_db import get_database_cursor, get_dataset_path, request_data_by_id, create_database
+from create_db import get_database_cursor, get_database_path, request_data_by_id
 
 
 ################################################# FENETRE 1 #########################################################
@@ -53,7 +52,6 @@ def f1():
     boutH = Button(text='Aide', command=aide, font='Arial 13',borderwidth=4, bg = "#D2B48C")
     boutH.place(anchor=tk.N, relheight=0.15, relwidth=0.15, relx=0.5, rely= 0.6)
     
-    #create_database(./database/Img_dataset/CelebA/img_align_celeba)
     '''
     frame = Frame(f1_acc, width=600, height=400)
     frame.pack()
@@ -300,13 +298,13 @@ def f3():
         elif(pass4==FALSE):
             showinfo('ATTENTION', 'Veuillez ne sélectionner que 3 images')
             
-    '''   
+      
     frame = Frame(f3_img, width=600, height=400)
     frame.pack()
     frame.place(anchor='center', relx=0.5, rely=0.5)
 
     
-    chemin = request_data_by_id(3)
+    chemin = create_db.request_data_by_id(3)
 
     #Create an object of tkinter ImageTk
     img = ImageTk.PhotoImage(master = f3_img, file = chemin)
@@ -314,7 +312,7 @@ def f3():
     #Create a Label Widget to display the Image
     label = Label(frame, image = img)
     label.pack()
-    '''
+    
 
     labelChoix = tk.Label(f3_img, text = " Veuillez cocher les trois images les plus justes:", font='Helvetica 16 bold')
     labelChoix.pack()
