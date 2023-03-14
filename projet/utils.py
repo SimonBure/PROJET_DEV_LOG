@@ -36,12 +36,13 @@ def get_path(env_path, where):
     elif where == "Img":
         path = os.path.join(env_path, "env", "Database", "img_dataset")
     elif where == "Interface":
-        path = os.path.join(env_path, "env", "Inteface")
+        path = os.path.join(env_path, "env", "Interface")
     elif where == "Encoder":
         path = os.path.join(env_path, "env", "Auto_encoder")
     elif where == "Result":
         path = os.path.join(env_path, "env", "Result")
-
+    elif where == "Temp":
+        path = os.path.join(env_path, "temp")
     return path  # Collect the path
 
 

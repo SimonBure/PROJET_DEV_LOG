@@ -52,7 +52,7 @@ if test == "Y" or test == "y":
     shutil.copy(path, dst)
 
     test = input("Créer database ? (Y/N)")
-    if test == "Y":
+    if test == "Y" or test == "y":
         db.create_database(env_path)
 
         img = db.request_data_by_id(1)
