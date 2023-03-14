@@ -1,9 +1,10 @@
 .idea/
-docs/source
-docs/build/doctrees
-docs/Makefile
-docs/make.bat
+docs/build
+docs/source/_static
+docs/source/_templates
+docs/source/*.rst
 projet/__pycache__/
 projet/src/__pycache__
+projet/tests/__pycache__
 env/
 projet/temp
