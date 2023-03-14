@@ -6,8 +6,7 @@ import utils
 
 def get_database_path():
     """
-    As pathway are different in each computer, compute actual pathway to store data in
-    a known path
+    Retrieve access to database to query her
 
     Returns
     -------
@@ -48,7 +47,7 @@ def metadata_pull():
 
     data = np.loadtxt(path_data, dtype=str, skiprows=2)
 
-    # Test choice
+    # Split for testing
     data = data[0:10]
 
     return metadata, data
@@ -62,8 +61,8 @@ def create_meta_table(cursor, metadata):
     -------
     cursor : database.cursor
         Cursor for the database
-    path : str
-        Path of the downloaded dataset.
+    metadata : list
+        List of the header's name of the metadata.
 
     """
     # Start the create table line :
@@ -85,6 +84,8 @@ def insert_data(cursor, connect, dataset):
     -------
     cursor : database.cursor
         Cursor for the database
+    connect : database.connector
+        Connector of the database
     dataset : numpy.array
         Contain thevalue of metadatas of the dataset
 
@@ -107,19 +108,8 @@ def insert_data(cursor, connect, dataset):
 
 def create_database():
     """
-    Create the database needed for the project. Insert dataset CelebA from : <insert url ?>
+    Create the database needed for the project. Insert CelebA dataset from personal link
 
-    Take
-    -------
-    path : str
-        Path of the downloaded dataset.
-    dataset : numpy.array
-        Contain the metadatas of the dataset
-
-    Returns
-    -------
-    cursor : database.cursor
-        Cursor for communicating with the database
     """
     con = sqlite3.connect(r"%s" % (get_database_path()))
     cursor = con.cursor()
@@ -184,7 +174,7 @@ def request_data_by_id(numbers):
 
 def request_data_by_metadata(array):
     """
-    Made a request that pull numbers id asked
+    Made a request that pull data according to metadatas
 
     Take
     -------
@@ -209,21 +199,28 @@ def request_data_by_metadata(array):
         where_str += "[%s] = ? AND " % (data)
     where_str = where_str[:-4]
 
-    res = cursor.execute("SELECT * FROM portrait WHERE %s" %
+    res = cursor.execute("SELECT [name] FROM portrait WHERE %s" %
                          (where_str), tuple(array))
-    #querry = str(res.fetchall()[0])[2:-3]
-    querry = res.fetchall()
+    querry = str(res.fetchall()[0])[2:-3]
+    querry = img_name_to_path(path, querry)
     return querry
 
 
 def img_name_to_path(path, name):
     """
     Convert image name into image path to display
+    
+    Take
+    -------
+    path : str
+        Relative path of the image
+    name : str
+        name of the file choosen
 
     Returns
     -------
     path : str
-        Path of the image.
+        Absolute path of the image.
 
     """
     return os.path.join(path, "img_dataset", "celeba", "img_align_celeba", "%s" % (name))
@@ -235,8 +232,8 @@ def print_database():
 
     Returns
     -------
-    path : str
-        Path of the image.
+    querry : list of str
+        All rows and lines of the dataset
 
     """
     cursor, con = get_database_cursor()
@@ -247,15 +244,12 @@ def print_database():
 
 
 if __name__ == '__main__':
-
-    path = utils.get_path("Img")
-
-    # Download dataset
-    # Prevent from requesting again
-    # if not os.path.exists(os.path.join(path, "img_dataset", "celeba")):
-    #     torchvision.datasets.CelebA(root=path, download=True)
-
-    create_database()
+    
+    if os.path.exists(utils.get_path("Database")) :
+        if os.path.exists(get_database_path()) :
+            print("Database already exist")
+        else :
+            create_database()   
 
     numbers = [1, 3, 6]
 
@@ -263,13 +257,9 @@ if __name__ == '__main__':
             "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
 
     print(request_data_by_metadata(meta))
+    
+    print(request_data_by_id(2))
 
     print(request_data_by_id(numbers))
 
-    db_cursor, con = get_database_cursor()
-
-    querry = "SELECT * FROM portrait"
-    res = db_cursor.execute(querry)
-    test = res.fetchall()
-    print(test)
     print(print_database())
