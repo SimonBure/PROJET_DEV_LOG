@@ -44,10 +44,10 @@ def f1():
     label_imagee = Label(framelogo, image = new_logo)
     label_imagee.pack() 
 
-    canvas = Canvas(f1_acc, width=1800, height=100, bg='ivory')
-    canvas.pack(side=TOP, padx=5, pady=5)
-    txtitre = canvas.create_text(500, 60, text="IdKit", font="Arial 50 italic", fill="green")
-    txt = canvas.create_text(750, 75, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
+    canvas = Canvas(f1_acc, width=400, height=100, bg='ivory')
+    canvas.place(anchor='center', relx=0.5, rely=0.15)
+    txtitre = canvas.create_text(200, 45, text="IdKit", font="Arial 50 italic", fill="green")
+    txt = canvas.create_text(200, 85, text="Le logiciel de constitution de portaits-robots",font = "Arial 12 italic", fill="green")
 
 
     boutS=Button(f1_acc, text="Commencer", font='Arial 13', borderwidth = 4, bg = '#BDECB6', padx=5, pady=5, command = openf2)
