@@ -45,7 +45,7 @@ if test == "Y" or test == "y":
     dst = os.path.join(dst, "celeba")
     with zipfile.ZipFile(path, 'r') as zip_ref:
         zip_ref.extractall(dst)
-        
+
     path = os.path.join(env_path, "temp", "idkit.png")
     dst = utils.get_path(env_path, "Interface")
     dst = os.path.join(dst, "idkit.png")
@@ -60,7 +60,7 @@ if test == "Y" or test == "y":
 
 test = input("Lancer programme ? (Y/N)")
 
-if test == "Y" or test == "y" :
+if test == "Y" or test == "y":
     main.f1()
 
 
