@@ -126,12 +126,13 @@ def training(data, num_epochs):
         print(f'Epoch:{epoch+1}, Loss:{loss.item():.4f}')
     return model
 
+
 flag=0
 if flag==0:
 
-    model = training(norm_faces, 10)
-    enco_im = encode(model, norm_faces[0])
-    plt.imshow(norm_faces[0])
+    model = training(faces.images, 10)
+    enco_im = encode(model, faces.images[0])
+    plt.imshow(faces.images[0])
     plt.savefig(path+"/base_im.png")
 
     """
