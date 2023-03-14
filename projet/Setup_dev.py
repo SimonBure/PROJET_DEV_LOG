@@ -55,7 +55,7 @@ if test == "Y" or test == "y":
     if test == "Y" or test == "y":
         db.create_database(env_path)
 
-        img = db.request_data_by_id(1)
+        img = db.request_data_by_id(env_path, 1)
         print(img)
 
 test = input("Lancer programme ? (Y/N)")
