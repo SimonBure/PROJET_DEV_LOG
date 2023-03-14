@@ -243,13 +243,9 @@ def f3():
         rep_tot = [repb1, repb2, repb3, repb4, repb5]
         return rep_tot
     
-#####################################################################################################################
-# A VOIR : comment "refresh" la fenetre 3 quand on choisit 3 images ? pour l'instant on passe direct à la fenetre 4 #
-#####################################################################################################################
-
     def verif_rep():
         """
-        Verifier que seules 3 images ont été choisies par l'utilisateur
+        Verifier que seule 1 image a été choisie par l'utilisateur
         Returns
         -------
         <boolean>
@@ -260,7 +256,7 @@ def f3():
             if (checkbut[i]==1):
                 compte+=1           
         stop = FALSE
-        if (compte==3):
+        if (compte==1):
             stop = TRUE 
         return stop
     
@@ -273,9 +269,8 @@ def f3():
             f3_img.destroy()
             f4()
         elif(pass4==FALSE):
-            showinfo('ATTENTION', 'Veuillez ne sélectionner que 3 images')
+            showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
             
-      
     
     frame = Frame(f3_img, width=200, height=200)
     frame.pack()

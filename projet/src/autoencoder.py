@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_olivetti_faces
 #import utils
 
-path="."#utils.get_path("Encoder")
+path=utils.get_path("Encoder")
 
 faces = fetch_olivetti_faces()
 norm_faces = faces.data.astype('float32')/255
@@ -127,24 +127,73 @@ def training(data, num_epochs):
     return model
 
 def save_model(model,name_file):
+    """
+    Saves the state dictionary of a PyTorch model to a file with the given name.
+
+    Parameters:
+        model (torch.nn.Module): PyTorch model to be saved.
+        name_file (str): Filename to save the model to.
+    """
     torch.save(model.state_dict(), name_file)
 
-def load_model(model,name_file):
+def load_model(name_file):
+    """
+    Loads the state dictionary of a PyTorch model from a file with the given name
+    and returns the corresponding model object.
+
+    Parameters:
+        model (torch.nn.Module): PyTorch model to be loaded.
+        name_file (str): Filename to load the model from.
+
+    Returns:
+        torch.nn.Module: The loaded PyTorch model.
+    """
     model = Autoencoder()
     model.load_state_dict(torch.load(name_file))
     return model
 
-def save_fig(im):
+def save_fig(im, path):
+    """
+    Saves a matplotlib image object to a file in the specified path.
+
+    Parameters:
+        im (matplotlib.image.AxesImage): The image to be saved.
+        path (str): The path to save the image to.
+    """
     plt.imshow(im)
     plt.savefig(path+"/recon_im.png")
 
-flag=2
+def save_encoded_im(tensor, name_file):
+    """
+    Saves a PyTorch tensor to a file with the given name.
+
+    Parameters:
+        tensor (torch.Tensor): The tensor to be saved.
+        name_file (str): The filename to save the tensor to.
+    """
+    torch.save(tensor, name_file)
+
+def load_encoded_im(name_file):
+    """
+    Loads a PyTorch tensor from a file with the given name and returns the corresponding tensor object.
+
+    Parameters:
+        name_file (str): The filename to load the tensor from.
+
+    Returns:
+        tensor (torch.Tensor): The loaded PyTorch tensor.
+    """
+    tensor = torch.load(name_file)
+    return tensor
+
+
+
+flag=0
 if flag==0:
 
     model = training(faces.images, 10)
     enco_im = encode(model, faces.images[0])
-    plt.imshow(faces.images[0])
-    plt.savefig(path+"/base_im.png")
+    save_fig(faces.images[0], "base_im.png")
 
     """
     en1=en.clone()
@@ -157,8 +206,7 @@ if flag==0:
     """
 
     deco_im=decode(model, enco_im)
-    plt.imshow(deco_im)
-    plt.savefig(path+"/recon_im.png")
+    save_fig(deco_im,"recon_im.png")
 
 if flag==1:
     overfitting(x_train, x_test, 30)

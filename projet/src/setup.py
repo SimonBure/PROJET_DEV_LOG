@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="INSA-IdKey",
+    name="IdKit",
     version="0.0.1",
     author="Simon Buré, Lionel Dalmau, Mayoran Raveendran, Olivia Seffacene, Jesus Uxue",
     author_email="lionel.dalmau@insa-lyon.fr",
@@ -13,5 +13,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3 ",
             "Operating System :: OS Independent",
     ],
-    install_requires=["tk", "sqlite3", "torch", "sklearn", "matplotlib", "PIL"]
+    install_requires=["tk", "torch", "sklearn", "matplotlib", "pillow"]
 )

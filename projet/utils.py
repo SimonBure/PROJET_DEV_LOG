@@ -18,7 +18,7 @@ def get_sub_sys():
     return sys[0]
 
 
-def get_path(where):
+def get_path(env_path, where):
     """
     As pathway are different in each computer, compute actual pathway to store data in
     a known path
@@ -29,29 +29,28 @@ def get_path(where):
         Path of the dataset download.
 
     """
-    path = os.path.dirname(os.path.realpath(__file__))
     if where == "Env":
-        path = os.path.join(path, "env")
+        path = os.path.join(env_path, "env")
     elif where == "Database":
-        path = os.path.join(path, "env", "Database")
+        path = os.path.join(env_path, "env", "Database")
     elif where == "Img":
-        path = os.path.join(path, "env", "Database", "img_dataset")
+        path = os.path.join(env_path, "env", "Database", "img_dataset")
     elif where == "Interface":
-        path = os.path.join(path, "env", "Inteface")
+        path = os.path.join(env_path, "env", "Inteface")
     elif where == "Encoder":
-        path = os.path.join(path, "env", "Auto_encoder")
+        path = os.path.join(env_path, "env", "Auto_encoder")
     elif where == "Result":
-        path = os.path.join(path, "env", "Result")
+        path = os.path.join(env_path, "env", "Result")
 
     return path  # Collect the path
 
 
-def create_folders():
+def create_folders(env_path):
     """
     Create folders needed for the program
     """
 
-    path = get_path("Env")
+    path = get_path(env_path, "Env")
 
     """
     Database Folder, will contain :
@@ -85,5 +84,5 @@ def create_folders():
     os.makedirs(create_path)
 
 
-def remove_env_prog():
-    shutil.rmtree(get_path("Env"))
+def remove_env_prog(env_path):
+    shutil.rmtree(get_path(env_path, "Env"))
