@@ -11,7 +11,7 @@ import zipfile
 env_path = os.path.dirname(os.path.realpath(__file__))
 
 
-test = input("Need to download file ? (Y/N)")
+test = input("Need to download dataset ? (Y/N)")
 if test == "Y" or test == "y":
     add_path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
     url = "https://filesender.renater.fr/download.php?token=80050e2e-f52b-44ed-8bad-ff4d77649cb3&files_ids=22772324"
@@ -33,7 +33,7 @@ if test == "Y" or test == "y":
 test = input("Créer environnement ? (Y/N)")
 
 if test == "Y" or test == "y":
-    utils.create_folders()
+    utils.create_folders(env_path)
 
     # Temp as no option for downloading dataset exist
     path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
@@ -45,6 +45,11 @@ if test == "Y" or test == "y":
     dst = os.path.join(dst, "celeba")
     with zipfile.ZipFile(path, 'r') as zip_ref:
         zip_ref.extractall(dst)
+        
+    path = os.path.join(env_path, "temp", "idkit.png")
+    dst = utils.get_path(env_path, "Interface")
+    dst = os.path.join(dst, "idkit.png")
+    shutil.copy(path, dst)
 
     test = input("Créer database ? (Y/N)")
     if test == "Y":
