@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_olivetti_faces
 #import utils
 
-path=utils.get_path("Encoder")
+path="."#utils.get_path("Encoder")
 
 faces = fetch_olivetti_faces()
 norm_faces = faces.data.astype('float32')/255
@@ -126,8 +126,19 @@ def training(data, num_epochs):
         print(f'Epoch:{epoch+1}, Loss:{loss.item():.4f}')
     return model
 
+def save_model(model,name_file):
+    torch.save(model.state_dict(), name_file)
 
-flag=0
+def load_model(model,name_file):
+    model = Autoencoder()
+    model.load_state_dict(torch.load(name_file))
+    return model
+
+def save_fig(im):
+    plt.imshow(im)
+    plt.savefig(path+"/recon_im.png")
+
+flag=2
 if flag==0:
 
     model = training(faces.images, 10)
