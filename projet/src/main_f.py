@@ -388,12 +388,12 @@ def f4(path_final,finaleimage):
         """
         f4_xprt.destroy()
 
-    def openf1():
+    def openf1(env_path):
         """
         Evenement associé au menu Nouveau: destruction de la fenetre courante et ouverture de la fenetre 1
         """
         f4_xprt.destroy()
-        f1()
+        f1(env_path)
         
     #directory_test = utils.get_path(env_path, "Encoder")    
     #path2 = os.path.join(directory_test,path_final)
@@ -409,7 +409,7 @@ def f4(path_final,finaleimage):
 
     menu1 = Menu(menubar, tearoff=0)
     menu1.add_command(label="Exporter", command=export)
-    menu1.add_command(label="Nouveau", command=openf1)
+    menu1.add_command(label="Nouveau", command= lambda : openf1(path_final))
     menu1.add_separator()
     menu1.add_command(label="Quitter", command=quit)
     menubar.add_cascade(label="Fichier", menu=menu1)
