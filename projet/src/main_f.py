@@ -240,13 +240,14 @@ def f3(env_path):
         Evenement : recuperer la valeur saisie par l'utilisateur dans le widget CheckButton image
         Returns
         -------
-        <list>
+        <list> : ensemble des valeurs des checkbuttons après que l'utilisateur ait fait son choix
         """
         repb1 = vb1.get()
         repb2 = vb2.get()
         repb3 = vb3.get()
         repb4 = vb4.get()
         repb5 = vb5.get()
+        print('rep1',repb1,'rep2', repb2,'rep3', repb3,'rep4', repb4,'rep5', repb5)
         rep_tot = [repb1, repb2, repb3, repb4, repb5]
         return rep_tot
     
@@ -255,30 +256,34 @@ def f3(env_path):
         Verifier que seule 1 image a été choisie par l'utilisateur
         Returns
         -------
-        <boolean>
+        <boolean> : TRUE si l'utilisateur n'a bien choisi qu'une image
+        <int>     : correspond à l'index de l'image choisie par l'utilisateur
         """
         checkbut=recup_valCheckB()
         compte = 0
+        index = 0
         for i in range(len(checkbut)):
             if (checkbut[i]==1):
-                compte+=1           
+                compte+=1      
+                index = i
         stop = FALSE
         if (compte==1):
             stop = TRUE 
-        return stop
-    
+        return stop, index
+
     def openf4(env_path):
         """
         Evenement associé au bouton Valider: destruction de la fenetre courante et ouverture de la fenetre 4
         """
         pass4 = verif_rep()
-        if pass4==TRUE:
+        index_final = pass4[1]
+        if pass4[0]==TRUE:
             f3_img.destroy()
-            f4(env_path)
-        elif(pass4==FALSE):
+            f4(env_path, img_list[index_final])
+        elif(pass4[0]==FALSE):
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
             
-    # GET IMAGE : UTILS
+    # Retrieve an image created by the encoder
     directory_test = utils.get_path(env_path, "Encoder")    
     print(directory_test)
     path1 = os.path.join(directory_test, "base_im.png")
@@ -334,7 +339,7 @@ def f3(env_path):
     label5 = Label(frame5, image = new_image5)
     label5.pack() 
 
-    labelChoix = tk.Label(f3_img, text = " Veuillez cocher les trois images les plus justes:", font='Helvetica 16 bold')
+    labelChoix = tk.Label(f3_img, text = " Veuillez cocher l'image la plus juste:", font='Helvetica 16 bold')
     labelChoix.pack()
     
     vb1 = IntVar()
@@ -363,7 +368,7 @@ def f3(env_path):
 
 ################################################# FENETRE 4 #########################################################
 
-def f4(env_path):
+def f4(path_final,finaleimage):
     """
     Création de la fenetre 4 depuis l'execution de openf4
     """
@@ -390,13 +395,13 @@ def f4(env_path):
         f4_xprt.destroy()
         f1()
         
-    directory_test = utils.get_path(env_path, "Encoder")    
-    path2 = os.path.join(directory_test,"recon_im.png")
+    #directory_test = utils.get_path(env_path, "Encoder")    
+    #path2 = os.path.join(directory_test,path_final)
 
     frame_final = Frame(f4_xprt, width=400, height=400)
     frame_final.pack()
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
-    img_finale = ImageTk.PhotoImage(Image.open(path2))
+    img_finale = ImageTk.PhotoImage(Image.open(finaleimage))
     label_final = Label(frame_final, image = img_finale)
     label_final.pack() 
 
