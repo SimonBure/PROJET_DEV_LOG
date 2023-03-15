@@ -279,7 +279,7 @@ def f3(env_path):
         index_final = pass4[1]
         if pass4[0]==TRUE:
             f3_img.destroy()
-            f4(env_path, img_list[index_final])
+            f4(env_path)
         elif(pass4[0]==FALSE):
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
             
@@ -368,7 +368,7 @@ def f3(env_path):
 
 ################################################# FENETRE 4 #########################################################
 
-def f4(path_final,finaleimage):
+def f4(env_path):
     """
     Création de la fenetre 4 depuis l'execution de openf4
     """
@@ -395,13 +395,13 @@ def f4(path_final,finaleimage):
         f4_xprt.destroy()
         f1(env_path)
         
-    #directory_test = utils.get_path(env_path, "Encoder")    
-    #path2 = os.path.join(directory_test,path_final)
+    directory_test = utils.get_path(env_path, "Encoder")    
+    path2 = os.path.join(directory_test, "recon_im.png")
 
     frame_final = Frame(f4_xprt, width=400, height=400)
     frame_final.pack()
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
-    img_finale = ImageTk.PhotoImage(Image.open(finaleimage))
+    img_finale = ImageTk.PhotoImage(Image.open(path2))
     label_final = Label(frame_final, image = img_finale)
     label_final.pack() 
 
@@ -409,7 +409,7 @@ def f4(path_final,finaleimage):
 
     menu1 = Menu(menubar, tearoff=0)
     menu1.add_command(label="Exporter", command=export)
-    menu1.add_command(label="Nouveau", command= lambda : openf1(path_final))
+    menu1.add_command(label="Nouveau", command= lambda : openf1(env_path))
     menu1.add_separator()
     menu1.add_command(label="Quitter", command=quit)
     menubar.add_cascade(label="Fichier", menu=menu1)
