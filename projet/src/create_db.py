@@ -48,7 +48,7 @@ def metadata_pull(env_path):
     data = np.loadtxt(path_data, dtype=str, skiprows=2)
 
     # Split for testing
-    data = data[0:10]
+    #data = data[0:10]
 
     return metadata, data
 
@@ -195,16 +195,19 @@ def request_data_by_metadata(env_path, array):
     metadata, data = metadata_pull(env_path)
 
     where_str = ""
-    for data in metadata[:-1]:  # Because last = empty, img name ?
-        where_str += "[%s] = ? AND " % (data)
+    querry_array = []
+    for i in range(40) : # 40 attributes
+        if array[i] != "0" :
+            where_str += "[%s] = ? AND " % (metadata[i])
+            querry_array.append(array[i])
+        
     where_str = where_str[:-4]
-
+    
     res = cursor.execute("SELECT [name] FROM portrait WHERE %s" %
-                         (where_str), tuple(array))
+                         (where_str), tuple(querry_array))
     querry = str(res.fetchall()[0])[2:-3]
     querry = img_name_to_path(path, querry)
     return querry
-
 
 def img_name_to_path(path, name):
     """
@@ -261,7 +264,11 @@ if __name__ == '__main__':
     print(request_data_by_metadata(env_path, meta))
     
     print(request_data_by_id(env_path, 2))
+    
+    meta_incomplete = ["0", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
+            "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
+    print(request_data_by_metadata(env_path, meta_incomplete))
 
     print(request_data_by_id(env_path, numbers))
 
-    print(print_database(env_path))
+    #print(print_database(env_path))
