@@ -7,7 +7,12 @@ import utils
 def get_database_path(env_path):
     """
     Retrieve access to database to query her
-
+    
+    Take
+    -------
+    env_path : str
+        Path of the environement.
+        
     Returns
     -------
     path : str
@@ -25,8 +30,8 @@ def metadata_pull(env_path):
 
     Take
     -------
-    path : str
-        Path of the downloaded dataset.
+    env_path : str
+        Path of the environement.
 
     Returns
     -------
@@ -109,7 +114,11 @@ def insert_data(cursor, connect, dataset):
 def create_database(env_path):
     """
     Create the database needed for the project. Insert CelebA dataset from personal link
-
+    
+    Take
+    -------
+    env_path : str
+        Path of the environement.
     """
     con = sqlite3.connect(r"%s" % (get_database_path(env_path)))
     cursor = con.cursor()
@@ -125,6 +134,11 @@ def create_database(env_path):
 def get_database_cursor(env_path):
     """
     Create the database's cursor
+    
+    Take
+    -------
+    env_path : str
+        Path of the environement.
 
     Returns
     -------
@@ -144,6 +158,8 @@ def request_data_by_id(env_path, numbers):
 
     Take
     -------
+    env_path : str
+        Path of the environement.
     numbers : int, list, tuple or 1D array
         id's image of database to pull
 
@@ -159,14 +175,14 @@ def request_data_by_id(env_path, numbers):
     if type(numbers) == int:
         res = cursor.execute(
             "SELECT [name] FROM portrait WHERE id = %s" % (numbers))
-        name = str(res.fetchall()[0])[2:-3]
+        name = res.fetchall()[0]
         querry = img_name_to_path(path, name)
     else:
         querry = []
         for id in numbers:
             res = cursor.execute(
                 "SELECT [name] FROM portrait WHERE id = %s" % (id))
-            name = str(res.fetchall()[0])[2:-3]
+            name = res.fetchall()[0]
             querry.append(img_name_to_path(path, name))
 
     return querry
@@ -178,10 +194,10 @@ def request_data_by_metadata(env_path, array):
 
     Take
     -------
+    env_path : str
+        Path of the environement.
     array : 1D array
         metadata array of 0 and 1
-    path : str
-        path of metadata
 
     Returns
     -------
@@ -205,9 +221,12 @@ def request_data_by_metadata(env_path, array):
     
     res = cursor.execute("SELECT [name] FROM portrait WHERE %s" %
                          (where_str), tuple(querry_array))
-    querry = str(res.fetchall()[0])[2:-3]
-    querry = img_name_to_path(path, querry)
-    return querry
+    querry = res.fetchall()
+    response = []
+    for elem in querry :
+        response.append(img_name_to_path(path, elem))
+    return response
+
 
 def img_name_to_path(path, name):
     """
@@ -228,10 +247,52 @@ def img_name_to_path(path, name):
     """
     return os.path.join(path, "img_dataset", "celeba", "img_align_celeba", "%s" % (name))
 
+def get_5_img(env_path, array = []) :
+    """
+    Return the path of 5 image. If array is given, try to have img at max
+    considering the attributes, else choose randomly.
+
+    Take
+    -------
+    env_path : str
+        Path of the environement.
+    array : 1D array
+        metadata array of 0 and 1
+
+    Returns
+    -------
+    path_img_list : str
+        Absolute path of the 5 images.
+
+    """
+    if array == [] :
+        numbers = np.random.randint(1, 202599, size = 5)
+        path_img_list = request_data_by_id(env_path, numbers)
+    else :
+        path_img_list = request_data_by_metadata(env_path, array)
+        if len(path_img_list) > 5 :
+            path_img_list_temp = []
+            numbers = np.random.randint(1, len(path_img_list), size = 5)
+            for i in numbers :
+                path_img_list_temp.append(path_img_list[i])
+            path_img_list = path_img_list_temp
+        elif len(path_img_list) < 5 :
+            numbers = np.random.randint(1, 202599, size = 5 - len(path_img_list))
+            path_img_list_compl = request_data_by_id(env_path, numbers)
+            for name in path_img_list_compl :
+                path_img_list.append(name)
+    
+    return path_img_list
+    
 
 def print_database(env_path):
     """
     Debug function see what is inside database
+    
+    Take
+    -------
+    env_path : str
+        Path of the environement.
 
     Returns
     -------
@@ -268,6 +329,15 @@ if __name__ == '__main__':
     meta_incomplete = ["0", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
             "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
     print(request_data_by_metadata(env_path, meta_incomplete))
+    
+    print(get_5_img(env_path))
+    
+    print(get_5_img(env_path, meta))
+    
+    meta_incomplete = ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0",
+            "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"]
+    
+    print(get_5_img(env_path, meta_incomplete))
 
     print(request_data_by_id(env_path, numbers))
 
