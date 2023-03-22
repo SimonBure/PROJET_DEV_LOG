@@ -2,6 +2,18 @@
 import os
 import platform
 import shutil
+import numpy as np
+import torch
+
+
+def save_tensor_to_disk_numpy(tensor: torch.Tensor, path_to_save: str):
+    numpy_version = tensor.numpy()  # Convert tensor to numpy array
+    np.save(path_to_save, numpy_version)  # Save numpy array to .npy format
+
+
+def load_tensor(path_to_load: str) -> torch.Tensor:
+    np_arr = np.load(path_to_load)  # Load numpy array from .npy binary file
+    return torch.Tensor(np_arr)  # Convert to a tensor
 
 
 def get_sub_sys():
