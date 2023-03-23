@@ -307,6 +307,128 @@ def print_database(env_path):
     querry = res.fetchall()
     return querry
 
+def create_querry_array(genre = 0, age = 0, hair_col = 0, 
+                        beard = 0, mustache = 0, 
+                        glasses = 0, hat = 0) :
+    """
+    Create the metadata array from users choice
+
+    Parameters
+    ----------
+    genre : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = Women, 2 = Men, 0 = Not mentioned
+    age : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = Young, 2 = Aged, 0 = Not mentioned
+    hair_col : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = Blond, 2 = Black, 3 = Brown, 4 = Grey, 5 = Bold, 
+        6 = Other, 0 = Not mentioned
+    beard : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = With, 2 = Without, 0 = Not mentioned
+    mustache : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = With, 2 = Without, 0 = Not mentioned
+    glasses : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = With, 2 = Without, 0 = Not mentioned
+    hat : int, optional
+        Attibute selected by the user for var_name. The default is 0.
+        1 = With, 2 = Without, 0 = Not mentioned
+
+    Returns
+    -------
+    array : 1D array
+        metadata array of 0 and 1
+
+    """
+    
+    array = ['0'] * 40
+    
+    array[10] = "-1" # No blurry images
+    
+    if genre == 1 : # Femme
+        array[20] = "-1"
+    elif genre == 2 :
+        array[20] = "1"
+        
+    if age == 1 : # Cas jeune
+        array[39] = "1"
+    elif age == 2 :
+        array[39] = "-1"
+        
+    if hair_col == 1 : # Blonds
+        array[9] = "1"
+        array[4] = "-1"
+    elif hair_col == 2 : # Noirs
+        array[8] = "1"
+        array[4] = "-1"
+    elif hair_col == 3 : # Marron
+        array[11] = "1"
+        array[4] = "-1"
+    elif hair_col == 4 : # Gris
+        array[17] = "1"
+        array[4] = "-1"
+    elif hair_col == 5 : # Chauve
+        array[4] = "1"
+        array[9] = "-1"
+        array[8] = "-1"
+        array[11] = "-1"
+        array[17] = "-1"
+    elif hair_col == 6 : # Autres
+        array[4] = "-1"
+        array[9] = "-1"
+        array[8] = "-1"
+        array[11] = "-1"
+        array[17] = "-1"
+        
+        
+    if beard == 1 : # Barbu
+        array[24] = "-1"
+    elif beard == 2 :
+        array[24] = "1"
+        
+    if mustache == 1 : # Avec moustaches
+        array[22] = "1"
+    elif mustache == 2 :
+        array[22] = "-1"
+        
+    if glasses == 1 : # Avec lunettes
+        array[15] = "1"
+    elif glasses == 2 :
+        array[15] = "-1"
+        
+    if glasses == 1 : # Avec chapeau
+        array[35] = "1"
+    elif glasses == 2 :
+        array[35] = "-1"
+    
+    return array
+
+def get_numb_response(env_path, array) :
+    """
+    Generate number of img that correspond to the querry
+
+    Parameters
+    ----------
+    env_path : str
+        Path of the environement.
+    array : 1D array
+        metadata array of 0 and 1
+
+    Returns
+    -------
+    len(resp)
+        Number of image
+
+    """
+    
+    resp = request_data_by_metadata(env_path, array)
+    return len(resp)
+    
+    
 
 if __name__ == '__main__':
 
@@ -343,3 +465,8 @@ if __name__ == '__main__':
     print(request_data_by_id(env_path, numbers))
 
     # print(print_database(env_path))
+    
+    print(create_querry_array())
+    
+    print(get_numb_response(env_path, create_querry_array(1, 1, 6, 0, 0, 0, 0)))
+    
