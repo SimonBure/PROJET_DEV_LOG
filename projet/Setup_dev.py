@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import src.create_db as db
+import src.database as db
 import src.main_f as main
 import src.autoencoder as auto
 import utils

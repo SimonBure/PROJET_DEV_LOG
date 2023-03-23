@@ -7,7 +7,7 @@ from tkinter import ttk
 import sys
 import os
 import utils
-import create_db
+import database
 import utils
 
 ################################################# FENETRE 1 #########################################################
@@ -301,7 +301,7 @@ def f3(env_path):
     label.pack()  
     
     # Retrieve 5 images
-    img_list = create_db.request_data_by_id(env_path, [0,1,2,3,4])
+    img_list = database.request_data_by_id(env_path, [0,1,2,3,4])
 
     frame2 = Frame(f3_img, width=200, height=200)
     frame2.pack()

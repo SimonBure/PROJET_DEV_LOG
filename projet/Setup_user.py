@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import IdKit.utils
-import IdKit.create_db
+import IdKit.database
 import IdKit.autoencoder
 import IdKit.main_f
 import shutil
