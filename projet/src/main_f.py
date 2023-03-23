@@ -7,7 +7,7 @@ from tkinter import ttk
 import sys
 import os
 import utils
-import database
+import create_db
 import utils
 
 ################################################# FENETRE 1 #########################################################
@@ -97,16 +97,6 @@ def f2(env_path):
         rba = valeur.get( )
         return(rba)
     
-    def recup_RB_peau():
-        """
-        Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Button peau
-        Returns
-        -------
-        <int>
-        """
-        rbp = value.get()
-        return(rbp)
-    
     def recup_valCBX(menucombo):
         """
         Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Combobox cheveux
@@ -130,7 +120,9 @@ def f2(env_path):
         lunet = vlun.get()
         mous = vmous.get() 
         hat = vhat.get()
-        liste_acc = [lunet, mous, hat]
+        brd = vbrd.get()
+        nsp = vnsp.get()
+        liste_acc = [lunet, mous, hat, brd, nsp]
         return liste_acc
     
     def verif_reponses():
@@ -143,12 +135,50 @@ def f2(env_path):
         g=recup_RB_genre()
         a=recup_RB_age()
         c=recup_valCBX(menucombo)
-        p=recup_RB_peau()
         acc=recup_valCkB()
         stop = FALSE
-        if (g==None or a==None or c=='Veuillez choisir un élément' or p==None or acc==[]):
+        if (g==None or a==None or c=='Veuillez choisir un élément' or acc==[]):
             stop = TRUE
+            
+        testliste=liste_db()
+        print(testliste)
         return stop
+    
+    def liste_db():
+        """
+        Renvoie une liste de string correspondant à la sélection des paramètres par l'utilisateur
+        Returns
+        -------
+        <list>
+        """
+        g=recup_RB_genre()
+        a=recup_RB_age()
+        c=recup_valCBX(menucombo)
+        acc=recup_valCkB()
+        
+        liste_acc = [['Femme', 'Homme', 'Jeune', 'Vieux', "Noirs", "Blonds","Bruns","Gris", "Chauve", "Lunettes", "Moustache", "Chapeau", "Barbe"],[0,0,0,0,0,0,0,0,0,0,0,0,0]]
+
+        if (g=='1'):
+            liste_acc[1][0]=1
+            print(liste_acc[1][0])
+        elif (g=='2'):
+            liste_acc[1][1]=1
+               
+        if (a=='3'):
+            liste_acc[1][2]=1
+        elif (a=='4'):
+            liste_acc[1][3]=1
+            
+        for i in range(4,8):
+            if (liste_acc[0][i] == c):
+                liste_acc[1][i]=1
+    
+        for i in range(9,12):
+            if (acc[i-9] == 1):
+                liste_acc[1][i]=1
+        type(liste_acc)
+        return liste_acc
+        
 
     def openf3(env_path):
         """
@@ -170,39 +200,32 @@ def f2(env_path):
     labelT = Label(f2_flr, text="Ce formulaire vise à affiner la base de données pour vous présenter les solutions les plus pertinentes dans un temps minimal", bg="white", font = "Arial 14 italic")
     labelT.pack()
 
-    labelSEXE = Label(f2_flr, text="Quel est le genre de l'individu ?", font='Helvetica 16 bold')
+    labelSEXE = Label(f2_flr, text="Quel est le genre de l'individu ?", font='Helvetica 12 bold')
     labelSEXE.pack()
 
     vari = StringVar()
     bF = Radiobutton(f2_flr, text="Femme", font='Helvetica 12', variable=vari, value=1, command=recup_RB_genre)
     bH = Radiobutton(f2_flr, text="Homme", font='Helvetica 12', variable=vari, value=2, command=recup_RB_genre)
+    bg_nsp = Radiobutton(f2_flr, text="Ne sait pas", font='Helvetica 12', variable=vari, value=0, command=recup_RB_genre)# à laisser pour qu'on puisse être sûrs qu'on a tout rempli
     bF.pack()
     bH.pack()
+    bg_nsp.pack()
 
     
-    labelAGE = Label(f2_flr, text="Quelle tranche d'âge ?", font='Helvetica 16 bold')
+    labelAGE = Label(f2_flr, text="Quelle tranche d'âge ?", font='Helvetica 12 bold')
     labelAGE.pack()
 
     valeur = StringVar()
     bJ = Radiobutton(f2_flr, text="Jeune", font='Helvetica 12', variable=valeur, value=3, command=recup_RB_age)
     bA = Radiobutton(f2_flr, text="Âgé", font='Helvetica 12', variable=valeur, value=4, command=recup_RB_age)
+    bA_nsp = Radiobutton(f2_flr, text="Ne sait pas", font='Helvetica 12', variable=valeur, value=0, command=recup_RB_age)# à laisser pour qu'on puisse être sûrs qu'on a tout rempli
     bJ.pack()
     bA.pack()
+    bA_nsp.pack()
 
-    
-    labelPEAU = Label(f2_flr, text="Quelle couleur de peau ?", font='Helvetica 16 bold')
-    labelPEAU.pack()
-
-    value = StringVar()
-    bP = Radiobutton(f2_flr, text="Pâle", font='Helvetica 12', variable=value, value=5, command=recup_RB_peau)
-    bD = Radiobutton(f2_flr, text="Foncée", font='Helvetica 12', variable=value, value=6, command=recup_RB_peau)
-    bP.pack()
-    bD.pack()
-
-
-    labelChoix = tk.Label(f2_flr, text = " Quelle couleur de cheveux ?", font='Helvetica 16 bold')
+    labelChoix = tk.Label(f2_flr, text = " Quelle couleur de cheveux ?", font='Helvetica 12 bold')
     labelChoix.pack()
-    listtest=["Veuillez choisir un élément", "Noirs", "Blonds","Bruns","Gris"]
+    listtest=["Veuillez choisir un élément", "Noirs", "Blonds","Bruns","Gris", "Ne sait pas"]
     menucombo = ttk.Combobox(f2_flr, values=listtest, font='Helvetica 12')
     menucombo.current(0)
     menucombo.pack()
@@ -211,15 +234,21 @@ def f2(env_path):
     vlun = IntVar()
     vmous = IntVar()
     vhat = IntVar()
-    labelChoix = tk.Label(f2_flr, text = " Veuillez cocher les accessoires particuliers:", font='Helvetica 16 bold')
+    vbrd = IntVar()
+    vnsp = IntVar()
+    labelChoix = tk.Label(f2_flr, text = " Veuillez cocher les accessoires particuliers:", font='Helvetica 12 bold')
     labelChoix.pack()
     boutLun = Checkbutton(f2_flr, text="Lunettes", font='Helvetica 12', variable=vlun, onvalue=1, offvalue=0, command = recup_valCkB)
     boutMoust = Checkbutton(f2_flr, text="Moustache", font='Helvetica 12', variable=vmous, onvalue=1, offvalue=0, command = recup_valCkB)
     boutHat = Checkbutton(f2_flr, text="Chapeau", font='Helvetica 12', variable=vhat, onvalue=1, offvalue=0, command = recup_valCkB)
+    boutbrd = Checkbutton(f2_flr, text="Barbe", font='Helvetica 12', variable=vbrd, onvalue=1, offvalue=0, command = recup_valCkB)
+    boutnsp = Checkbutton(f2_flr, text="Aucun/Ne sait pas", font='Helvetica 12', variable=vnsp, onvalue=1, offvalue=0, command = recup_valCkB)
 
     boutLun.pack()
     boutMoust.pack()
     boutHat.pack()
+    boutbrd.pack()
+    boutnsp.pack()
     
 
     f2_flr.mainloop()
@@ -301,7 +330,7 @@ def f3(env_path):
     label.pack()  
     
     # Retrieve 5 images
-    img_list = database.request_data_by_id(env_path, [0,1,2,3,4])
+    img_list = create_db.request_data_by_id(env_path, [0,1,2,3,4])
 
     frame2 = Frame(f3_img, width=200, height=200)
     frame2.pack()
