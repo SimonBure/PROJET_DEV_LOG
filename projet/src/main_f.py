@@ -146,37 +146,41 @@ def f2(env_path):
     
     def liste_db():
         """
-        Renvoie une liste de string correspondant à la sélection des paramètres par l'utilisateur
+        Renvoie un array 2D correspondant à la sélection des paramètres par l'utilisateur
         Returns
         -------
-        <list>
+        <2D array>
         """
         g=recup_RB_genre()
         a=recup_RB_age()
         c=recup_valCBX(menucombo)
         acc=recup_valCkB()
         
-        liste_acc = [['Femme', 'Homme', 'Jeune', 'Vieux', "Noirs", "Blonds","Bruns","Gris", "Chauve", "Lunettes", "Moustache", "Chapeau", "Barbe"],[0,0,0,0,0,0,0,0,0,0,0,0,0]]
+        liste_acc = [['Genre', 'Age', "Cheveux", "Lunettes", "Moustache", "Chapeau", "Barbe"],[0,0,0,0,0,0,0]]
 
-        if (g=='1'):
+        if (g=='1'): # 0 : nsp, 1 : femme, 2 : homme
             liste_acc[1][0]=1
             print(liste_acc[1][0])
         elif (g=='2'):
-            liste_acc[1][1]=1
+            liste_acc[1][0]=2
                
-        if (a=='3'):
-            liste_acc[1][2]=1
+        if (a=='3'): # 0 : nsp, 1 : jeune, 2 : vieux
+            liste_acc[1][1]=1
         elif (a=='4'):
-            liste_acc[1][3]=1
-            
-        for i in range(4,8):
-            if (liste_acc[0][i] == c):
+            liste_acc[1][1]=2
+         
+        list_cheveux=["Noirs", "Blonds","Bruns","Gris", "Chauve"]
+        # 0 : ne sait pas, noirs : 1, blonds : 2, bruns : 3, gris : 4, chauve : 5
+        for i in range(len(list_cheveux)):
+            if (list_cheveux[i] == c):
+                liste_acc[1][2]=i+1
+                
+        # accessoires : dans l'ordre des cases 3 à 6, 0 : ne sait pas ou non présent, 1 : présent
+        for i in range(3,6):
+            if (acc[i-3] == 1):
                 liste_acc[1][i]=1
-    
-        for i in range(9,12):
-            if (acc[i-9] == 1):
-                liste_acc[1][i]=1
-        type(liste_acc)
+        print(type(liste_acc[1][2]))
+        
         return liste_acc
         
 
@@ -225,7 +229,7 @@ def f2(env_path):
 
     labelChoix = tk.Label(f2_flr, text = " Quelle couleur de cheveux ?", font='Helvetica 12 bold')
     labelChoix.pack()
-    listtest=["Veuillez choisir un élément", "Noirs", "Blonds","Bruns","Gris", "Ne sait pas"]
+    listtest=["Veuillez choisir un élément", "Noirs", "Blonds","Bruns","Gris", "Chauve", "Ne sait pas"]
     menucombo = ttk.Combobox(f2_flr, values=listtest, font='Helvetica 12')
     menucombo.current(0)
     menucombo.pack()
