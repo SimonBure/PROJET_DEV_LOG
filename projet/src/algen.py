@@ -26,9 +26,9 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> T
             size = temp_tensor.shape
 
             # Global Tensor containing all the images
-            flat_img_tensor = torch.zeros((len(img_path),
-                                           size[2] * size[1],
-                                           size[0]))
+            flat_img_tensor = torch.zeros((len(img_path), size[0],
+                                           size[1] * size[2]))
+            # print(f"Global tensor shape: {flat_img_tensor.shape}")
             for i, path in enumerate(img_path):
                 if type(path) is str:
                     img = Image.open(path)  # PIL picture
@@ -38,7 +38,8 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> T
                         img = ae.encode()
 
                     img_tensor = to_tensor(img)  # Transform PIL to torch Tensor
-                    flat_img_tensor[i] = flatten(img_tensor)  #
+                    # print(f"Image tensor shape: {img_tensor.shape}")
+                    flat_img_tensor[i] = flatten(img_tensor)
 
                 else:
                     raise TypeError("List should contain paths (str)")
@@ -84,8 +85,9 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> T
                 img = ae.encode()
                 img = img.numpy()
 
-            img_arr = np.array(img)
-            return np.concatenate(img_arr)
+            img_arr = np.transpose(np.array(img), (2, 0, 1))  # Uniformisation of the data dimension
+            print(f"Array of the img is: {img_arr.shape}")
+            return img_arr.reshape(img_arr.shape[0], -1)
 
         else:
             raise TypeError("Input should either be a path (str)\
@@ -96,7 +98,7 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> T
                          be tensor or numpy")
 
 
-def mutate_img(img_encoded: np.ndarray | torch.Tensor, noise: float, modif="random") -> np.ndarray:
+def mutate_img(img_encoded: ndarray | Tensor, noise: float, modif="random") -> ndarray | Tensor:
     """
 
     Parameters
@@ -144,7 +146,7 @@ def mutate_img(img_encoded: np.ndarray | torch.Tensor, noise: float, modif="rand
         raise ValueError("Chose a valid value for the modif parameter")
 
 
-def crossing_over(images_encoded: np.ndarray or torch.Tensor) -> np.ndarray:
+def crossing_over(images_encoded: ndarray | Tensor) -> ndarray | Tensor:
     # TODO images_encoded est une liste des images choisies qu'il faut "fusionner"
     # TODO Diviser les différentes images au hasard, les regrouper
     pass
@@ -174,6 +176,7 @@ if __name__ == "__main__":
     # Testing flatten func for ndarray
     print(f"Flat ndarray shape: {flatten_img(pic_path, 'numpy').shape}")
     print(f"Flat ndarray list shape: {flatten_img(pic_path_list, 'numpy').shape}")
+    print(f"Shape of first element: {flatten_img(pic_path_list, 'numpy')[0].shape}")
 
     # Transform the image into a torch Tensor object
     to_tensor = transforms.ToTensor()
@@ -183,6 +186,8 @@ if __name__ == "__main__":
     # Testing flatten func for Tensor
     flat_pic = flatten_img(pic_path)
     print(f"Tensor dim after flatten func: {flat_pic.shape}")
+    flat_pics = flatten_img(pic_path_list)
+    print(f"Tensor list dim after flatten: {flat_pics.shape}")
 
     # Trying with oliveti dataset
     oliveti_faces = ae.faces.images  # ndarray of all the pictures
