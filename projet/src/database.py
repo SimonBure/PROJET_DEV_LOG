@@ -278,10 +278,8 @@ def get_5_img(env_path, array=[]):
                 path_img_list_temp.append(path_img_list[i])
             path_img_list = path_img_list_temp
         elif len(path_img_list) < 5:
-            numbers = np.random.randint(1, 202599, size=5 - len(path_img_list))
-            path_img_list_compl = request_data_by_id(env_path, numbers)
-            for name in path_img_list_compl:
-                path_img_list.append(name)
+            print("Not enough img in database")
+            return 0
 
     return path_img_list
 
@@ -323,7 +321,7 @@ def create_querry_array(genre = 0, age = 0, hair_col = 0,
         1 = Young, 2 = Aged, 0 = Not mentioned
     hair_col : int, optional
         Attibute selected by the user for var_name. The default is 0.
-        1 = Blond, 2 = Black, 3 = Brown, 4 = Grey, 5 = Bold, 
+        1 = Black, 2 = Black, 3 = Brown, 4 = Grey, 5 = Bold, 
         6 = Other, 0 = Not mentioned
     beard : int, optional
         Attibute selected by the user for var_name. The default is 0.
@@ -359,11 +357,11 @@ def create_querry_array(genre = 0, age = 0, hair_col = 0,
     elif age == 2 :
         array[39] = "-1"
         
-    if hair_col == 1 : # Blonds
-        array[9] = "1"
-        array[4] = "-1"
-    elif hair_col == 2 : # Noirs
+    if hair_col == 1 : # Noirs
         array[8] = "1"
+        array[4] = "-1"
+    elif hair_col == 2 : # Blonds
+        array[9] = "1"
         array[4] = "-1"
     elif hair_col == 3 : # Marron
         array[11] = "1"
@@ -468,5 +466,5 @@ if __name__ == '__main__':
     
     print(create_querry_array())
     
-    print(get_numb_response(env_path, create_querry_array(1, 1, 6, 0, 0, 0, 0)))
+    print(get_numb_response(env_path, create_querry_array(1, 2, 2, 0, 0, 1, 0)))
     

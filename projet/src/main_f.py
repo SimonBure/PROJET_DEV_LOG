@@ -7,7 +7,7 @@ from tkinter import ttk
 import sys
 import os
 import utils
-import create_db
+import database
 import utils
 
 ################################################# FENETRE 1 #########################################################
@@ -141,7 +141,6 @@ def f2(env_path):
             stop = TRUE
             
         testliste=liste_db()
-        print(testliste)
         return stop
     
     def liste_db():
@@ -190,9 +189,10 @@ def f2(env_path):
         """
         
         test = verif_reponses()
+        ans_user = liste_db()
         if test==FALSE:
             f2_flr.destroy()
-            f3(env_path)
+            f3(env_path, ans_user)
         elif(test==TRUE):
             showinfo('ATTENTION', 'Veuillez remplir tous les champs')
 
@@ -259,7 +259,7 @@ def f2(env_path):
 
 ################################################# FENETRE 3 #########################################################
 
-def f3(env_path):
+def f3(env_path, ans_user):
     """
     Création de la fenetre 3 depuis l'execution de openf3
     """
@@ -315,26 +315,35 @@ def f3(env_path):
             f4(env_path)
         elif(pass4[0]==FALSE):
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
-            
+    """       
     # Retrieve an image created by the encoder
     directory_test = utils.get_path(env_path, "Encoder")    
     print(directory_test)
     path1 = os.path.join(directory_test, "base_im.png")
     print(path1)
     path2 = os.path.join(directory_test, "recon_im.png")
+    """
+    # Retrieve 5 images
+    array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][6], ans_user[1][4], ans_user[1][3], ans_user[1][5])
+    print(array_metadata)
+    img_list = database.get_5_img(env_path, array_metadata)
+    
+    # Créer une fenêtre d'erreur :
+    if img_list == 0 :
+        # Fenêtre d'erreur
+        a = 0 # sert à rien mais pour ne pas avoir de problèmes d'indentation
     
     
     frame = Frame(f3_img, width=200, height=200)
     frame.pack()
     frame.place(anchor='center', relx=0.10, rely=0.4)
-    img = Image.open(path1)
+    img = Image.open(img_list[0])
     resized_image= img.resize((200,200), Image.ANTIALIAS)
     new_image= ImageTk.PhotoImage(resized_image)
     label = Label(frame, image = new_image)
     label.pack()  
     
-    # Retrieve 5 images
-    img_list = create_db.request_data_by_id(env_path, [0,1,2,3,4])
+    
 
     frame2 = Frame(f3_img, width=200, height=200)
     frame2.pack()
