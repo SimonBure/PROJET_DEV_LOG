@@ -14,6 +14,18 @@ import autoencoder as ae
 
 # TODO Fusionner les 2 fonctions en 1 seule avec un paramètre type="numpy" ou "tensor"
 def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> Tensor | ndarray | Any:
+    """
+
+    Parameters
+    ----------
+    img_path
+    img_type
+    encode
+
+    Returns
+    -------
+
+    """
     if img_type == "tensor":
         # To transform a numpy array or a PIL image to a torch Tensor
         to_tensor = transforms.ToTensor()
@@ -146,9 +158,9 @@ def mutate_img(img_encoded: ndarray | Tensor, noise: float, modif="random") -> n
         raise ValueError("Chose a valid value for the modif parameter")
 
 
-def crossing_over(images_encoded: ndarray | Tensor) -> ndarray | Tensor:
-    # TODO images_encoded est une liste des images choisies qu'il faut "fusionner"
-    # TODO Diviser les différentes images au hasard, les regrouper
+def crossing_over(images_encoded: ndarray | Tensor, crossing_rate: float) -> ndarray | Tensor:
+    # TODO images_encoded est un array / tensor des images choisies qu'il faut "fusionner"
+    # TODO traverser chaque pixel et l'échanger avec un autre d'une image différente
     pass
 
 
