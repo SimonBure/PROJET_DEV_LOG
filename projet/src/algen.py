@@ -7,13 +7,13 @@ from PIL import Image
 from numpy import ndarray
 from torch import Tensor
 
-from create_db import request_data_by_id
+from database import request_data_by_id
 from torchvision import transforms
 import autoencoder as ae
 
 
 # TODO Fusionner les 2 fonctions en 1 seule avec un paramètre type="numpy" ou "tensor"
-def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> Tensor | ndarray | Any:
+def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> Tensor | ndarray:
     """
 
     Parameters
@@ -33,7 +33,7 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> T
         flatten = nn.Flatten(1, 2)
 
         if type(img_path) is list:
-            temp_img = Image.open(img_path[0])  # Temporary img to get it size
+            temp_img = Image.open(img_path[0])  # Temporary img to get its size
             temp_tensor = to_tensor(temp_img)
             size = temp_tensor.shape
 
@@ -110,22 +110,47 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False) -> T
                          be tensor or numpy")
 
 
-def mutate_img(img_encoded: ndarray | Tensor, noise: float, modif="random") -> ndarray | Tensor:
+def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2, noise: float = 1, mut_type="random")\
+        -> ndarray | Tensor:
     """
 
     Parameters
     ----------
     img_encoded
+    mutation_rate
     noise
-    modif
+    mut_type
 
     Returns
     -------
 
     """
-    # TODO Tester différentes transformations sur les images:
-    # Modifier les pixels aléatoirement, uniformément
-    if modif == "random":
+    # Randomly selects the pixels to be modified
+    if mut_type == "random":
+        if type(img_encoded) is ndarray:
+            img_encoded: np.ndarray
+            mut_proba_arr = np.random.random(size=img_encoded.shape)  # Random draw for each pixel of img_encoded
+            img_mut = img_encoded
+            noise_arr = noise * np.random.normal(size=img_encoded.shape)
+            # Adding noise only on pixels where mut_proba_arr is lower than mutation_rate
+            img_mut[mut_proba_arr < mutation_rate] += noise_arr[mut_proba_arr < mutation_rate]
+
+        elif type(img_encoded) is Tensor:
+            img_encoded: torch.Tensor
+            mut_proba_tensor = torch.randn(size=img_encoded.size())
+            img_mut = img_encoded
+            noise_tensor = noise * torch.randn(size=img_encoded.size())
+            img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
+
+        else:
+            raise TypeError(f"Input should either be of type np.ndarray \
+                or torch.Tensor and not a {type(img_encoded)}")
+
+        return img_mut
+
+    # Modify every pixel with a random noise
+    elif mut_type == "uniform":
+        # Add random noise on each pixel
         if type(img_encoded) is np.ndarray:
             img_encoded: np.ndarray
             # Adding white noise to the numpy array
@@ -136,23 +161,13 @@ def mutate_img(img_encoded: ndarray | Tensor, noise: float, modif="random") -> n
             img_encoded: torch.Tensor
             # Adding white noise to a torch Tensor
             img_mut = img_encoded + noise \
-                * torch.randn(img_encoded.size())
+                * torch.randn(size=img_encoded.size())
 
         else:
             raise TypeError(f"Input should either be of type np.ndarray \
                 or torch.Tensor and not a {type(img_encoded)}")
+
         return img_mut
-
-    elif modif == "uniform":
-        if type(img_encoded) is np.ndarray:
-            img_mut = img_encoded  # TODO Transformation du tableau
-
-        elif type(img_encoded) is torch.Tensor:
-            img_mut = img_encoded  # TODO Transformation avec nn.Linear ?
-
-        else:
-            raise TypeError(f"Input should either be of type np.ndarray \
-                or torch.Tensor and not a {type(img_encoded)}")
 
     else:
         raise ValueError("Chose a valid value for the modif parameter")
@@ -161,6 +176,7 @@ def mutate_img(img_encoded: ndarray | Tensor, noise: float, modif="random") -> n
 def crossing_over(images_encoded: ndarray | Tensor, crossing_rate: float) -> ndarray | Tensor:
     # TODO images_encoded est un array / tensor des images choisies qu'il faut "fusionner"
     # TODO traverser chaque pixel et l'échanger avec un autre d'une image différente
+
     pass
 
 
@@ -214,11 +230,19 @@ if __name__ == "__main__":
     pic_encoded = ae.encode(autoencoder, fst_face)
     print(f"Shape of the encoded tensor: {pic_encoded.shape}")
 
-    # Testing mutation func
+    # Testing mutation on all pixels
     some_tensor = torch.randn(size=(5, 5))
     print(f"Base tensor: {some_tensor}")
-    print(f"Mutated tensor: {mutate_img(some_tensor, noise=1)}")
+    # print(f"Mutated tensor: {mutate_img(some_tensor, noise=1, mut_type='uniform')}")
 
     some_array = np.random.randn(5, 5)
     print(f"Base array: {some_array}")
-    print(f"Mutated array: {mutate_img(some_array, 1)}")
+    # print(f"Mutated array: {mutate_img(some_array, noise=1, mut_type='uniform')}")
+
+    # Testing mutation on random pixels
+    mut_tensor_rdm = mutate_img(some_tensor, mutation_rate=0.2)
+    print(f"Mutated tensor (random): {mut_tensor_rdm}")
+    mut_arr_rdm = mutate_img(some_array, mutation_rate=0.2)
+    print(f"Mutated array (random): {mut_arr_rdm}")
+
+
