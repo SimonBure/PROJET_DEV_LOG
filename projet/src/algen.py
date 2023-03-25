@@ -4,6 +4,7 @@ import numpy as np
 import torch.nn as nn
 import torch
 from PIL import Image
+from copy import deepcopy
 from numpy import ndarray
 from torch import Tensor
 
@@ -128,7 +129,7 @@ def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2, noise:
     # Randomly selects the pixels to be modified
     if mut_type == "random":
         if type(img_encoded) is ndarray:
-            img_encoded: np.ndarray
+            img_encoded: ndarray
             mut_proba_arr = np.random.random(size=img_encoded.shape)  # Random draw for each pixel of img_encoded
             img_mut = img_encoded
             noise_arr = noise * np.random.normal(size=img_encoded.shape)
@@ -136,8 +137,8 @@ def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2, noise:
             img_mut[mut_proba_arr < mutation_rate] += noise_arr[mut_proba_arr < mutation_rate]
 
         elif type(img_encoded) is Tensor:
-            img_encoded: torch.Tensor
-            mut_proba_tensor = torch.randn(size=img_encoded.size())
+            img_encoded: Tensor
+            mut_proba_tensor = torch.rand(size=img_encoded.size())
             img_mut = img_encoded
             noise_tensor = noise * torch.randn(size=img_encoded.size())
             img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
@@ -177,7 +178,36 @@ def crossing_over(images_encoded: ndarray | Tensor, crossing_rate: float) -> nda
     # TODO images_encoded est un array / tensor des images choisies qu'il faut "fusionner"
     # TODO traverser chaque pixel et l'échanger avec un autre d'une image différente
 
-    pass
+    if type(images_encoded) is ndarray:
+        images_encoded: ndarray
+        for i, img in enumerate(images_encoded):
+            crossing_arr = np.random.random(size=img.shape)
+            # Randomly choosing which image to swap pixels with
+            other_ind = [j for j in range(images_encoded.size()[0]) if j != i]
+            chosen_ind = np.random.choice(other_ind)
+
+            new_img = deepcopy(img)
+            # Swapping
+            new_img[crossing_arr < crossing_rate] = images_encoded[chosen_ind][crossing_arr < crossing_rate]
+            return new_img
+
+    elif type(images_encoded) is Tensor:
+        images_encoded: Tensor
+        for i, img in enumerate(images_encoded):
+            crossing_tensor = torch.rand(size=img.size())
+
+            # Randomly choosing which image to swap pixels with
+            other_ind = [j for j in range(images_encoded.size()[0]) if j != i]
+            chosen_ind = np.random.choice(other_ind)
+
+            new_img = deepcopy(img)
+            # Swapping
+            new_img[crossing_tensor < crossing_rate] = images_encoded[chosen_ind][crossing_tensor < crossing_rate]
+            return new_img
+
+    else:
+        raise TypeError(f"Input should either be of type np.ndarray \
+            or torch.Tensor and not a {type(images_encoded)}")
 
 
 if __name__ == "__main__":
