@@ -306,8 +306,7 @@ def print_database(env_path):
     return querry
 
 def create_querry_array(genre = 0, age = 0, hair_col = 0, 
-                        beard = 0, mustache = 0, 
-                        glasses = 0, hat = 0) :
+                        glasses = 0, mustache = 0, beard = 0):
     """
     Create the metadata array from users choice
 
@@ -397,11 +396,6 @@ def create_querry_array(genre = 0, age = 0, hair_col = 0,
         array[15] = "1"
     elif glasses == 2 :
         array[15] = "-1"
-        
-    if hat == 1 : # Avec chapeau
-        array[35] = "1"
-    elif hat == 2 :
-        array[35] = "-1"
     
     return array
 
