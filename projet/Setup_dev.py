@@ -38,11 +38,11 @@ if test == "Y" or test == "y":
 
     # Temp as no option for downloading dataset exist
     path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
-    dst = utils.get_path(env_path, "Img")
+    dst = utils.get_path(env_path, "Img_base")
     dst = os.path.join(dst, "celeba", "list_attr_celeba.txt")
     shutil.copy(path, dst)
     path = os.path.join(env_path, "temp", "img_align_celeba.zip")
-    dst = utils.get_path(env_path, "Img")
+    dst = utils.get_path(env_path, "Img_base")
     dst = os.path.join(dst, "celeba")
     with zipfile.ZipFile(path, 'r') as zip_ref:
         zip_ref.extractall(dst)

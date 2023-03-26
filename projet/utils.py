@@ -47,6 +47,8 @@ def get_path(env_path, where):
         path = os.path.join(env_path, "env", "Database")
     elif where == "Img":
         path = os.path.join(env_path, "env", "Database", "img_dataset","celeba" ,"img_align_celeba")
+    elif where == "Img_base":
+        path = os.path.join(env_path, "env", "Database", "img_dataset")
     elif where == "Interface":
         path = os.path.join(env_path, "env", "Interface")
     elif where == "Encoder":

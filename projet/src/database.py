@@ -398,9 +398,9 @@ def create_querry_array(genre = 0, age = 0, hair_col = 0,
     elif glasses == 2 :
         array[15] = "-1"
         
-    if glasses == 1 : # Avec chapeau
+    if hat == 1 : # Avec chapeau
         array[35] = "1"
-    elif glasses == 2 :
+    elif hat == 2 :
         array[35] = "-1"
     
     return array
@@ -462,9 +462,9 @@ if __name__ == '__main__':
 
     print(request_data_by_id(env_path, numbers))
 
-    # print(print_database(env_path))
+    #print(len(print_database(env_path)))
     
     print(create_querry_array())
     
-    print(get_numb_response(env_path, create_querry_array(1, 2, 2, 0, 0, 1, 0)))
+    print(get_numb_response(env_path, create_querry_array(0)))
     
