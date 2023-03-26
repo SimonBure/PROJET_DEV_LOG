@@ -119,10 +119,9 @@ def f2(env_path):
         """
         lunet = vlun.get()
         mous = vmous.get() 
-        hat = vhat.get()
         brd = vbrd.get()
         nsp = vnsp.get()
-        liste_acc = [lunet, mous, hat, brd, nsp]
+        liste_acc = [lunet, mous, brd, nsp]
         return liste_acc
     
     def verif_reponses():
@@ -155,7 +154,7 @@ def f2(env_path):
         c=recup_valCBX(menucombo)
         acc=recup_valCkB()
         
-        liste_acc = [['Genre', 'Age', "Cheveux", "Lunettes", "Moustache", "Chapeau", "Barbe"],[0,0,0,0,0,0,0]]
+        liste_acc = [['Genre', 'Age', "Cheveux", "Lunettes", "Moustache", "Barbe"],[0,0,0,0,0,0]]
 
         if (g=='1'): # 0 : nsp, 1 : femme, 2 : homme
             liste_acc[1][0]=1
@@ -175,7 +174,7 @@ def f2(env_path):
                 liste_acc[1][2]=i+1
                 
         # accessoires : dans l'ordre des cases 3 à 6, 0 : ne sait pas ou non présent, 1 : présent
-        for i in range(3,6):
+        for i in range(3,5):
             if (acc[i-3] == 1):
                 liste_acc[1][i]=1
         print(type(liste_acc[1][2]))
@@ -195,7 +194,6 @@ def f2(env_path):
             f3(env_path, ans_user)
         elif(test==TRUE):
             showinfo('ATTENTION', 'Veuillez remplir tous les champs')
-
 
 
     boutSend=Button(f2_flr, text="Envoyer", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= lambda : openf3(env_path))
@@ -237,20 +235,17 @@ def f2(env_path):
     
     vlun = IntVar()
     vmous = IntVar()
-    vhat = IntVar()
     vbrd = IntVar()
     vnsp = IntVar()
     labelChoix = tk.Label(f2_flr, text = " Veuillez cocher les accessoires particuliers:", font='Helvetica 12 bold')
     labelChoix.pack()
     boutLun = Checkbutton(f2_flr, text="Lunettes", font='Helvetica 12', variable=vlun, onvalue=1, offvalue=0, command = recup_valCkB)
     boutMoust = Checkbutton(f2_flr, text="Moustache", font='Helvetica 12', variable=vmous, onvalue=1, offvalue=0, command = recup_valCkB)
-    boutHat = Checkbutton(f2_flr, text="Chapeau", font='Helvetica 12', variable=vhat, onvalue=1, offvalue=0, command = recup_valCkB)
     boutbrd = Checkbutton(f2_flr, text="Barbe", font='Helvetica 12', variable=vbrd, onvalue=1, offvalue=0, command = recup_valCkB)
     boutnsp = Checkbutton(f2_flr, text="Aucun/Ne sait pas", font='Helvetica 12', variable=vnsp, onvalue=1, offvalue=0, command = recup_valCkB)
 
     boutLun.pack()
     boutMoust.pack()
-    boutHat.pack()
     boutbrd.pack()
     boutnsp.pack()
     
@@ -280,29 +275,31 @@ def f3(env_path, ans_user):
         repb3 = vb3.get()
         repb4 = vb4.get()
         repb5 = vb5.get()
-        print('rep1',repb1,'rep2', repb2,'rep3', repb3,'rep4', repb4,'rep5', repb5)
-        rep_tot = [repb1, repb2, repb3, repb4, repb5]
+        rep_finale = vfinal.get()
+        rep_tot = [repb1, repb2, repb3, repb4, repb5, rep_finale]
         return rep_tot
     
     def verif_rep():
         """
-        Verifier que seule 1 image a été choisie par l'utilisateur
+        Verifier combien d'images ont été choisies par l'utilisateur
         Returns
         -------
-        <boolean> : TRUE si l'utilisateur n'a bien choisi qu'une image
+        <boolean> : TRUE si l'utilisateur n'a bien choisi qu'une image # A MODIFIER !!
         <int>     : correspond à l'index de l'image choisie par l'utilisateur
         """
         checkbut=recup_valCheckB()
         compte = 0
         index = 0
-        for i in range(len(checkbut)):
+        for i in range(len(checkbut)-1):
             if (checkbut[i]==1):
                 compte+=1      
                 index = i
         stop = FALSE
         if (compte==1):
             stop = TRUE 
-        return stop, index
+        if (checkbut[5]==1):
+            finale = TRUE
+        return stop, index, finale
 
     def openf4(env_path):
         """
@@ -310,11 +307,26 @@ def f3(env_path, ans_user):
         """
         pass4 = verif_rep()
         index_final = pass4[1]
-        if pass4[0]==TRUE:
+        if pass4[0]==TRUE and pass4[2]==TRUE:
             f3_img.destroy()
             f4(env_path)
         elif(pass4[0]==FALSE):
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
+                     
+    def aidef3():
+        """
+        Evenement associé au bouton Help: affichage d'un panneau aide suite à un clic sur le boutton Aide
+        """
+        showinfo('Aide', """Veuillez choisir les images correspondant le mieux au suspect, parmi les images proposées. Choisissez les 3 images les plus exactes jusqu'à ce que l'une d'elles vous satisfasse. Pour sélectionner l'image finale, veuillez cocher la case "Finale" """)
+
+
+    boutHelp = Button(text='Aide', command=aidef3, font='Arial 14',borderwidth=4, bg = "#D2B48C")
+    boutHelp.place(anchor=tk.E, relheight=0.1, relwidth=0.1, relx=0.6, rely= 0.75)
+    
+    vfinal = IntVar()
+    checkbfinal = Checkbutton(f3_img, text="Finale", font='Helvetica 10', variable=vfinal, onvalue=1, offvalue=0)
+    checkbfinal.place(anchor=tk.E, relheight=0.1, relwidth=0.1, relx=0.6, rely= 0.65)
+    
     """       
     # Retrieve an image created by the encoder
     directory_test = utils.get_path(env_path, "Encoder")    
@@ -324,9 +336,11 @@ def f3(env_path, ans_user):
     path2 = os.path.join(directory_test, "recon_im.png")
     """
     # Retrieve 5 images
-    array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][6], ans_user[1][4], ans_user[1][3], ans_user[1][5])
+    array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][4], ans_user[1][3], ans_user[1][5])
     print(array_metadata)
     img_list = database.get_5_img(env_path, array_metadata)
+    print('contenu de img_list', img_list)
+    print('type de img_list', type(img_list))
     
     # Créer une fenêtre d'erreur :
     if img_list == 0 :
@@ -343,8 +357,6 @@ def f3(env_path, ans_user):
     label = Label(frame, image = new_image)
     label.pack()  
     
-    
-
     frame2 = Frame(f3_img, width=200, height=200)
     frame2.pack()
     frame2.place(anchor='center', relx=0.3, rely=0.4)
@@ -403,7 +415,7 @@ def f3(env_path, ans_user):
     b5.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.90, rely= 0.05)
 
     boutVal=Button(f3_img, text="Valider", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command = lambda : openf4(env_path))
-    boutVal.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.7)
+    boutVal.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.4, rely= 0.7)
 
 
     f3_img.mainloop()
@@ -436,7 +448,11 @@ def f4(env_path):
         """
         f4_xprt.destroy()
         f1(env_path)
-        
+    
+    labelexpl = Label(f4_xprt, text="Voici l'image finale. Vous pouvez utiliser le menu en onglet pour l'exporter, recommencer une session ou quitter l'application.", bg="white", font = "Arial 14 italic")
+    labelexpl.pack()
+    
+    
     directory_test = utils.get_path(env_path, "Encoder")    
     path2 = os.path.join(directory_test, "recon_im.png")
 
