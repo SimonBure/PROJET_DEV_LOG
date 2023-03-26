@@ -177,6 +177,10 @@ def f2(env_path):
         for i in range(3,5):
             if (acc[i-3] == 1):
                 liste_acc[1][i]=1
+            if acc[3] == 1 :
+                liste_acc[1][3]=0
+                liste_acc[1][4]=0
+                liste_acc[1][5]=0
         print(type(liste_acc[1][2]))
         
         return liste_acc
