@@ -41,7 +41,7 @@ def metadata_pull(env_path):
         Array of metadata value for each image.
 
     """
-    path = utils.get_path(env_path, "Img")
+    path = utils.get_path(env_path, "Img_base")
     path_data = os.path.join(path, "celeba", "list_attr_celeba.txt")
 
     with open(path_data, "r") as file:
