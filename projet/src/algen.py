@@ -224,7 +224,7 @@ def crossing_over(images_encoded: ndarray | Tensor,
     Parameters
     ----------
     images_encoded: numpy.ndarray or torch.Tensor
-        Object containing an or several images pixels values. The images
+        Object containing one or several images pixels values. The images
         where the pixel are drawn is chosen randomly between all the
         input images, with a uniform distribution
     crossing_rate: float
