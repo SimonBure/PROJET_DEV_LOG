@@ -5,12 +5,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchsummary import summary
+# from torchsummary import summary
 from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset, Dataset, DataLoader
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-import utils
+from projet import utils
 import os
 from PIL import Image
 import database
@@ -37,11 +37,6 @@ def load_model(path):
     model = Autoencoder()
     model.load_state_dict(torch.load(path))
     return model
-
-
-#env_path = os.path.dirname(os.path.realpath(__file__))
-env_path = "projet"
-
 
 #################### Create a custom dataset class #########
 class MyDataset(Dataset):
@@ -110,50 +105,13 @@ def crop_image_tensor(tensor):
     left = 18
     crop_height = 160
     crop_width = 160
-    img = img.permute(2, 0, 1)
+    img = tensor.permute(2, 0, 1)
     img = TF.crop(img, top, left, crop_height, crop_width)
     cropped_tensor = img.permute(1, 2, 0)
     #print(cropped_tensor.shape)
     return(cropped_tensor)
 
-CelebA= load_dataset(178,218, nb_samples=10000, crop_images=True)
-print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
-"""
-faces_db = database.request_data_by_id(env_path, range(1000))
-#Image.open(faces_db[0]).show()
-samples = np.zeros((len(faces_db), 218, 178, 3), dtype=np.uint8)
-top = 40
-left = 18
-crop_height = 160
-crop_width = 160
-print(samples.shape)
 
-# Loop through the list of image files and load each image into the samples array
-for i, filename in enumerate(faces_db):
-    # Print a progress indicator every 10% of the way through the loop
-    if i % (len(faces_db)//10) == 0:
-        print('-', end='', flush=True)
-    # Load the image from disk
-    im = Image.open(filename)
-    # Convert the image data to a numpy array and add it to the samples array
-    samples[i] = np.asarray(im)
-
-samples = torch.from_numpy(samples.astype(np.float32) / 255.0)
-print(samples.shape)
-#print(samples.size(0))
-cropped_samples = torch.empty(samples.size(0), crop_height, crop_width, 3)
-
-for i, tensor in enumerate(samples):
-    img = tensor
-    img = img.permute(2, 0, 1)
-    img = TF.crop(img, top, left, crop_height, crop_width)
-    img = img.permute(1, 2, 0)
-    cropped_samples[i] = img
-samples = cropped_samples
-print(samples.shape)
-"""
-###################### Showing some images from the CelebA dataset constructed#############
-print("This is are images obtained from tensors in the CelebA dataset:" )
 def plot_5_images(dataset, width, height):
 
     samples = dataset.samples
@@ -172,12 +130,6 @@ def plot_5_images(dataset, width, height):
         axs[i].imshow(samples[random_indices[i]], cmap=None, interpolation='nearest', aspect='equal')
         axs[i].axis("off")
     plt.show()
-
-#plot_5_images(CelebA, 160, 160)
-
-
-
-
 
 ################### Data spliting  ##################
 def split_train_valid_test_set(dataset, p_train, p_valid):
@@ -201,33 +153,7 @@ def split_train_valid_test_set(dataset, p_train, p_valid):
 
     return train_ds.tensors[0], valid_ds.tensors[0], test_ds.tensors[0]
 
-p_train = 0.8
-p_valid = 0.1
-
-train_ds, valid_ds, test_ds = split_train_valid_test_set(CelebA, p_train, p_valid)
-valid_ds[0].shape
-
-
-############################## Loading the dataset into a DataLoader ###################
-my_batch_size = 10
-# DataLoader d'entrainement
-train_dl = DataLoader(train_ds, batch_size=my_batch_size, shuffle=True)
-print(f"Training dataset contains : {len(train_ds)} images")
-print(f"Training dataloader contains : {len(train_dl)} batchs each containing {my_batch_size} images \n")
-
-# DataLoader de validation
-valid_dl = DataLoader(valid_ds, batch_size=my_batch_size)
-print(f"Validation dataset contains: {len(valid_ds)} images")
-print(f"Validation dataloader contains : {len(valid_dl)} batchs each containing {my_batch_size} images")
-
-
-for batch_idx, batch in enumerate(train_dl):
-    print(f"Batch {batch_idx} shape: {batch.shape}")
-    break # Only print the first batch
-
-
 ####################### Auto-encoder #####
-
 class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
@@ -240,7 +166,6 @@ class Autoencoder(nn.Module):
             nn.ReLU(),
             nn.Conv2d(32, 64, 7, stride=2, padding=1)
         )
-
         # Decoder
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(64, 32, 7, stride=2, padding=1, output_padding=1),
@@ -255,16 +180,6 @@ class Autoencoder(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
-##Architecture
-
-width = 160
-height = 160
-nb_chan_out = 64
-AutoEncoder = Autoencoder()#width, height, nb_chan_out)
-print("AutoEncoder model:")
-print(summary(AutoEncoder, (3, width , height)))
-
-
 
 ################ Training the autoencoder
 def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
@@ -278,36 +193,18 @@ def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
     for epoch in range(nb_epochs):
         epoch_loss = 0
         for x in train_dl:
-          x_hat = autoencoder(x)
-          #print(x_hat.shape)
-          loss = loss_fn(x_hat, x)
-          loss.backward()
-          optimizer.step()
-          optimizer.zero_grad()
-          epoch_loss += loss.item()
+            x_hat = autoencoder(x)
+            # print(x_hat.shape)
+            loss = loss_fn(x_hat, x)
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+            epoch_loss += loss.item()
 
         train_losses.append(epoch_loss / len(train_dl))
         print(f"Epoch {epoch + 1}/{nb_epochs}, loss={train_losses[-1]:.5f}")
 
     return autoencoder
-
-model = Autoencoder()
-# Before actually training the model check if there is a trained model already
-model_path = os.path.join(utils.get_path(env_path, "Encoder"),"model.pt")
-print(model_path)
-# Check if the model file exists
-if os.path.isfile(model_path):
-    # If the file exists, load the saved weights
-    print("Model is already trained")
-    model = Autoencoder()
-    model.load_state_dict(torch.load(model_path))
-
-else:
-    model = Autoencoder()
-    model = train_autoencoder(model, train_dl, nb_epochs=20, learning_rate=0.01)
-    # Save Model
-    torch.save(model.state_dict(), model_path)
-
 
 ##################### Recap of the Tensor sizes
 """
@@ -325,12 +222,12 @@ print("Decoded Tensor with the batch dimension erased: ", decoded2.shape)
 """
 ########################
 
-#transform = T.ToPILImage()
-#img = transform(decoded2)
-#img.save('my_image.png')
-#img.show()
-#Encoded -> Decoded
-#img.save('/path/to/my_image.png')
+# transform = T.ToPILImage()
+# img = transform(decoded2)
+# img.save('my_image.png')
+# img.show()
+# Encoded -> Decoded
+# img.save('/path/to/my_image.png')
 
 def encode_decode_tensor (tensor):
     x = tensor.unsqueeze(0)
@@ -351,24 +248,115 @@ def encode (image):
     Returns:
         torch.Tensor: Tensor representing the encoded representation of the input image.
     """
-    x = tensor.unsqueeze(0)
+    x = image.unsqueeze(0)
     x = x.permute(0,3,1,2)
     encoded = model.encoder(x)
     return(encoded)
 
 def decode (encoded_tensor):
-    decoded = model.decoder(encoded)
+    decoded = model.decoder(encoded_tensor)
     decoded_shor = decoded.squeeze(0)
     return (decoded_shor)
-#print(len(CelebA[:5]))
-#print(CelebA[0])
 
-for i, image in enumerate(CelebA[:5]):
-    decoded = encode_decode_tensor(image)
-    transform = T.ToPILImage()
-    img = transform(decoded)
-    #img.show()
-    img.save(os.path.join(utils.get_path(env_path, "Encoder"),"gen_img",f'img{i}.jpg'))
+if __name__ == "__main__":
+    # env_path = os.path.dirname(os.path.realpath(__file__))
+    env_path = "projet"
 
-#print(train_dl.shape)
-#utils.save_tensor_to_disk_numpy(train_dl, model_path)
+    CelebA = load_dataset(178, 218, nb_samples=10000, crop_images=True)
+    print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
+
+    p_train = 0.8
+    p_valid = 0.1
+
+    train_ds, valid_ds, test_ds = split_train_valid_test_set(CelebA, p_train, p_valid)
+    # valid_ds[0].shape
+
+    ############################## Loading the dataset into a DataLoader ###################
+    my_batch_size = 10
+    # DataLoader d'entrainement
+    train_dl = DataLoader(train_ds, batch_size=my_batch_size, shuffle=True)
+    print(f"Training dataset contains : {len(train_ds)} images")
+    print(f"Training dataloader contains : {len(train_dl)} batchs each containing {my_batch_size} images \n")
+
+    # DataLoader de validation
+    valid_dl = DataLoader(valid_ds, batch_size=my_batch_size)
+    print(f"Validation dataset contains: {len(valid_ds)} images")
+    print(f"Validation dataloader contains : {len(valid_dl)} batchs each containing {my_batch_size} images")
+
+    for batch_idx, batch in enumerate(train_dl):
+        print(f"Batch {batch_idx} shape: {batch.shape}")
+        break  # Only print the first batch
+
+    """
+    faces_db = database.request_data_by_id(env_path, range(1000))
+    #Image.open(faces_db[0]).show()
+    samples = np.zeros((len(faces_db), 218, 178, 3), dtype=np.uint8)
+    top = 40
+    left = 18
+    crop_height = 160
+    crop_width = 160
+    print(samples.shape)
+
+    # Loop through the list of image files and load each image into the samples array
+    for i, filename in enumerate(faces_db):
+        # Print a progress indicator every 10% of the way through the loop
+        if i % (len(faces_db)//10) == 0:
+            print('-', end='', flush=True)
+        # Load the image from disk
+        im = Image.open(filename)
+        # Convert the image data to a numpy array and add it to the samples array
+        samples[i] = np.asarray(im)
+
+    samples = torch.from_numpy(samples.astype(np.float32) / 255.0)
+    print(samples.shape)
+    #print(samples.size(0))
+    cropped_samples = torch.empty(samples.size(0), crop_height, crop_width, 3)
+
+    for i, tensor in enumerate(samples):
+        img = tensor
+        img = img.permute(2, 0, 1)
+        img = TF.crop(img, top, left, crop_height, crop_width)
+        img = img.permute(1, 2, 0)
+        cropped_samples[i] = img
+    samples = cropped_samples
+    print(samples.shape)
+    """
+    ###################### Showing some images from the CelebA dataset constructed#############
+    print("This is are images obtained from tensors in the CelebA dataset:")
+
+    # plot_5_images(CelebA, 160, 160)
+
+    ##Architecture
+    width = 160
+    height = 160
+    nb_chan_out = 64
+    AutoEncoder = Autoencoder()  # width, height, nb_chan_out)
+    print("AutoEncoder model:")
+    # print(summary(AutoEncoder, (3, width, height)))
+
+    model = Autoencoder()
+    # Before actually training the model check if there is a trained model already
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
+    print(model_path)
+    # Check if the model file exists
+    if os.path.isfile(model_path):
+        # If the file exists, load the saved weights
+        print("Model is already trained")
+        model = Autoencoder()
+        model.load_state_dict(torch.load(model_path))
+
+    else:
+        model = Autoencoder()
+        model = train_autoencoder(model, train_dl, nb_epochs=20, learning_rate=0.01)
+        # Save Model
+        torch.save(model.state_dict(), model_path)
+
+    for i, image in enumerate(CelebA[:5]):
+        decoded = encode_decode_tensor(image)
+        transform = T.ToPILImage()
+        img = transform(decoded)
+        #img.show()
+        img.save(os.path.join(utils.get_path(env_path, "Encoder"),"gen_img",f'img{i}.jpg'))
+
+    # print(train_dl.shape)
+    # utils.save_tensor_to_disk_numpy(train_dl, model_path)
