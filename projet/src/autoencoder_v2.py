@@ -87,7 +87,7 @@ def load_dataset(input_path, width, height, nb_samples=-1, crop_images=False):
     print(f"Number loaded images: {len(dataset)}/{total_nb_images}\n")
 
     return dataset
-CelebA= load_dataset(utils.get_path(env_path, "Img"),178,218, nb_samples=1000, crop_images=True)
+CelebA= load_dataset(utils.get_path(env_path, "Img"),178,218, nb_samples=10000, crop_images=True)
 print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
 """
 faces_db = database.request_data_by_id(env_path, range(1000))
@@ -311,6 +311,16 @@ def encode_decode_tensor (tensor):
     print(decoded_shor.shape)
     return (decoded_shor)
 
+def encode (tensor):
+    x = tensor.unsqueeze(0)
+    x = x.permute(0,3,1,2)
+    encoded = model.encoder(x)
+    return(encoded)
+
+def decode (encoded_tensor):
+    decoded = model.decoder(encoded)
+    decoded_shor = decoded.squeeze(0)
+    return (decoded_shor)
 #print(len(CelebA[:5]))
 #print(CelebA[0])
 for i, image in enumerate(CelebA[:5]):
