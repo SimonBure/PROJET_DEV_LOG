@@ -22,6 +22,23 @@ import time                      # Allow to compute runtime
 import math                      # Mathematical functions
 
 
+def load_model(path):
+    """
+    Loads the state dictionary of a PyTorch model from a file with the given name
+    and returns the corresponding model object.
+
+    Parameters:
+        model (torch.nn.Module): PyTorch model to be loaded.
+        path (str): Path to load the model from.
+
+    Returns:
+        torch.nn.Module: The loaded PyTorch model.
+    """
+    model = Autoencoder()
+    model.load_state_dict(torch.load(path))
+    return model
+
+
 #env_path = os.path.dirname(os.path.realpath(__file__))
 env_path = "projet"
 
@@ -38,7 +55,7 @@ class MyDataset(Dataset):
         sample = self.samples[idx]
         return sample
 ################## Load Database ###########################
-def load_dataset(input_path, width, height, nb_samples=-1, crop_images=False):
+def load_dataset(width, height, nb_samples=-1, crop_images=False):
     # define crop parameters
     top = 40
     left = 18
@@ -87,7 +104,19 @@ def load_dataset(input_path, width, height, nb_samples=-1, crop_images=False):
     print(f"Number loaded images: {len(dataset)}/{total_nb_images}\n")
 
     return dataset
-CelebA= load_dataset(utils.get_path(env_path, "Img"),178,218, nb_samples=10000, crop_images=True)
+
+def crop_image_tensor(tensor):
+    top = 40
+    left = 18
+    crop_height = 160
+    crop_width = 160
+    img = img.permute(2, 0, 1)
+    img = TF.crop(img, top, left, crop_height, crop_width)
+    cropped_tensor = img.permute(1, 2, 0)
+    #print(cropped_tensor.shape)
+    return(cropped_tensor)
+
+CelebA= load_dataset(178,218, nb_samples=10000, crop_images=True)
 print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
 """
 faces_db = database.request_data_by_id(env_path, range(1000))
@@ -281,7 +310,7 @@ else:
 
 
 ##################### Recap of the Tensor sizes
-
+"""
 print("Database Tensor: ",CelebA[0].shape)
 aTensor = CelebA[0]
 x = aTensor.unsqueeze(0)
@@ -293,10 +322,11 @@ decoded = AutoEncoder.decoder(recon)
 print("Decoded Tensor : ",decoded.shape)
 decoded2 = decoded.squeeze(0)
 print("Decoded Tensor with the batch dimension erased: ", decoded2.shape)
+"""
 ########################
 
-transform = T.ToPILImage()
-img = transform(decoded2)
+#transform = T.ToPILImage()
+#img = transform(decoded2)
 #img.save('my_image.png')
 #img.show()
 #Encoded -> Decoded
@@ -308,10 +338,19 @@ def encode_decode_tensor (tensor):
     encoded = model.encoder(x)
     decoded = model.decoder(encoded)
     decoded_shor = decoded.squeeze(0)
-    print(decoded_shor.shape)
+    #print(decoded_shor.shape)
     return (decoded_shor)
 
-def encode (tensor):
+def encode (image):
+    """
+    Encodes an input image using the given PyTorch model.
+    Parameters:
+        model (nn.Module): Neural networt model.
+        img (PIL.Image): PIL Image object representing the input image.
+
+    Returns:
+        torch.Tensor: Tensor representing the encoded representation of the input image.
+    """
     x = tensor.unsqueeze(0)
     x = x.permute(0,3,1,2)
     encoded = model.encoder(x)
@@ -323,9 +362,13 @@ def decode (encoded_tensor):
     return (decoded_shor)
 #print(len(CelebA[:5]))
 #print(CelebA[0])
+
 for i, image in enumerate(CelebA[:5]):
     decoded = encode_decode_tensor(image)
     transform = T.ToPILImage()
     img = transform(decoded)
-    img.show()
+    #img.show()
     img.save(os.path.join(utils.get_path(env_path, "Encoder"),"gen_img",f'img{i}.jpg'))
+
+#print(train_dl.shape)
+#utils.save_tensor_to_disk_numpy(train_dl, model_path)
