@@ -4,6 +4,7 @@ import platform
 import shutil
 from numpy import save, load
 from torch import Tensor
+from importlib import resources
 
 
 def save_tensor_to_disk_numpy(tensor: Tensor, path_to_save: str):
@@ -60,7 +61,7 @@ def get_path(env_path, where):
     return path  # Collect the path
 
 
-def create_folders(env_path):
+def create_folders(env_path, dev = False):
     """
     Create folders needed for the program
     """
@@ -73,8 +74,12 @@ def create_folders(env_path):
         img_dataset folder
             img + attribute selection
     """
-    create_path = os.path.join(path, "Database", "img_dataset", "celeba")
-    os.makedirs(create_path)
+    if dev == True :
+        create_path = os.path.join(path, "Database", "img_dataset", "celeba")
+        os.makedirs(create_path)
+    else :
+        create_path = os.path.join(path, "Database", "img_dataset")
+        os.makedirs(create_path)
 
     """
     Result Folder, will contain :
@@ -97,7 +102,17 @@ def create_folders(env_path):
     """
     create_path = os.path.join(path, "Auto_encoder", "gen_img")
     os.makedirs(create_path)
+    
+    """
+    Data Folder, will contain :
+        idkit.db
+        idkit.png
+        new_dataset.zip
+    """
+    create_path = os.path.join(path, "Data")
+    os.makedirs(create_path)
 
 
 def remove_env_prog(env_path):
     shutil.rmtree(get_path(env_path, "Env"))
+    

@@ -20,7 +20,7 @@ def get_database_path(env_path):
 
     """
     path = utils.get_path(env_path, "Database")
-    data_loc = os.path.join(path, "project.db")
+    data_loc = os.path.join(path, "idkit.db")
     return data_loc
 
 
