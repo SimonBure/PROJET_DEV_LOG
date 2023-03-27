@@ -1,4 +1,4 @@
-from typing import Any
+import os.path
 
 import numpy as np
 import torch.nn as nn
@@ -7,10 +7,12 @@ from PIL import Image
 from copy import deepcopy
 from numpy import ndarray
 from torch import Tensor
+from torchvision import transforms
 
 from database import request_data_by_id
-from torchvision import transforms
 import autoencoder as ae
+# import autoencoder_v2 as ae2
+from projet import utils
 
 
 def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
@@ -32,17 +34,22 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
     Returns
     -------
     flat_img: torch.Tensor or numpy.ndarray
-    Contains the values for all the pixels of the images found in the
-    given path. If several paths are given, all the images are stored
-    in one single object
+        Contains the values for all the pixels of the images found in the
+        given path. If several paths are given, all the images are stored
+        in one single object
 
-    >>>arr = np.array([3, 6, 9])
-    >>>flatten_img(arr).shape
-    (3, 54)
+    >>>path = "./projet/env/Database/img_dataset/celeba/img_align_celeba/000021.jpg"
+    >>>flatten_img(path, img_type="numpy").shape
+    (3, 38804)
 
-    >>> tensor = torch.Tensor([3, 5, 8])
-    >>>flatten_img(tensor).size()
-    torch.Size([3, 40])
+    >>>flatten_img(path).size()
+    torch.Size([3, 38804])
+
+    >>>path_list = ['./projet/env/Database/img_dataset/celeba/img_align_celeba/000001.jpg',
+    >>>'./projet/env/Database/img_dataset/celeba/img_align_celeba/000002.jpg',
+    >>>'./projet/env/Database/img_dataset/celeba/img_align_celeba/000003.jpg']
+    >>>flatten_img(path_list).size()
+    torch.Size([3, 3, 38804])
 
 
     """
@@ -117,7 +124,8 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
                 img = ae.encode()
                 img = img.numpy()
 
-            img_arr = np.transpose(np.array(img), (2, 0, 1))  # Uniformisation of the data dimension
+            # Uniformization of the data dimension
+            img_arr = np.transpose(np.array(img), (2, 0, 1))
             print(f"Array of the img is: {img_arr.shape}")
             return img_arr.reshape(img_arr.shape[0], -1)
 
@@ -277,9 +285,10 @@ if __name__ == "__main__":
     pic_path = request_data_by_id(env_path, id_nb)
     print(f"Path for the picture(s): {pic_path}")
 
-    # Path of the first 20 images
-    id_array = np.arange(start=0, stop=20, step=1)
+    # Path of the first 3 images
+    id_array = np.arange(start=0, stop=3, step=1)
     pic_path_list = request_data_by_id(env_path, id_array)
+    print(f"Path list: {pic_path_list}")
 
     # Open the image with PIL
     pic = Image.open(pic_path)
@@ -297,7 +306,7 @@ if __name__ == "__main__":
 
     # Transform the image into a torch Tensor object
     to_tensor = transforms.ToTensor()
-    pic_tensor = to_tensor(pic_array)
+    pic_tensor = to_tensor(pic)
     print(f"Base Tensor dim: {pic_tensor.shape}")
 
     # Testing flatten func for Tensor
@@ -306,30 +315,27 @@ if __name__ == "__main__":
     flat_pics = flatten_img(pic_path_list)
     print(f"Tensor list dim after flatten: {flat_pics.shape}")
 
-    # Trying with oliveti dataset
-    oliveti_faces = ae.faces.images  # ndarray of all the pictures
-    fst_face = oliveti_faces[0]
-    a_tensor = to_tensor(fst_face)
-    print(f"Olivetti shape: {a_tensor.shape}")
-
-    # Create an autoencoder
-    autoencoder = ae.Autoencoder()
+    # Load an autoencoder and encode an img
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
+    autoencoder = ae.load_model(model_path)
+    encoded_img = ae.encode(autoencoder, pic)
+    print(f"Image tensor : {encoded_img.size()}")
 
     # Encoding an image
-    pic_encoded = ae.encode(autoencoder, fst_face)
-    print(f"Shape of the encoded tensor: {pic_encoded.shape}")
+    # pic_encoded = ae.encode(autoencoder, fst_face)
+    # print(f"Shape of the encoded tensor: {pic_encoded.shape}")
 
     # Testing mutation on all pixels
-    some_tensor = torch.randn(size=(3, 3))
-    print(f"Base tensor: {some_tensor}")
-    print(f"Mutated tensor: {mutate_img(some_tensor, mut_type='uniform')}")
-
-    some_array = np.random.randn(3, 3)
-    print(f"Base array: {some_array}")
-    print(f"Mutated array: {mutate_img(some_array, mut_type='uniform')}")
+    # some_tensor = torch.randn(size=(3, 3))
+    # print(f"Base tensor: {some_tensor}")
+    # print(f"Mutated tensor: {mutate_img(some_tensor, mut_type='uniform')}")
+    #
+    # some_array = np.random.randn(3, 3)
+    # print(f"Base array: {some_array}")
+    # print(f"Mutated array: {mutate_img(some_array, mut_type='uniform')}")
 
     # Testing mutation on random pixels
-    mut_tensor_rdm = mutate_img(some_tensor, mutation_rate=0.2)
-    print(f"Mutated tensor (random): {mut_tensor_rdm}")
-    mut_arr_rdm = mutate_img(some_array, mutation_rate=0.2)
-    print(f"Mutated array (random): {mut_arr_rdm}")
+    # mut_tensor_rdm = mutate_img(some_tensor, mutation_rate=0.2)
+    # print(f"Mutated tensor (random): {mut_tensor_rdm}")
+    # mut_arr_rdm = mutate_img(some_array, mutation_rate=0.2)
+    # print(f"Mutated array (random): {mut_arr_rdm}")
