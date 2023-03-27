@@ -177,10 +177,6 @@ def f2(env_path):
         for i in range(3,5):
             if (acc[i-3] == 1):
                 liste_acc[1][i]=1
-            if acc[3] == 1 :
-                liste_acc[1][3]=0
-                liste_acc[1][4]=0
-                liste_acc[1][5]=0
         print(type(liste_acc[1][2]))
         
         return liste_acc
@@ -193,9 +189,14 @@ def f2(env_path):
         
         test = verif_reponses()
         ans_user = liste_db()
+            # Retrieve 5 images
+        array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][4], ans_user[1][3], ans_user[1][5])
+        print(array_metadata)
+        img_list = database.get_5_img(env_path, array_metadata) # liste de path
+    
         if test==FALSE:
             f2_flr.destroy()
-            f3(env_path, ans_user)
+            f3(env_path, img_list)
         elif(test==TRUE):
             showinfo('ATTENTION', 'Veuillez remplir tous les champs')
 
@@ -258,7 +259,7 @@ def f2(env_path):
 
 ################################################# FENETRE 3 #########################################################
 
-def f3(env_path, ans_user):
+def f3(env_path, img_list):
     """
     Création de la fenetre 3 depuis l'execution de openf3
     """
@@ -283,39 +284,100 @@ def f3(env_path, ans_user):
         rep_tot = [repb1, repb2, repb3, repb4, repb5, rep_finale]
         return rep_tot
     
-    def verif_rep():
+    def verif_rep_3():
         """
         Verifier combien d'images ont été choisies par l'utilisateur
         Returns
         -------
-        <boolean> : TRUE si l'utilisateur n'a bien choisi qu'une image # A MODIFIER !!
-        <int>     : correspond à l'index de l'image choisie par l'utilisateur
+        stop : <boolean> : TRUE si l'utilisateur a bien choisi 3 images 
+        index_choix : <int> : correspond aux index des images choisies par l'utilisateur
         """
         checkbut=recup_valCheckB()
         compte = 0
-        index = 0
+        index_choix = []
         for i in range(len(checkbut)-1):
             if (checkbut[i]==1):
                 compte+=1      
+                index_choix.append(i)
+        stop = FALSE
+        if (compte==3):
+            stop = TRUE 
+        return stop, index_choix
+    
+    def chemin_choix(index_choix):
+        """
+        Récuperer les chemins des images sélectionnées par l'utilisateur pour les envoyer à l'algorithme génétique
+        Returns
+        -------
+        liste_chemin : <list> : liste contenant les chemins des 3 images sélectionnées
+        """
+        liste_chemin = []
+        for i in range(img_list):
+            if ((i == index_choix[0]) or (i == index_choix[1]) or (i == index_choix[2])):
+                liste_chemin.append(img_list[i])
+        return liste_chemin
+    
+    def verif_rep_1():
+        """
+        Verifier quelle image a été choisie par l'utilisateur, et qu'il n'y en a bien qu'une. 
+        Returns
+        -------
+        final : <boolean> : TRUE si l'utilisateur a bien choisi 1 image 
+        index : <int> : correspond à l'index de l'image choisie par l'utilisateur
+        """
+        checkbfinal=recup_valCheckB()
+        index = 0
+        compte = 0
+        for i in range(len(checkbfinal)-1):
+            if (checkbfinal[i]==1):
+                compte+=1      
                 index = i
         stop = FALSE
-        if (compte==1):
-            stop = TRUE 
-        if (checkbut[5]==1):
-            finale = TRUE
+        finale = FALSE
+        for i in range(len(checkbfinal)-1):
+            if (compte==1):
+                stop = TRUE 
+            if (checkbfinal[5]==1):
+                finale = TRUE
         return stop, index, finale
+    
+    def openf3(env_path):
+        """
+        Refresh la fenetre courante
+        """
+        f3(env_path, img_list)
 
     def openf4(env_path):
         """
         Evenement associé au bouton Valider: destruction de la fenetre courante et ouverture de la fenetre 4
         """
-        pass4 = verif_rep()
-        index_final = pass4[1]
-        if pass4[0]==TRUE and pass4[2]==TRUE:
+        refresh_3 = verif_rep_3()
+        pass_4 = verif_rep_1()
+        index_final = pass_4[1]
+        if (refresh_3[0]==TRUE):
+            # - boucle de temps : à voir combien de temps prend l'algo gen, mais AC rapide
+            # - si boucle de temps ne marche pas, faire un break de temps de 30 sec
+            # - sur cette boucle de temps, appeler à un intervalle dt une fonction de l'AC qui renvoie un 
+            # booléen quand les nouvelles images ont bien été encodées
+            # - une fois que ce booléen (le résultat de la fonction) est true, aller chercher les nouvelles img
+            # - écraser les anciennes images dans img_list
+            # - refresh la fenetre : appeller openf3 ?
+            
+            # code pour refresh : récupérer le path d'une image de l'AC, modifier img_list avec puis tout réafficher
+            directory_test = utils.get_path(env_path, "Encoder")    
+            path1 = os.path.join(directory_test, "base_im.png")
+            ## le seul souci : il faudrait que les 5 images de l'autoencodeur aient toujours le meme nom --> ok, se mettre d'accord du nom avec Jesus
+
+            img_refresh = path1
+            img_list[0]=path1
             f3_img.destroy()
-            f4(env_path)
-        elif(pass4[0]==FALSE):
-            showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image''')
+            openf3(env_path)
+        elif (pass_4[0]==TRUE and pass_4[2]==TRUE):
+            f3_img.destroy()
+            f4(env_path, index_final, img_list)  
+        elif((pass_4[0]==FALSE and refresh_3[0]==FALSE)or(pass_4[0]==TRUE and pass_4[2]==FALSE)or(pass_4[0]==FALSE and pass_4[2]==TRUE)):
+        # si on n'a pas 1 ou 3 images, ou qu'on en a une mais pas finale, ou finale pas mais qu'une
+            showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image et cocher la case "Finale" ou sélectionner 3 images''')
                      
     def aidef3():
         """
@@ -339,12 +401,7 @@ def f3(env_path, ans_user):
     print(path1)
     path2 = os.path.join(directory_test, "recon_im.png")
     """
-    # Retrieve 5 images
-    array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][4], ans_user[1][3], ans_user[1][5])
-    print(array_metadata)
-    img_list = database.get_5_img(env_path, array_metadata)
-    print('contenu de img_list', img_list)
-    print('type de img_list', type(img_list))
+
     
     # Créer une fenêtre d'erreur :
     if img_list == 0 :
@@ -426,7 +483,7 @@ def f3(env_path, ans_user):
 
 ################################################# FENETRE 4 #########################################################
 
-def f4(env_path):
+def f4(env_path, index_final, img_list):
     """
     Création de la fenetre 4 depuis l'execution de openf4
     """
@@ -456,15 +513,16 @@ def f4(env_path):
     labelexpl = Label(f4_xprt, text="Voici l'image finale. Vous pouvez utiliser le menu en onglet pour l'exporter, recommencer une session ou quitter l'application.", bg="white", font = "Arial 14 italic")
     labelexpl.pack()
     
-    
-    directory_test = utils.get_path(env_path, "Encoder")    
-    path2 = os.path.join(directory_test, "recon_im.png")
+    #??? à vérif ### directory_save = utils.get_path(env_path, "Sauvegarde")    
+    #                path_save = os.path.join(directory_save, "DEMANDER LE NOM.png")
+    # vérifier que le nom n'existe pas déjà 
+    # sauvegarder
 
     frame_final = Frame(f4_xprt, width=400, height=400)
     frame_final.pack()
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
-    img_finale = ImageTk.PhotoImage(Image.open(path2))
-    label_final = Label(frame_final, image = img_finale)
+    image_finale= Image.open(img_list[index_final])
+    label_final = Label(frame_final, image = image_finale)
     label_final.pack() 
 
     menubar = Menu(f4_xprt)
