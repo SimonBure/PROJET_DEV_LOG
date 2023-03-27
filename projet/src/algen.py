@@ -46,8 +46,8 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
     torch.Size([3, 38804])
 
     >>>path_list = ['./projet/env/Database/img_dataset/celeba/img_align_celeba/000001.jpg',
-    >>>'./projet/env/Database/img_dataset/celeba/img_align_celeba/000002.jpg',
-    >>>'./projet/env/Database/img_dataset/celeba/img_align_celeba/000003.jpg']
+    >>>             './projet/env/Database/img_dataset/celeba/img_align_celeba/000002.jpg',
+    >>>             './projet/env/Database/img_dataset/celeba/img_align_celeba/000003.jpg']
     >>>flatten_img(path_list).size()
     torch.Size([3, 3, 38804])
 
@@ -285,8 +285,8 @@ if __name__ == "__main__":
     pic_path = request_data_by_id(env_path, id_nb)
     print(f"Path for the picture(s): {pic_path}")
 
-    # Path of the first 3 images
-    id_array = np.arange(start=0, stop=3, step=1)
+    # Path of the first 4 images
+    id_array = np.arange(start=0, stop=4, step=1)
     pic_path_list = request_data_by_id(env_path, id_array)
     print(f"Path list: {pic_path_list}")
 
