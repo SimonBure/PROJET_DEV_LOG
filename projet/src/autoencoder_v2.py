@@ -239,6 +239,7 @@ print(summary(AutoEncoder, (3, width , height)))
 
 ################ Training the autoencoder
 def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
+
     # Define the loss function and optimizer
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(autoencoder.parameters(), lr=learning_rate)
@@ -259,9 +260,26 @@ def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
         train_losses.append(epoch_loss / len(train_dl))
         print(f"Epoch {epoch + 1}/{nb_epochs}, loss={train_losses[-1]:.5f}")
 
-    return train_losses
-train_losses = train_autoencoder(AutoEncoder, train_dl, nb_epochs=20, learning_rate=0.01)
-#####################
+    return autoencoder
+
+model = Autoencoder()
+# Before actually training the model check if there is a trained model already
+model_path = os.path.join(utils.get_path(env_path, "Encoder"),"model.pt")
+print(model_path)
+# Check if the model file exists
+if os.path.isfile(model_path):
+    # If the file exists, load the saved weights
+    print("Model is already trained")
+    model = Autoencoder()
+    model.load_state_dict(torch.load(model_path))
+
+else:
+    model = Autoencoder()
+    model = train_autoencoder(model, train_dl, nb_epochs=20, learning_rate=0.01)
+    # Save Model
+    torch.save(model.state_dict(), model_path)
+
+
 ##################### Recap of the Tensor sizes
 
 print("Database Tensor: ",CelebA[0].shape)
@@ -287,8 +305,8 @@ img = transform(decoded2)
 def encode_decode_tensor (tensor):
     x = tensor.unsqueeze(0)
     x = x.permute(0,3,1,2)
-    encoded = AutoEncoder.encoder(x)
-    decoded = AutoEncoder.decoder(encoded)
+    encoded = model.encoder(x)
+    decoded = model.decoder(encoded)
     decoded_shor = decoded.squeeze(0)
     print(decoded_shor.shape)
     return (decoded_shor)
@@ -300,4 +318,4 @@ for i, image in enumerate(CelebA[:5]):
     transform = T.ToPILImage()
     img = transform(decoded)
     img.show()
-    img.save(os.path.join(utils.get_path(env_path, "Encoder"),f'img{i}.jpg'))
+    img.save(os.path.join(utils.get_path(env_path, "Encoder"),"gen_img",f'img{i}.jpg'))
