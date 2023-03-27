@@ -276,3 +276,28 @@ print("Decoded Tensor : ",decoded.shape)
 decoded2 = decoded.squeeze(0)
 print("Decoded Tensor with the batch dimension erased: ", decoded2.shape)
 ########################
+
+transform = T.ToPILImage()
+img = transform(decoded2)
+#img.save('my_image.png')
+#img.show()
+#Encoded -> Decoded
+#img.save('/path/to/my_image.png')
+
+def encode_decode_tensor (tensor):
+    x = tensor.unsqueeze(0)
+    x = x.permute(0,3,1,2)
+    encoded = AutoEncoder.encoder(x)
+    decoded = AutoEncoder.decoder(encoded)
+    decoded_shor = decoded.squeeze(0)
+    print(decoded_shor.shape)
+    return (decoded_shor)
+
+#print(len(CelebA[:5]))
+#print(CelebA[0])
+for i, image in enumerate(CelebA[:5]):
+    decoded = encode_decode_tensor(image)
+    transform = T.ToPILImage()
+    img = transform(decoded)
+    img.show()
+    img.save(os.path.join(utils.get_path(env_path, "Encoder"),f'img{i}.jpg'))
