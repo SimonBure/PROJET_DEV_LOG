@@ -22,6 +22,33 @@ import time                      # Allow to compute runtime
 import math                      # Mathematical functions
 
 
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super(Autoencoder, self).__init__()
+
+        # Encoder
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 16, 3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 32, 3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, 7, stride=2, padding=1)
+        )
+        # Decoder
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(64, 32, 7, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 3, 3, stride=2, padding=1, output_padding=1),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+
 def load_model(path):
     """
     Loads the state dictionary of a PyTorch model from a file with the given name
@@ -153,35 +180,7 @@ def split_train_valid_test_set(dataset, p_train, p_valid):
 
     return train_ds.tensors[0], valid_ds.tensors[0], test_ds.tensors[0]
 
-####################### Auto-encoder #####
-class Autoencoder(nn.Module):
-    def __init__(self):
-        super(Autoencoder, self).__init__()
 
-        # Encoder
-        self.encoder = nn.Sequential(
-            nn.Conv2d(3, 16, 3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(16, 32, 3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, 7, stride=2, padding=1)
-        )
-        # Decoder
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, 7, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(16, 3, 3, stride=2, padding=1, output_padding=1),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
-
-################ Training the autoencoder
 def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
 
     # Define the loss function and optimizer
@@ -206,7 +205,8 @@ def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
 
     return autoencoder
 
-##################### Recap of the Tensor sizes
+
+# Recap of the Tensor sizes
 """
 print("Database Tensor: ",CelebA[0].shape)
 aTensor = CelebA[0]
@@ -220,7 +220,7 @@ print("Decoded Tensor : ",decoded.shape)
 decoded2 = decoded.squeeze(0)
 print("Decoded Tensor with the batch dimension erased: ", decoded2.shape)
 """
-########################
+
 
 # transform = T.ToPILImage()
 # img = transform(decoded2)
@@ -238,20 +238,23 @@ def encode_decode_tensor (tensor):
     #print(decoded_shor.shape)
     return (decoded_shor)
 
-def encode (image):
+
+def encode(image):
     """
     Encodes an input image using the given PyTorch model.
     Parameters:
         model (nn.Module): Neural networt model.
-        img (PIL.Image): PIL Image object representing the input image.
+        image: torch.Tensor
+            PIL Image object representing the input image.
 
     Returns:
         torch.Tensor: Tensor representing the encoded representation of the input image.
     """
-    x = image.unsqueeze(0)
-    x = x.permute(0,3,1,2)
+    x = image.unsqueeze(0)  # Adding one dimension for the autoencoder
+    # Changing the image to the correct dimensions order for the autoencoder
+    x = x.permute(0, 3, 1, 2)
     encoded = model.encoder(x)
-    return(encoded)
+    return encoded
 
 def decode (encoded_tensor):
     decoded = model.decoder(encoded_tensor)

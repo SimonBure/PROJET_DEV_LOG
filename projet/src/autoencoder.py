@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
+from PIL import Image
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_olivetti_faces
 import utils
@@ -21,34 +22,30 @@ revtrans = transforms.ToPILImage()
 
 class Autoencoder(nn.Module):
     def __init__(self):
-        super().__init__()
-        # N, 1, 28, 28
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 16, 3, stride=2, padding=1),  # -> N, 16, 14, 14
-            nn.ReLU(),
-            nn.Conv2d(16, 32, 3, stride=2, padding=1),  # -> N, 32, 7, 7
-            nn.ReLU(),
-            nn.Conv2d(32, 64, 7, stride=2, padding=1)  # -> N, 64, 1, 1
-        )
+        super(Autoencoder, self).__init__()
 
-        # N , 64, 1, 1
+        # Encoder
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 16, 3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 32, 3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, 7, stride=2, padding=1)
+        )
+        # Decoder
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, 7),  # -> N, 32, 7, 7
+            nn.ConvTranspose2d(64, 32, 7, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
-            # N, 16, 14, 14 (N,16,13,13 without output_padding)
-            nn.ConvTranspose2d(32, 16, 3, stride=2,
-                               padding=1, output_padding=1),
+            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
             nn.ReLU(),
-            # N, 1, 28, 28  (N,1,27,27)
-            nn.ConvTranspose2d(16, 1, 3, stride=2,
-                               padding=1, output_padding=1),
+            nn.ConvTranspose2d(16, 3, 3, stride=2, padding=1, output_padding=1),
             nn.Sigmoid()
         )
 
     def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
 
 
 def encode(model, img):
@@ -164,16 +161,20 @@ def load_model(name_file):
     return model
 
 
-def save_fig(im, path, img_type):
+def save_img(img: Image, path: str, format: str):
     """
-    Saves a matplotlib image object to a file in the specified path.
 
-    Parameters:
-        im (matplotlib.image.AxesImage): The image to be saved.
-        path (str): The path to save the image to.
+    Parameters
+    ----------
+    img: PIL.Image
+        Image object
+    path: str
+        Path where to store the image
+    format: str
+        Wanted format for the image
     """
-    plt.imshow(im)
-    plt.savefig(os.path.join(path, img_type))
+    img.show()  # Display the image
+    img.save(os.path.join(path, format))  # Save the image
 
 
 def save_encoded_im(tensor, name_file):
@@ -209,7 +210,7 @@ def launch_encoder(env_path):
 
         model = training(faces.images, 10)
         enco_im = encode(model, faces.images[0])
-        save_fig(faces.images[0], path, "base_im.png")
+        save_img(faces.images[0], path, "base_im.png")
 
         """
         en1=en.clone()
@@ -222,7 +223,7 @@ def launch_encoder(env_path):
         """
 
         deco_im = decode(model, enco_im)
-        save_fig(deco_im, path, "recon_im.png")
+        save_img(deco_im, path, "recon_im.png")
 
     if flag == 1:
         overfitting(x_train, x_test, 30)
