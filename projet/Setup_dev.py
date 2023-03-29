@@ -42,11 +42,11 @@ if test == "Y" or test == "y":
     # idkit.png pour le logo du programme
     path = utils.get_path(env_path, "Interface")
     url2 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283444"
-    add_path = os.path.join(env_path, "idkit.png")
+    add_path = os.path.join(path, "idkit.png")
     wget.download(url2, out=add_path)
     
     # new_dataset.zip pour les images de la base de données
-    path = utils.get_path(env_path, "Img_base")
+    path = utils.get_path(path, "Img_base")
     add_path = os.path.join(path, "new_dataset.zip")
     url3 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283445"
     wget.download(url3, out=add_path)
@@ -72,7 +72,7 @@ if test == "Y" or test == "y":
 
     test = input("Créer database ? (Y/N)")
     if test == "Y" or test == "y":
-        db.create_database(env_path)
+        db.create_database(env_path, "Project")
         logging.info('Creating database')
 
         img = db.request_data_by_id(env_path, 1)

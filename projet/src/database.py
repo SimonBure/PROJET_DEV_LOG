@@ -4,7 +4,7 @@ import os
 import utils
 
 
-def get_database_path(env_path):
+def get_database_path(env_path, who = "idkit"):
     """
     Retrieve access to database to query her
 
@@ -20,7 +20,10 @@ def get_database_path(env_path):
 
     """
     path = utils.get_path(env_path, "Database")
-    data_loc = os.path.join(path, "idkit.db")
+    if who == "Project" :
+        data_loc = os.path.join(path, "project.db")
+    else :
+        data_loc = os.path.join(path, "idkit.db")
     return data_loc
 
 
@@ -111,7 +114,7 @@ def insert_data(cursor, connect, dataset):
     connect.commit()
 
 
-def create_database(env_path):
+def create_database(env_path, who = "Project"):
     """
     Create the database needed for the project. Insert CelebA dataset from personal link
 
@@ -120,7 +123,7 @@ def create_database(env_path):
     env_path : str
         Path of the environement.
     """
-    con = sqlite3.connect(r"%s" % (get_database_path(env_path)))
+    con = sqlite3.connect(r"%s" % (get_database_path(env_path,"Project")))
     cursor = con.cursor()
 
     # Retrieve datas :
