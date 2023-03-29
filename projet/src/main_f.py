@@ -158,7 +158,6 @@ def f2(env_path):
 
         if (g=='1'): # 0 : nsp, 1 : femme, 2 : homme
             liste_acc[1][0]=1
-            print(liste_acc[1][0])
         elif (g=='2'):
             liste_acc[1][0]=2
                
@@ -177,7 +176,6 @@ def f2(env_path):
         for i in range(3,5):
             if (acc[i-3] == 1):
                 liste_acc[1][i]=1
-        print(type(liste_acc[1][2]))
         
         return liste_acc
         
@@ -487,45 +485,43 @@ def f4(env_path, index_final, img_list):
     """
     Création de la fenetre 4 depuis l'execution de openf4
     """
-    f4_xprt = Tk()
-    w, h = f4_xprt.winfo_screenwidth(), f4_xprt.winfo_screenheight()
-    f4_xprt.geometry("%dx%d" % (w, h))
+    f4_final = Tk()
+    w, h = f4_final.winfo_screenwidth(), f4_final.winfo_screenheight()
+    f4_final.geometry("%dx%d" % (w, h))
 
     def export():
         """
-        Evenement associé au menu Exporter: export de l'image en format <A DEFINIR>
+        DOCSTRING A MAJ
+        Evenement associé au menu Exporter: export de l'image en format JGP
+        L'export se fait par défaut dans l'environnement, ou l'utilisateur entre un chemin d'accès
         """
-        showinfo("alerte", "Pas encore fonctionnel")
+        f5(env_path, image_finale)
 
     def quit():
         """
         Evenement associé au menu Quitter: destruction de la fenetre courante
         """
-        f4_xprt.destroy()
+        f4_final.destroy()
 
     def openf1(env_path):
         """
         Evenement associé au menu Nouveau: destruction de la fenetre courante et ouverture de la fenetre 1
         """
-        f4_xprt.destroy()
+        f4_final.destroy()
         f1(env_path)
     
-    labelexpl = Label(f4_xprt, text="Voici l'image finale. Vous pouvez utiliser le menu en onglet pour l'exporter, recommencer une session ou quitter l'application.", bg="white", font = "Arial 14 italic")
+    labelexpl = Label(f4_final, text="Voici l'image finale. Vous pouvez utiliser le menu en onglet pour l'exporter, recommencer une session ou quitter l'application.", bg="white", font = "Arial 14 italic")
     labelexpl.pack()
     
-    #??? à vérif ### directory_save = utils.get_path(env_path, "Sauvegarde")    
-    #                path_save = os.path.join(directory_save, "DEMANDER LE NOM.png")
-    # vérifier que le nom n'existe pas déjà 
-    # sauvegarder
 
-    frame_final = Frame(f4_xprt, width=400, height=400)
+    frame_final = Frame(f4_final, width=400, height=400)
     frame_final.pack()
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
     image_finale= Image.open(img_list[index_final])
     label_final = Label(frame_final, image = image_finale)
     label_final.pack() 
 
-    menubar = Menu(f4_xprt)
+    menubar = Menu(f4_final)
 
     menu1 = Menu(menubar, tearoff=0)
     menu1.add_command(label="Exporter", command=export)
@@ -535,11 +531,70 @@ def f4(env_path, index_final, img_list):
     menubar.add_cascade(label="Fichier", menu=menu1)
 
 
-    f4_xprt.config(menu=menubar)
+    f4_final.config(menu=menubar)
 
 
-    f4_xprt.mainloop()
+    f4_final.mainloop()
+    
+################################################# FENETRE 5 #########################################################
+ 
+def f5(env_path, image_finale):
+    
+    f5_xprt = Tk()
+      
+    def export():
+       '''
+       DOCSTRING A FAIRE
+       '''
+        chemin=T1.get("1.0","end-1c")
+       
+        nom   =T2.get("1.0","end-1c")
+        
+        if (nom != None): 
+            jpg = '.jpg'
+            nom_final = nom+jpg
+        elif (chemin == None):
+            nom_final = 'image_finale.jpg'
+        
+        if (chemin == None):
+            chemin = '../env/Result'
+       
+        path_defaut = chemin
+        img_save = image_finale
+        img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
+        
+        showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
 
-
+    ## VOIR QUE FAIRE QUAND LE CHEMIN N EST PAS BON (afficher une erreur), ou nom existe déjà (AFFICHER UNE ERREUR)
+              
+    def quitter():
+        """
+        Evenement associé au menu Quitter: destruction de la fenetre courante
+        """
+        f5_xprt.destroy()  
+        
+    
+    txt1 = Label(f5_xprt, text="chemin de sauvegarde", bg="white", font = "Arial 14 italic")
+    txt1.pack()
+    T1 = Text(f5_xprt, height = 3, width = 52)
+    T1.pack()
+    
+    txt2 = Label(f5_xprt, text="Nom de l'image", bg="white", font = "Arial 14 italic")
+    txt2.pack()
+    T2 = Text(f5_xprt, height = 3, width = 52)
+    T2.pack()
+    
+    boutSend=Button(f5_xprt, text="OK", font='Arial 8', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= export)
+    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.8)
+    
+    boutSend=Button(f5_xprt, text="Fermer", font='Arial 8', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= quitter)
+    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.8)
+ 
+    f5_xprt.mainloop()    
+    
+    
+    
 if __name__ == '__main__':
     f1("../")
+    
+ 
