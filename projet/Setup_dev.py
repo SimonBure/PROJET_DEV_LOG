@@ -8,6 +8,12 @@ import sys
 import os
 import wget
 import zipfile
+import logging
+
+#Setup log file
+logging.basicConfig(filename='Idkit.log', encoding='utf-8', level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s : %(message)s')
+
 
 env_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -22,7 +28,9 @@ if test == "Y" or test == "y":
 
 test = input("Créer environnement ? (Y/N)")
 
+
 if test == "Y" or test == "y":
+    logging.info('Creating environement')
     utils.create_folders(env_path, dev = True)
     
     # idkit.db database du programme
@@ -65,6 +73,7 @@ if test == "Y" or test == "y":
     test = input("Créer database ? (Y/N)")
     if test == "Y" or test == "y":
         db.create_database(env_path)
+        logging.info('Creating database')
 
         img = db.request_data_by_id(env_path, 1)
         print(img)
@@ -76,10 +85,12 @@ if test == "Y" or test == "y":
 test = input("Lancer programme ? (Y/N)")
 
 if test == "Y" or test == "y":
+    logging.info('Program launched')
     main.f1(env_path)
 
 
 test2 = input("Détruire environnemnt ? (Y/N)")
 
 if test2 == "Y" or test == "y":
+    logging.info('Destructing environement')
     utils.remove_env_prog(env_path)
