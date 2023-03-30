@@ -17,17 +17,16 @@ from projet import utils
 
 
 def flatten_img(img_path: str | list[str]) -> Tensor:
+    # TODO Update doc
     """Uses the path stored in img_path to create a Tensor or a ndarray
     in a convenient shape for all the future modifications.
     This function can also encode the image if needed
+
 
     Parameters
     ----------
     img_path: str or list[str]
         Path or paths of the images to be retrieved
-    encode: bool
-        True if the images need to be encoded by the autoencoder,
-        False otherwise. Default to True
 
     Returns
     -------
@@ -58,6 +57,8 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
     if type(img_path) is list:
         temp_img = Image.open(img_path[0])  # Temporary img to get its size
         temp_tensor = to_tensor(temp_img)
+        temp_tensor = ae2.crop_image_tensor(temp_tensor)
+        temp_tensor = ae2.encode(autoencoder, temp_tensor)
         size = temp_tensor.shape
 
         # Global Tensor containing all the images
@@ -99,8 +100,8 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
             or a list of paths")
 
 
-def deflatten_img(flat_tensor: Tensor,
-                  base_encoded_dim: tuple[int, int, int]) -> Image:
+def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size) -> Image:
+    # TODO Docstring here
     # Path where to find a trained autoencoder
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
@@ -183,7 +184,7 @@ def crossing_over(img_encoded: Tensor, crossing_rate: float) -> Tensor:
         where the pixel are drawn is chosen randomly between all the
         input images, with a uniform distribution
     crossing_rate: float
-    Probability for a pixel to be swapped between images
+        Probability for a pixel to be swapped between images
 
     Returns
     -------
@@ -218,8 +219,8 @@ if __name__ == "__main__":
     pic_path = request_data_by_id(env_path, id_nb)
     print(f"Path for the picture(s): {pic_path}")
 
-    # Path of the first 4 images
-    id_array = np.arange(start=0, stop=4, step=1)
+    # Path of the first 3 images
+    id_array = np.arange(start=0, stop=3, step=1)
     pic_path_list = request_data_by_id(env_path, id_array)
     print(f"Path list: {pic_path_list}")
 
@@ -234,10 +235,6 @@ if __name__ == "__main__":
     # some_tensor = torch.randn(size=(3, 3))
     # print(f"Base tensor: {some_tensor}")
     # print(f"Mutated tensor: {mutate_img(some_tensor, mut_type='uniform')}")
-
-    # some_array = np.random.randn(3, 3)
-    # print(f"Base array: {some_array}")
-    # print(f"Mutated array: {mutate_img(some_array, mut_type='uniform')}")
 
     # Testing mutation on random pixels
     # mut_tensor_rdm = mutate_img(some_tensor, mutation_rate=0.2)
@@ -257,14 +254,23 @@ if __name__ == "__main__":
     decoded = ae.decode(autoencoder, encoded_img)  # Decoding the tensor
     # decoded.show("Image décodée")
 
-    # Testing flatten on encoded image
+    # Testing flatten on an image
     flat_encoded_tensor = flatten_img(pic_path)
-    print(f"Flat encoded shape: {flat_encoded_tensor.size()}")
+    print(f"Flat encoded size: {flat_encoded_tensor.size()}")
+
+    # Testing flatten on several images
+    flat_several = flatten_img(pic_path_list)
+    print(f"Several image tensor size: {flat_several.size()}")
 
     # Testing resize
-    deflat_img = deflatten_img(flat_encoded_tensor)
+    deflat_img = deflatten_img(flat_encoded_tensor, encoded_img.size())
     deflat_img.show()
-    # deflatten_img.show("Image après le processus de flatten - deflatten")
 
     # Testing mutation on flat encoded image
-    # mut_img = mutate_img(flat_encoded_img)
+    mut_img = mutate_img(flat_encoded_tensor, mut_type="uniform")
+    deflat_img = deflatten_img(mut_img, encoded_img.size())
+    deflat_img.show()
+
+    mut_img = mutate_img(flat_encoded_tensor, mut_type="random")
+    deflat_img = deflatten_img(mut_img, encoded_img.size())
+    deflat_img.show()
