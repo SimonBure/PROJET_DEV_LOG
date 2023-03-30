@@ -280,7 +280,7 @@ def get_5_img(env_path, array=[], who = "idkit"):
         path_img_list = request_data_by_metadata(env_path, array, who)
         if len(path_img_list) > 5:
             path_img_list_temp = []
-            numbers = np.random.randint(1, len(path_img_list), size=5)
+            numbers = np.random.choice(list(range(len(path_img_list))), size=5, replace = False )
             for i in numbers:
                 path_img_list_temp.append(path_img_list[i])
             path_img_list = path_img_list_temp
