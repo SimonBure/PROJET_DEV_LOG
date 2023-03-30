@@ -37,7 +37,7 @@ def f1(env_path):
         f1_acc.destroy()
         f2(env_path)
         
-    logo_path = utils.get_path(env_path, "Temp")
+    logo_path = utils.get_path(env_path, "Interface")
     logo_path = os.path.join(logo_path, "idkit.png")
     
     framelogo = Frame(f1_acc, width=400, height=400)
@@ -189,7 +189,6 @@ def f2(env_path):
         ans_user = liste_db()
             # Retrieve 5 images
         array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][4], ans_user[1][3], ans_user[1][5])
-        print(array_metadata)
         img_list = database.get_5_img(env_path, array_metadata) # liste de path
     
         if test==FALSE:
@@ -284,11 +283,12 @@ def f3(env_path, img_list):
     
     def verif_rep_3():
         """
-        Verifier combien d'images ont été choisies par l'utilisateur
+        Verifier si 3 images ont étées choisies par l'utilisateur
+        
         Returns
         -------
         stop : <boolean> : TRUE si l'utilisateur a bien choisi 3 images 
-        index_choix : <int> : correspond aux index des images choisies par l'utilisateur
+        index_choix : <list of int> : liste contenant les index des images choisies par l'utilisateur
         """
         checkbut=recup_valCheckB()
         compte = 0
@@ -302,25 +302,14 @@ def f3(env_path, img_list):
             stop = TRUE 
         return stop, index_choix
     
-    def chemin_choix(index_choix):
-        """
-        Récuperer les chemins des images sélectionnées par l'utilisateur pour les envoyer à l'algorithme génétique
-        Returns
-        -------
-        liste_chemin : <list> : liste contenant les chemins des 3 images sélectionnées
-        """
-        liste_chemin = []
-        for i in range(img_list):
-            if ((i == index_choix[0]) or (i == index_choix[1]) or (i == index_choix[2])):
-                liste_chemin.append(img_list[i])
-        return liste_chemin
-    
     def verif_rep_1():
         """
-        Verifier quelle image a été choisie par l'utilisateur, et qu'il n'y en a bien qu'une. 
+        Verifier qu'une seule image a étée choisie par l'utilisateur, et laquelle.
+        
         Returns
         -------
-        final : <boolean> : TRUE si l'utilisateur a bien choisi 1 image 
+        stop : <boolean> : TRUE si l'utilisateur a bien choisi 1 seule image
+        final : <boolean> : TRUE si l'utilisateur a bien coché "final" 
         index : <int> : correspond à l'index de l'image choisie par l'utilisateur
         """
         checkbfinal=recup_valCheckB()
@@ -339,7 +328,22 @@ def f3(env_path, img_list):
                 finale = TRUE
         return stop, index, finale
     
-    def openf3(env_path):
+    
+    def chemin_choix(index_choix):
+        """
+        Récuperer les chemins des images sélectionnées par l'utilisateur pour les envoyer à l'algorithme génétique
+        Returns
+        -------
+        liste_chemin : <list> : liste contenant les chemins des 3 images sélectionnées
+        """
+        liste_chemin = []
+        for i in range(img_list):
+            if ((i == index_choix[0]) or (i == index_choix[1]) or (i == index_choix[2])):
+                liste_chemin.append(img_list[i])
+        return liste_chemin
+    
+    
+    def openf3(env_path, img_list):
         """
         Refresh la fenetre courante
         """
@@ -347,11 +351,13 @@ def f3(env_path, img_list):
 
     def openf4(env_path):
         """
-        Evenement associé au bouton Valider: destruction de la fenetre courante et ouverture de la fenetre 4
+        Evenement associé au bouton Valider: selon les résultats des fonctions verif_rep_1 et 
+        verif_rep_3, destruction de la fenetre courante et ouverture de la fenetre 4 ou actualisation de la fenetre 3
         """
         refresh_3 = verif_rep_3()
         pass_4 = verif_rep_1()
-        index_final = pass_4[1]
+        i_fin=pass_4[1]
+
         if (refresh_3[0]==TRUE):
             # - boucle de temps : à voir combien de temps prend l'algo gen, mais AC rapide
             # - si boucle de temps ne marche pas, faire un break de temps de 30 sec
@@ -361,22 +367,23 @@ def f3(env_path, img_list):
             # - écraser les anciennes images dans img_list
             # - refresh la fenetre : appeller openf3 ?
             
-            # code pour refresh : récupérer le path d'une image de l'AC, modifier img_list avec puis tout réafficher
-            directory_test = utils.get_path(env_path, "Encoder")    
-            path1 = os.path.join(directory_test, "base_im.png")
+            ## code pour refresh : récupérer le path d'une image de l'AC, modifier img_list avec puis tout réafficher
+            #directory_test = utils.get_path(env_path, "Encoder")    
+            #path1 = os.path.join(directory_test, "base_im.png")
             ## le seul souci : il faudrait que les 5 images de l'autoencodeur aient toujours le meme nom --> ok, se mettre d'accord du nom avec Jesus
 
-            img_refresh = path1
-            img_list[0]=path1
-            f3_img.destroy()
-            openf3(env_path)
+           # img_refresh = path1
+           # img_list[0]=path1
+           # f3_img.destroy()
+            openf3(env_path, img_list)
         elif (pass_4[0]==TRUE and pass_4[2]==TRUE):
+            path_final_img = img_list[i_fin]
             f3_img.destroy()
-            f4(env_path, index_final, img_list)  
+            f4(env_path, path_final_img)  
         elif((pass_4[0]==FALSE and refresh_3[0]==FALSE)or(pass_4[0]==TRUE and pass_4[2]==FALSE)or(pass_4[0]==FALSE and pass_4[2]==TRUE)):
-        # si on n'a pas 1 ou 3 images, ou qu'on en a une mais pas finale, ou finale pas mais qu'une
+        # A VERIFIER si on n'a pas 1 ou 3 images, ou qu'on en a une mais pas finale, ou finale pas mais qu'une
             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image et cocher la case "Finale" ou sélectionner 3 images''')
-                     
+                    
     def aidef3():
         """
         Evenement associé au bouton Help: affichage d'un panneau aide suite à un clic sur le boutton Aide
@@ -403,21 +410,21 @@ def f3(env_path, img_list):
     
     # Créer une fenêtre d'erreur :
     if img_list == 0 :
+        showinfo('ATTENTION', '''Il n'existe pas assez d'images correspondantes à cette sélection dans la base de données. Veuillez élargir vos critères.''')  
         # Fenêtre d'erreur
         a = 0 # sert à rien mais pour ne pas avoir de problèmes d'indentation
     
     
     frame = Frame(f3_img, width=200, height=200)
-    frame.pack()
     frame.place(anchor='center', relx=0.10, rely=0.4)
     img = Image.open(img_list[0])
     resized_image= img.resize((200,200), Image.ANTIALIAS)
     new_image= ImageTk.PhotoImage(resized_image)
     label = Label(frame, image = new_image)
     label.pack()  
+
     
     frame2 = Frame(f3_img, width=200, height=200)
-    frame2.pack()
     frame2.place(anchor='center', relx=0.3, rely=0.4)
     img2 = Image.open(img_list[1])
     resized_image2= img2.resize((200,200), Image.ANTIALIAS)
@@ -426,7 +433,6 @@ def f3(env_path, img_list):
     label2.pack()   
     
     frame3 = Frame(f3_img, width=200, height=200)
-    frame3.pack()
     frame3.place(anchor='center', relx=0.5, rely=0.4)
     img3 = Image.open(img_list[2])
     resized_image3= img3.resize((200,200), Image.ANTIALIAS)
@@ -435,7 +441,6 @@ def f3(env_path, img_list):
     label3.pack()   
     
     frame4 = Frame(f3_img, width=200, height=200)
-    frame4.pack()
     frame4.place(anchor='center', relx=0.7, rely=0.4)
     img4 = Image.open(img_list[3])
     resized_image4= img4.resize((200,200), Image.ANTIALIAS)
@@ -444,7 +449,6 @@ def f3(env_path, img_list):
     label4.pack() 
     
     frame5 = Frame(f3_img, width=200, height=200)
-    frame5.pack()
     frame5.place(anchor='center', relx=0.9, rely=0.4)
     img5 = Image.open(img_list[4])
     resized_image5= img5.resize((200,200), Image.ANTIALIAS)
@@ -481,7 +485,7 @@ def f3(env_path, img_list):
 
 ################################################# FENETRE 4 #########################################################
 
-def f4(env_path, index_final, img_list):
+def f4(env_path, path_final_img):
     """
     Création de la fenetre 4 depuis l'execution de openf4
     """
@@ -495,7 +499,7 @@ def f4(env_path, index_final, img_list):
         Evenement associé au menu Exporter: export de l'image en format JGP
         L'export se fait par défaut dans l'environnement, ou l'utilisateur entre un chemin d'accès
         """
-        f5(env_path, image_finale)
+        f5(env_path, img_f5)
 
     def quit():
         """
@@ -509,18 +513,12 @@ def f4(env_path, index_final, img_list):
         """
         f4_final.destroy()
         f1(env_path)
+        
     
     labelexpl = Label(f4_final, text="Voici l'image finale. Vous pouvez utiliser le menu en onglet pour l'exporter, recommencer une session ou quitter l'application.", bg="white", font = "Arial 14 italic")
     labelexpl.pack()
     
-
-    frame_final = Frame(f4_final, width=400, height=400)
-    frame_final.pack()
-    frame_final.place(anchor='center', relx=0.5, rely=0.45)
-    image_finale= Image.open(img_list[index_final])
-    label_final = Label(frame_final, image = image_finale)
-    label_final.pack() 
-
+    
     menubar = Menu(f4_final)
 
     menu1 = Menu(menubar, tearoff=0)
@@ -530,6 +528,15 @@ def f4(env_path, index_final, img_list):
     menu1.add_command(label="Quitter", command=quit)
     menubar.add_cascade(label="Fichier", menu=menu1)
 
+        
+    frame_final = Frame(f4_final, width=400, height=400)
+    frame_final.place(anchor='center', relx=0.5, rely=0.45)
+    img_f5 = Image.open(path_final_img)
+    image_finale = ImageTk.PhotoImage(img_f5) 
+    print(type(image_finale))
+    label_final = Label(frame_final, image = image_finale)
+    label_final.pack() 
+   
 
     f4_final.config(menu=menubar)
 
@@ -538,7 +545,7 @@ def f4(env_path, index_final, img_list):
     
 ################################################# FENETRE 5 #########################################################
  
-def f5(env_path, image_finale):
+def f5(env_path, img_f5):
     
     f5_xprt = Tk()
       
@@ -546,21 +553,20 @@ def f5(env_path, image_finale):
        '''
        DOCSTRING A FAIRE
        '''
-       chemin=T1.get("1.0","end-1c")
-       
-       nom   =T2.get("1.0","end-1c")
+       chemin = T1.get("1.0","end-1c")  
+       nom    = T2.get("1.0","end-1c")
         
-       if (nom != None): 
+       if (nom != ''): 
            jpg = '.jpg'
            nom_final = nom+jpg
-       elif (chemin == None):
+       elif (nom == ''):
            nom_final = 'image_finale.jpg'
         
-       if (chemin == None):
-           chemin = '../env/Result'
+       if (chemin == ''):
+           chemin = utils.get_path(env_path, 'Result')
       
        path_defaut = chemin
-       img_save = image_finale
+       img_save = img_f5
        img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
         
        showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
@@ -585,10 +591,10 @@ def f5(env_path, image_finale):
     T2.pack()
     
     boutSend=Button(f5_xprt, text="OK", font='Arial 8', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= export)
-    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.8)
+    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.4, rely= 0.8)
     
     boutSend=Button(f5_xprt, text="Fermer", font='Arial 8', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= quitter)
-    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.5, rely= 0.8)
+    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.6, rely= 0.8)
  
     f5_xprt.mainloop()    
     
