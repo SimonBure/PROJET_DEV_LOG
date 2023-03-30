@@ -10,7 +10,6 @@ from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset, Dataset, DataLoader
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from projet import utils
 import os
 from PIL import Image
 import database
@@ -19,8 +18,8 @@ import torchvision.transforms.functional as TF
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 import time                      # Allow to compute runtime
-import math                      # Mathematical functions
-
+import math
+from projet import utils                   # Mathematical functions
 
 class Autoencoder(nn.Module):
     def __init__(self):
@@ -138,7 +137,6 @@ def crop_image_tensor(tensor):
     #print(cropped_tensor.shape)
     return(cropped_tensor)
 
-
 def plot_5_images(dataset, width, height):
 
     samples = dataset.samples
@@ -179,6 +177,49 @@ def split_train_valid_test_set(dataset, p_train, p_valid):
     test_ds = TensorDataset(sample_test.permute(0, 3, 1, 2))
 
     return train_ds.tensors[0], valid_ds.tensors[0], test_ds.tensors[0]
+
+def test_train_model(model, train_loader, val_loader, nb_epochs, learning_rate):
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    criterion = torch.nn.MSELoss()
+    train_losses, val_losses = [], []
+    device = "cpu"
+    for epoch in range(nb_epochs):
+        # Train the model
+        model.train()
+        train_loss = 0
+        for data in train_loader:
+            optimizer.zero_grad()
+            inputs = data.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, inputs)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item() * inputs.size(0)
+        train_loss /= len(train_loader.dataset)
+        train_losses.append(train_loss)
+
+        # Evaluate the model on the validation set
+        model.eval()
+        val_loss = 0
+        with torch.no_grad():
+            for data in val_loader:
+                inputs = data.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, inputs)
+                val_loss += loss.item() * inputs.size(0)
+        val_loss /= len(val_loader.dataset)
+        val_losses.append(val_loss)
+
+        # Print the loss for this epoch
+        print(f'Epoch {epoch+1}/{nb_epochs}: Train Loss: {train_loss:.6f} Val Loss: {val_loss:.6f}')
+
+    # Plot the training and validation losses over time
+    plt.plot(train_losses, label='Train Loss')
+    plt.plot(val_losses, label='Val Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
 
 
 def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
@@ -265,8 +306,24 @@ if __name__ == "__main__":
     # env_path = os.path.dirname(os.path.realpath(__file__))
     env_path = "projet"
 
-    CelebA = load_dataset(178, 218, nb_samples=10000, crop_images=True)
-    print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
+    CelebA_ds_tensor_path = os.path.join(utils.get_path(env_path, "Encoder"), "database_tensor.npy")
+
+
+    if os.path.isfile(CelebA_ds_tensor_path):
+        #if the file exists, load the tensor of the datasets
+        print("The database is already loaded")
+        CelebA = MyDataset(utils.load_tensor(CelebA_ds_tensor_path))
+        print("Number of tensors: ", len(CelebA.samples))
+    else:
+        print("The database is not loaded yet")
+        CelebA = load_dataset(178, 218, nb_samples=10000, crop_images=True)
+        print("Number of tensors: ", len(CelebA.samples))
+        utils.save_tensor_to_disk_numpy(CelebA.samples, CelebA_ds_tensor_path)
+    #print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
+
+    #CelebA = load_dataset(178, 218, nb_samples=100, crop_images=True)
+    print(type(CelebA))
+
 
     p_train = 0.8
     p_valid = 0.1
@@ -290,40 +347,6 @@ if __name__ == "__main__":
         print(f"Batch {batch_idx} shape: {batch.shape}")
         break  # Only print the first batch
 
-    """
-    faces_db = database.request_data_by_id(env_path, range(1000))
-    #Image.open(faces_db[0]).show()
-    samples = np.zeros((len(faces_db), 218, 178, 3), dtype=np.uint8)
-    top = 40
-    left = 18
-    crop_height = 160
-    crop_width = 160
-    print(samples.shape)
-
-    # Loop through the list of image files and load each image into the samples array
-    for i, filename in enumerate(faces_db):
-        # Print a progress indicator every 10% of the way through the loop
-        if i % (len(faces_db)//10) == 0:
-            print('-', end='', flush=True)
-        # Load the image from disk
-        im = Image.open(filename)
-        # Convert the image data to a numpy array and add it to the samples array
-        samples[i] = np.asarray(im)
-
-    samples = torch.from_numpy(samples.astype(np.float32) / 255.0)
-    print(samples.shape)
-    #print(samples.size(0))
-    cropped_samples = torch.empty(samples.size(0), crop_height, crop_width, 3)
-
-    for i, tensor in enumerate(samples):
-        img = tensor
-        img = img.permute(2, 0, 1)
-        img = TF.crop(img, top, left, crop_height, crop_width)
-        img = img.permute(1, 2, 0)
-        cropped_samples[i] = img
-    samples = cropped_samples
-    print(samples.shape)
-    """
     ###################### Showing some images from the CelebA dataset constructed#############
     print("This is are images obtained from tensors in the CelebA dataset:")
 
@@ -341,6 +364,7 @@ if __name__ == "__main__":
     # Before actually training the model check if there is a trained model already
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     print(model_path)
+    """
     # Check if the model file exists
     if os.path.isfile(model_path):
         # If the file exists, load the saved weights
@@ -350,9 +374,11 @@ if __name__ == "__main__":
 
     else:
         model = Autoencoder()
-        model = train_autoencoder(model, train_dl, nb_epochs=20, learning_rate=0.01)
+        model = train_autoencoder(model, train_dl, nb_epochs=20, learning_rate=0.001)
         # Save Model
         torch.save(model.state_dict(), model_path)
+    """
+    test_train_model(model, train_dl, valid_dl, nb_epochs = 100, learning_rate = 0.001)
 
     for i, image in enumerate(CelebA[:5]):
         decoded = encode_decode_tensor(image)
