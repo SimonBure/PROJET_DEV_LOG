@@ -167,16 +167,25 @@ def f2(env_path):
         elif (a=='4'):
             liste_acc[1][1]=2
          
-        list_cheveux=["Noirs", "Blonds","Bruns","Gris", "Chauve"]
-        # 0 : ne sait pas, noirs : 1, blonds : 2, bruns : 3, gris : 4, chauve : 5
+        list_cheveux=["Noirs", "Blonds","Bruns","Gris", "Chauve", "Autre"]
+        # 0 : ne sait pas, noirs : 1, blonds : 2, bruns : 3, gris : 4, chauve : 5, Autre : 6
         for i in range(len(list_cheveux)):
             if (list_cheveux[i] == c):
                 liste_acc[1][2]=i+1
                 
         # accessoires : dans l'ordre des cases 3 à 6, 0 : ne sait pas ou non présent, 1 : présent
         for i in range(3,5):
-            if (acc[i-3] == 1):
+            if (acc[i-3] == 1): # Si acc est choisi on le met dans la requête
                 liste_acc[1][i]=1
+            else :
+                if acc[4] == 1 : # Si pas choisi + pas sur on ne sait pas donc 0
+                    liste_acc[1][i]=0
+                else : # Si pas choisi + on est sur, donc 2 : pas l'attribut
+                    liste_acc[1][i]=2
+        if acc[3] == 1 : # Si Aucun alors peut importe les précédants choix on met tout à 2
+            liste_acc[1][3]=2
+            liste_acc[1][4]=2
+            liste_acc[1][5]=2
         
         return liste_acc
         
@@ -230,7 +239,7 @@ def f2(env_path):
 
     labelChoix = tk.Label(f2_flr, text = " Quelle couleur de cheveux ?", font='Helvetica 12 bold')
     labelChoix.pack()
-    listtest=["Veuillez choisir un élément", "Noirs", "Blonds","Bruns","Gris", "Chauve", "Ne sait pas"]
+    listtest=["Veuillez choisir un élément", "Noirs", "Blonds","Bruns","Gris", "Chauve", "Autre", "Ne sait pas"]
     menucombo = ttk.Combobox(f2_flr, values=listtest, font='Helvetica 12')
     menucombo.current(0)
     menucombo.pack()
@@ -252,6 +261,7 @@ def f2(env_path):
     boutLun.pack()
     boutMoust.pack()
     boutbrd.pack()
+    boutauc.pack()
     boutnsp.pack()
     
 
