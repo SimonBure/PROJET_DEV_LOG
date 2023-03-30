@@ -1,10 +1,127 @@
-import sqlite3
-import numpy as np
-import os
+# -*- coding: utf-8 -*-
+
+import database
 import utils
+import os
+import numpy as np
+import shutil
+import sqlite3
 
+env_path = "../"
 
-def get_database_path(env_path, who = "idkit"):
+dataset_path = utils.get_path(env_path, "Img_base")
+dataset_path = os.path.join(dataset_path, "new_dataset")
+
+if not os.path.exists(dataset_path) :
+    os.makedirs(dataset_path)
+    
+def get_X_img(env_path, array, x, who):
+    """
+    Return the path of 5 image. If array is given, try to have img at max
+    considering the attributes, else choose randomly.
+
+    Take
+    -------
+    env_path : str
+        Path of the environement.
+    array : 1D array
+        metadata array of 0 and 1
+
+    Returns
+    -------
+    path_img_list : str
+        Absolute path of the 5 images.
+
+    """
+    path_img_list = database.request_data_by_metadata(env_path, array, who)
+    if len(path_img_list) == 0 :
+        return 0 # Do nothing
+    elif len(path_img_list) > x:
+        path_img_list_temp = []
+        numbers = np.random.randint(1, len(path_img_list), size= x)
+        for i in numbers:
+            path_img_list_temp.append(path_img_list[i])
+        path_img_list = path_img_list_temp
+
+    return path_img_list
+
+possibilities = ["-1", "1", "0"]
+
+meta = ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "-1", "0", "0", "0", "0", "0", "0", "0", "0",
+                   "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
+
+# All possibilities that exists for each attributes :
+for i in [1,2] :
+    for b in possibilities :
+        if i == 1 :
+            meta[4] = b
+        else :
+            meta[0] = b
+        for c in possibilities : 
+            if i == 1 :
+                meta[5] = c
+            else :
+                meta[6] = c
+            for d in possibilities : 
+                if i == 1 :
+                    meta[7] = d
+                else :
+                    meta[8] = d
+                for e in possibilities :  
+                    if i == 1 :
+                        meta[9] = e
+                    else :
+                        meta[11] = e
+                    for f in possibilities :
+                        if i == 1 :
+                            meta[13] = f
+                        else :
+                            meta[15] = f
+                        for g in possibilities :
+                            if i == 1 :
+                                meta[16] = g
+                            else :
+                                meta[17] = g
+                            for h in possibilities :
+                                if i == 1 :
+                                    meta[20] = h
+                                else :
+                                    meta[22] = h
+                                for i in possibilities :
+                                    if i == 1 :
+                                        meta[24] = i
+                                    else :
+                                        meta[23] = i
+                                    for j in possibilities :
+                                        if i == 1 :
+                                            meta[25] = j
+                                        else :
+                                            meta[28] = j
+                                        for k in possibilities :
+                                            if i == 1 :
+                                                meta[27] = k
+                                            else :
+                                                meta[32] = k
+                                            for l in possibilities :
+                                                if i == 1 :
+                                                    meta[33] = l
+                                                else :
+                                                    meta[30] = l
+                                                for m in possibilities :
+                                                    if i == 1 :
+                                                        meta[35] = m
+                                                    else :
+                                                        meta[39] = m
+                                    
+                                                    path = get_X_img(env_path, meta, 4, "Project")
+                                                    if type(path) == list :
+                                                        for img in path :
+                                                            shutil.copy(img, dataset_path)
+                                                    elif type(path) == str :
+                                                        shutil.copy(path, dataset_path)
+    print("Moitié faite !")
+
+def get_database_path(env_path):
     """
     Retrieve access to database to query her
 
@@ -20,14 +137,8 @@ def get_database_path(env_path, who = "idkit"):
 
     """
     path = utils.get_path(env_path, "Database")
-    if who == "Project" :
-        data_loc = os.path.join(path, "project.db")
-    elif who == "Auto" :
-        data_loc = os.path.join(path, "autoencode.db")
-    else :
-        data_loc = os.path.join(path, "idkit.db")
+    data_loc = os.path.join(path, "autoencode.db")
     return data_loc
-
 
 def metadata_pull(env_path):
     """
@@ -51,16 +162,33 @@ def metadata_pull(env_path):
 
     with open(path_data, "r") as file:
         file.readline()
-        metadata = file.readline()
+        metadata_raw = file.readline()
 
-    metadata = metadata.split(" ")
+    metadata = metadata_raw.split(" ")
 
     data = np.loadtxt(path_data, dtype=str, skiprows=2)
+    
+    real_data = []
+    path_img = os.path.join(path, "new_dataset")
+    img_name = os.listdir(path_img)
+    for name in img_name :
+        name = int(name[:-4])
+        real_data.append(data[name-1])
+    
+    path_data = os.path.join(path, "list_attr_celeba.txt")
+    with open(path_data, "w") as file:
+        file.write(metadata_raw)
+        for line in real_data :
+            line_str = ""
+            for i in range(len(line)) :
+                line_str += str(line[i]) + " "
+            file.write(line_str + "\n")
+        
 
     # Split for testing
     #data = data[0:10]
 
-    return metadata, data
+    return metadata, real_data
 
 
 def create_meta_table(cursor, metadata):
@@ -84,7 +212,6 @@ def create_meta_table(cursor, metadata):
 
     com_line = "CREATE TABLE IF NOT EXISTS portrait (%s);" % (table_str)
     cursor.execute(com_line)
-
 
 def insert_data(cursor, connect, dataset):
     """
@@ -114,9 +241,8 @@ def insert_data(cursor, connect, dataset):
     print('We have inserted', cursor.rowcount,
           'records to the table.')  # Testing possibility ?
     connect.commit()
-
-
-def create_database(env_path, who = "Project"):
+    
+def create_database(env_path):
     """
     Create the database needed for the project. Insert CelebA dataset from personal link
 
@@ -125,7 +251,7 @@ def create_database(env_path, who = "Project"):
     env_path : str
         Path of the environement.
     """
-    con = sqlite3.connect(r"%s" % (get_database_path(env_path,"Project")))
+    con = sqlite3.connect(r"%s" % (get_database_path(env_path)))
     cursor = con.cursor()
 
     # Retrieve datas :
@@ -134,9 +260,12 @@ def create_database(env_path, who = "Project"):
     create_meta_table(cursor, metadata)
 
     insert_data(cursor, con, dataset)
+    
+   
+create_database(env_path)
 
 
-def get_database_cursor(env_path, who = "idkit"):
+def get_database_cursor(env_path):
     """
     Create the database's cursor
 
@@ -152,52 +281,11 @@ def get_database_cursor(env_path, who = "idkit"):
     connect : database.connector
         Connector of the database
     """
-    
-    if os.path.exists(get_database_path(env_path, who)) :
-        connect = sqlite3.connect(get_database_path(env_path, who))
-        cursor = connect.cursor()
-    else :
-        raise(Exception("Database do not exist"))
+    connect = sqlite3.connect(get_database_path(env_path))
+    cursor = connect.cursor()
     return cursor, connect
 
-
-def request_data_by_id(env_path, numbers, who = "Project"):
-    """
-    Made a request that pull numbers id asked
-
-    Take
-    -------
-    env_path : str
-        Path of the environement.
-    numbers : int, list, tuple or 1D array
-        id's image of database to pull
-
-    Returns
-    -------
-    querry : str, list of str
-        filename of the selected id number
-
-    """
-    cursor, con = get_database_cursor(env_path, who)
-    path = utils.get_path(env_path, "Database")
-
-    if type(numbers) == int:
-        res = cursor.execute(
-            "SELECT [name] FROM portrait WHERE id = %s" % (numbers))
-        name = res.fetchall()[0]
-        querry = img_name_to_path(path, name)
-    else:
-        querry = []
-        for id in numbers:
-            res = cursor.execute(
-                "SELECT [name] FROM portrait WHERE id = %s" % (id))
-            name = res.fetchall()[0]
-            querry.append(img_name_to_path(path, name))
-
-    return querry
-
-
-def request_data_by_metadata(env_path, array, who = "idkit"):
+def request_data_by_metadata(env_path, array):
     """
     Made a request that pull data according to metadatas
 
@@ -214,7 +302,7 @@ def request_data_by_metadata(env_path, array, who = "idkit"):
         filename of possible img according to metadata gave
 
     """
-    cursor, con = get_database_cursor(env_path, who)
+    cursor, con = get_database_cursor(env_path)
     path = utils.get_path(env_path, "Database")
 
     metadata, data = metadata_pull(env_path)
@@ -256,66 +344,8 @@ def img_name_to_path(path, name):
     """
     return os.path.join(path, "img_dataset", "celeba", "img_align_celeba", "%s" % (name))
 
-
-def get_5_img(env_path, array=[], who = "idkit"):
-    """
-    Return the path of 5 image. If array is given, try to have img at max
-    considering the attributes, else choose randomly.
-
-    Take
-    -------
-    env_path : str
-        Path of the environement.
-    array : 1D array
-        metadata array of 0 and 1
-
-    Returns
-    -------
-    path_img_list : str
-        Absolute path of the 5 images.
-
-    """
-    if array == []:
-        numbers = np.random.randint(1, 634, size=5)
-        path_img_list = request_data_by_id(env_path, numbers)
-    else:
-        path_img_list = request_data_by_metadata(env_path, array, who)
-        if len(path_img_list) > 5:
-            path_img_list_temp = []
-            numbers = np.random.choice(list(range(len(path_img_list))), size=5, replace = False )
-            for i in numbers:
-                path_img_list_temp.append(path_img_list[i])
-            path_img_list = path_img_list_temp
-        elif len(path_img_list) < 5:
-            print("Not enough img in database")
-            return 0
-
-    return path_img_list
-
-
-def print_database(env_path, who = "idkit"):
-    """
-    Debug function see what is inside database
-
-    Take
-    -------
-    env_path : str
-        Path of the environement.
-
-    Returns
-    -------
-    querry : list of str
-        All rows and lines of the dataset
-
-    """
-    cursor, con = get_database_cursor(env_path, who)
-
-    res = cursor.execute("SELECT * FROM portrait")
-    querry = res.fetchall()
-    return querry
-
 def create_querry_array(genre = 0, age = 0, hair_col = 0, 
-                        glasses = 0, mustache = 0, beard = 0):
+                        beard = 0, mustache = 0, glasses = 0) :
     """
     Create the metadata array from users choice
 
@@ -428,46 +458,14 @@ def get_numb_response(env_path, array) :
     
     resp = request_data_by_metadata(env_path, array)
     return len(resp)
-    
-    
 
-if __name__ == '__main__':
+print(get_numb_response(env_path, create_querry_array(2,1,6,1,1,1)))
 
-    env_path = "../"
 
-    if os.path.exists(utils.get_path(env_path, "Database")):
-        if os.path.exists(get_database_path(env_path)):
-            print("Database already exist")
-        else:
-            create_database(env_path)
+cursor, con = get_database_cursor(env_path)
 
-    numbers = [1, 3, 6]
+res = cursor.execute("SELECT [name] FROM portrait")
+querry = res.fetchall()
+print(len(querry))
+con.close()
 
-    meta = ["-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-            "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
-
-    print(request_data_by_metadata(env_path, meta))
-
-    print(request_data_by_id(env_path, 720))
-
-    meta_incomplete = ["0", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-                       "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
-    print(request_data_by_metadata(env_path, meta_incomplete))
-
-    print(get_5_img(env_path))
-
-    print(get_5_img(env_path, meta))
-
-    meta_incomplete = ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0",
-                       "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1"]
-
-    print(get_5_img(env_path, meta_incomplete))
-
-    print(request_data_by_id(env_path, numbers))
-
-    print(len(print_database(env_path, "Auto")))
-    
-    print(create_querry_array())
-    
-    print(get_numb_response(env_path, create_querry_array(0)))
-    
