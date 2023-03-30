@@ -8,14 +8,15 @@ from copy import deepcopy
 from numpy import ndarray
 from torch import Tensor
 from torchvision import transforms
+from torchsummary import summary
 
 from database import request_data_by_id
 import autoencoder as ae
-# import autoencoder_v2 as ae2
+import autoencoder_v2 as ae2
 from projet import utils
 
 
-def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
+def flatten_img(img_path: str | list[str], img_type="tensor", encode=True)\
         -> Tensor | ndarray:
     """Uses the path stored in img_path to create a Tensor or a ndarray
     in a convenient shape for all the future modifications.
@@ -50,13 +51,12 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
     >>>             './projet/env/Database/img_dataset/celeba/img_align_celeba/000003.jpg']
     >>>flatten_img(path_list).size()
     torch.Size([3, 3, 38804])
-
-
     """
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     if img_type == "tensor":
         # To transform a numpy array or a PIL image to a torch Tensor
         to_tensor = transforms.ToTensor()
-        # To flatten a torch tensor to a tensor with one dimension x number of color channels
+        # To flatten a torch tensor to a tensor with two dimensions only
         flatten = nn.Flatten(1, 2)
 
         if type(img_path) is list:
@@ -86,12 +86,13 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
 
         elif type(img_path) is str:
             img = Image.open(img_path)  # PIL picture
+            img_tensor = to_tensor(img)
+            img_tensor = ae2.crop_image_tensor(img_tensor)
 
             if encode:
-                # TODO Aller chercher un autoencoder entraîné
-                img = ae.encode()
+                model = ae.load_model(model_path)
+                img_tensor = ae2.encode(model, img_tensor)
 
-            img_tensor = to_tensor(img)
             return flatten(img_tensor)
 
         else:
@@ -136,6 +137,22 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=False)\
     else:
         raise ValueError("Wrong parameter img_type value. Should either\
                          be tensor or numpy")
+
+
+def deflatten_img(flat_tensor: Tensor, base_width: int = 18,
+                  base_length: int = 18, decode=True) -> Image:
+    base_dim = (base_width, base_length, 3)
+    if decode:
+        model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
+        model = ae.load_model(model_path)
+        unflat_img = flat_tensor.reshape((64, 18, 18))
+        decoded_img = ae.decode(model, unflat_img)
+        return decoded_img
+
+    else:
+        rev_tf = transforms.ToPILImage()
+        unflat_tensor = flat_tensor.reshape(base_dim)
+        return rev_tf(unflat_tensor)
 
 
 def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2,
@@ -292,44 +309,16 @@ if __name__ == "__main__":
 
     # Open the image with PIL
     pic = Image.open(pic_path)
-    print(f"Type of the picture: {type(pic)}")
 
-    # Convert the image into a ndarray
-    pic_array = np.array(pic)
-    # print(f"Array of the pixels: {pic_array}")
-    print(f"Shape of the pic: {pic_array.shape}")
-
-    # Testing flatten func for ndarray
-    print(f"Flat ndarray shape: {flatten_img(pic_path, 'numpy').shape}")
-    print(f"Flat ndarray list shape: {flatten_img(pic_path_list, 'numpy').shape}")
-    print(f"Shape of first element: {flatten_img(pic_path_list, 'numpy')[0].shape}")
-
-    # Transform the image into a torch Tensor object
-    to_tensor = transforms.ToTensor()
-    pic_tensor = to_tensor(pic)
-    print(f"Base Tensor dim: {pic_tensor.shape}")
-
-    # Testing flatten func for Tensor
-    flat_pic = flatten_img(pic_path)
-    print(f"Tensor dim after flatten func: {flat_pic.shape}")
-    flat_pics = flatten_img(pic_path_list)
-    print(f"Tensor list dim after flatten: {flat_pics.shape}")
-
-    # Load an autoencoder and encode an img
-    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
-    autoencoder = ae.load_model(model_path)
-    encoded_img = ae.encode(autoencoder, pic)
-    print(f"Image tensor : {encoded_img.size()}")
-
-    # Encoding an image
-    # pic_encoded = ae.encode(autoencoder, fst_face)
-    # print(f"Shape of the encoded tensor: {pic_encoded.shape}")
+    # Converting the image to a Tensor
+    tf_tensor = transforms.ToTensor()
+    pic_tensor = tf_tensor(pic)
 
     # Testing mutation on all pixels
     # some_tensor = torch.randn(size=(3, 3))
     # print(f"Base tensor: {some_tensor}")
     # print(f"Mutated tensor: {mutate_img(some_tensor, mut_type='uniform')}")
-    #
+
     # some_array = np.random.randn(3, 3)
     # print(f"Base array: {some_array}")
     # print(f"Mutated array: {mutate_img(some_array, mut_type='uniform')}")
@@ -339,3 +328,27 @@ if __name__ == "__main__":
     # print(f"Mutated tensor (random): {mut_tensor_rdm}")
     # mut_arr_rdm = mutate_img(some_array, mutation_rate=0.2)
     # print(f"Mutated array (random): {mut_arr_rdm}")
+
+    # Load an autoencoder and encode an img
+    # pic.show("Image de base")
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
+    pic_cropped = ae2.crop_image_tensor(pic_tensor)
+    print(f"Base size: {pic_tensor.size()}")
+    print(f"Cropped size: {pic_cropped.size()}")
+    autoencoder = ae.load_model(model_path)  # Loading the trained model
+    encoded_img = ae2.encode(autoencoder, pic_cropped)  # Encoding the tensor
+    print(f"Image tensor : {encoded_img.size()}")
+    decoded = ae.decode(autoencoder, encoded_img)  # Decoding the tensor
+    # decoded.show("Image décodée")
+
+    # Testing flatten on encoded image
+    flat_encoded_tensor = flatten_img(pic_path)
+    print(f"Flat encoded shape: {flat_encoded_tensor.size()}")
+
+    # Testing resize
+    deflat_img = deflatten_img(flat_encoded_tensor)
+    deflat_img.show()
+    # deflatten_img.show("Image après le processus de flatten - deflatten")
+
+    # Testing mutation on flat encoded image
+    # mut_img = mutate_img(flat_encoded_img)
