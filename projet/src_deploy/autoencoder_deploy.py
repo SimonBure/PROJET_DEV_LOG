@@ -150,7 +150,7 @@ def load_encoded_im(name_file):
         tensor (torch.Tensor): The loaded PyTorch tensor.
     """
     tensor = torch.load(name_file)
-    return 
+    return tensor
 
 def load_model(name_file):
     """
