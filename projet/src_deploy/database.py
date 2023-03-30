@@ -39,8 +39,11 @@ def get_database_cursor(env_path):
     connect : database.connector
         Connector of the database
     """
-    connect = sqlite3.connect(get_database_path(env_path))
-    cursor = connect.cursor()
+    if os.path.exists(get_database_path(env_path)) :
+        connect = sqlite3.connect(get_database_path(env_path))
+        cursor = connect.cursor()
+    else :
+        raise(Exception("Database do not exist"))
     return cursor, connect
 
 
@@ -175,7 +178,7 @@ def get_5_img(env_path, array=[]):
         path_img_list = request_data_by_metadata(env_path, array)
         if len(path_img_list) > 5:
             path_img_list_temp = []
-            numbers = np.random.randint(1, len(path_img_list), size=5)
+            numbers = np.random.choice(list(range(len(path_img_list))), size=5, replace = True )
             for i in numbers:
                 path_img_list_temp.append(path_img_list[i])
             path_img_list = path_img_list_temp
