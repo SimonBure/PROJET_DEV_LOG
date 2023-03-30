@@ -151,7 +151,7 @@ def get_database_cursor(env_path, who = "idkit"):
         Connector of the database
     """
     
-    if os.path.exists(get_database_path(env_path)) :
+    if os.path.exists(get_database_path(env_path, who)) :
         connect = sqlite3.connect(get_database_path(env_path, who))
         cursor = connect.cursor()
     else :
