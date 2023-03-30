@@ -2,6 +2,7 @@ import sqlite3
 import numpy as np
 import os
 import utils
+import logging
 
 
 def get_database_path(env_path):
@@ -171,6 +172,7 @@ def get_5_img(env_path, array=[]):
         Absolute path of the 5 images.
 
     """
+    logging.info('Generating 5 images')
     if array == []:
         numbers = np.random.randint(1, 634, size=5)
         path_img_list = request_data_by_id(env_path, numbers)
@@ -184,6 +186,7 @@ def get_5_img(env_path, array=[]):
             path_img_list = path_img_list_temp
         elif len(path_img_list) < 5:
             print("Not enough img in database")
+            logging.warning('Not enough img in database for selected querry')
             return 0
 
     return path_img_list
