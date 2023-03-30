@@ -134,7 +134,7 @@ def create_database(env_path, who = "Project"):
     insert_data(cursor, con, dataset)
 
 
-def get_database_cursor(env_path):
+def get_database_cursor(env_path, who = "idkit"):
     """
     Create the database's cursor
 
@@ -152,14 +152,14 @@ def get_database_cursor(env_path):
     """
     
     if os.path.exists(get_database_path(env_path)) :
-        connect = sqlite3.connect(get_database_path(env_path))
+        connect = sqlite3.connect(get_database_path(env_path, who))
         cursor = connect.cursor()
     else :
         raise(Exception("Database do not exist"))
     return cursor, connect
 
 
-def request_data_by_id(env_path, numbers):
+def request_data_by_id(env_path, numbers, who = "Project"):
     """
     Made a request that pull numbers id asked
 
@@ -176,7 +176,7 @@ def request_data_by_id(env_path, numbers):
         filename of the selected id number
 
     """
-    cursor, con = get_database_cursor(env_path)
+    cursor, con = get_database_cursor(env_path, who)
     path = utils.get_path(env_path, "Database")
 
     if type(numbers) == int:
@@ -195,7 +195,7 @@ def request_data_by_id(env_path, numbers):
     return querry
 
 
-def request_data_by_metadata(env_path, array):
+def request_data_by_metadata(env_path, array, who = "idkit"):
     """
     Made a request that pull data according to metadatas
 
@@ -212,7 +212,7 @@ def request_data_by_metadata(env_path, array):
         filename of possible img according to metadata gave
 
     """
-    cursor, con = get_database_cursor(env_path)
+    cursor, con = get_database_cursor(env_path, who)
     path = utils.get_path(env_path, "Database")
 
     metadata, data = metadata_pull(env_path)
@@ -255,7 +255,7 @@ def img_name_to_path(path, name):
     return os.path.join(path, "img_dataset", "celeba", "img_align_celeba", "%s" % (name))
 
 
-def get_5_img(env_path, array=[]):
+def get_5_img(env_path, array=[], who = "idkit"):
     """
     Return the path of 5 image. If array is given, try to have img at max
     considering the attributes, else choose randomly.
@@ -274,10 +274,10 @@ def get_5_img(env_path, array=[]):
 
     """
     if array == []:
-        numbers = np.random.randint(1, 202599, size=5)
+        numbers = np.random.randint(1, 634, size=5)
         path_img_list = request_data_by_id(env_path, numbers)
     else:
-        path_img_list = request_data_by_metadata(env_path, array)
+        path_img_list = request_data_by_metadata(env_path, array, who)
         if len(path_img_list) > 5:
             path_img_list_temp = []
             numbers = np.random.randint(1, len(path_img_list), size=5)
