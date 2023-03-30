@@ -220,7 +220,7 @@ def test_train_model(model, train_loader, val_loader, nb_epochs, learning_rate):
     plt.ylabel('Loss')
     plt.legend()
     plt.show()
-
+    return(model)
 
 def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
 
@@ -316,7 +316,7 @@ if __name__ == "__main__":
         print("Number of tensors: ", len(CelebA.samples))
     else:
         print("The database is not loaded yet")
-        CelebA = load_dataset(178, 218, nb_samples=10000, crop_images=True)
+        CelebA = load_dataset(178, 218, nb_samples=100, crop_images=True)
         print("Number of tensors: ", len(CelebA.samples))
         utils.save_tensor_to_disk_numpy(CelebA.samples, CelebA_ds_tensor_path)
     #print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
@@ -362,7 +362,7 @@ if __name__ == "__main__":
 
     model = Autoencoder()
     # Before actually training the model check if there is a trained model already
-    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model40k.pt")
     print(model_path)
     """
     # Check if the model file exists
@@ -378,7 +378,8 @@ if __name__ == "__main__":
         # Save Model
         torch.save(model.state_dict(), model_path)
     """
-    test_train_model(model, train_dl, valid_dl, nb_epochs = 100, learning_rate = 0.001)
+    model = test_train_model(model, train_dl, valid_dl, nb_epochs = 100, learning_rate = 0.001)
+    torch.save(model.state_dict(), model_path)
 
     for i, image in enumerate(CelebA[:5]):
         decoded = encode_decode_tensor(image)
