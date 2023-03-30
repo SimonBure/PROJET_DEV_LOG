@@ -46,7 +46,7 @@ if test == "Y" or test == "y":
     wget.download(url2, out=add_path)
     
     # new_dataset.zip pour les images de la base de données
-    path = utils.get_path(path, "Img_base")
+    path = utils.get_path(env_path, "Img_base")
     add_path = os.path.join(path, "new_dataset.zip")
     url3 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283445"
     wget.download(url3, out=add_path)
