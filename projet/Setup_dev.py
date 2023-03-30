@@ -13,6 +13,7 @@ import logging
 #Setup log file
 logging.basicConfig(filename='Idkit.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s : %(message)s')
+logging.getLogger('PIL').setLevel(logging.WARNING) # Merci PIL ...
 
 
 env_path = os.path.dirname(os.path.realpath(__file__))
@@ -91,6 +92,6 @@ if test == "Y" or test == "y":
 
 test2 = input("Détruire environnemnt ? (Y/N)")
 
-if test2 == "Y" or test == "y":
+if test2 == "Y" or test2 == "y":
     logging.info('Destructing environement')
     utils.remove_env_prog(env_path)
