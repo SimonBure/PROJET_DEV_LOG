@@ -150,34 +150,26 @@ def mutate_img(img_encoded: Tensor, mutation_rate: float = 0.2,
         [-0.2572, -0.7410, -0.8748],
         [ 1.8747, -0.3136,  0.4488]])
     """
-    # Randomly selects the pixels to be modified
-    if mut_type == "random":
-        if type(img_encoded) is Tensor:
+    if type(img_encoded) is Tensor:
+        # Add random noise to random pixels
+        if mut_type == "random":
+            # Randomly selects the pixels to be modified
             mut_proba_tensor = torch.rand(size=img_encoded.size())
             img_mut = img_encoded
             noise_tensor = noise * torch.randn(size=img_encoded.size())
             img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
+            return img_mut
 
-        else:
-            raise TypeError(f"Input should either be of type or torch.Tensor \
-                            and not a {type(img_encoded)}")
-
-    # Modify every pixel with a random noise
-    elif mut_type == "uniform":
         # Add random noise on each pixel
-        if type(img_encoded) is Tensor:
+        elif mut_type == "uniform":
             # Adding white noise to a torch Tensor
             img_mut = img_encoded + noise \
-                * torch.randn(size=img_encoded.size())
-
-        else:
-            raise TypeError(f"Input should either be of type or torch.Tensor \
-                            and not a {type(img_encoded)}")
+                      * torch.randn(size=img_encoded.size())
+            return img_mut
 
     else:
-        raise ValueError("Chose a valid value for the modif parameter")
-
-    return img_mut
+        raise TypeError(f"Input should either be of type or torch.Tensor \
+                        and not a {type(img_encoded)}")
 
 
 def crossing_over(img_encoded: Tensor, crossing_rate: float) -> Tensor:
