@@ -291,7 +291,7 @@ def get_5_img(env_path, array=[], who = "idkit"):
     return path_img_list
 
 
-def print_database(env_path):
+def print_database(env_path, who = "idkit"):
     """
     Debug function see what is inside database
 
@@ -306,7 +306,7 @@ def print_database(env_path):
         All rows and lines of the dataset
 
     """
-    cursor, con = get_database_cursor(env_path)
+    cursor, con = get_database_cursor(env_path, who)
 
     res = cursor.execute("SELECT * FROM portrait")
     querry = res.fetchall()
@@ -446,7 +446,7 @@ if __name__ == '__main__':
 
     print(request_data_by_metadata(env_path, meta))
 
-    print(request_data_by_id(env_path, 2))
+    print(request_data_by_id(env_path, 720))
 
     meta_incomplete = ["0", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
                        "1", "-1", "1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "1"]
@@ -463,7 +463,7 @@ if __name__ == '__main__':
 
     print(request_data_by_id(env_path, numbers))
 
-    #print(len(print_database(env_path)))
+    print(len(print_database(env_path, "Project")))
     
     print(create_querry_array())
     
