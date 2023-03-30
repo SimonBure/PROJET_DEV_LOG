@@ -1,65 +1,60 @@
 # -*- coding: utf-8 -*-
 import IdKit.utils
 import IdKit.database
-import IdKit.autoencoder
+#import IdKit.autoencoder
 import IdKit.main_f
-import shutil
-import sys
 import os
+import sys
 import wget
 import zipfile
 
 env_path = os.path.dirname(os.path.realpath(__file__))
 
-test = input("Nécessité de télécharger les fichiers du programme ? (Y/N)")
-if test == "Y":
-    create_path = os.path.join(env_path, "temp")
-    os.makedirs(create_path)
-    add_path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
-    url = "https://filesender.renater.fr/download.php?token=80050e2e-f52b-44ed-8bad-ff4d77649cb3&files_ids=22772324"
-    wget.download(url, add_path)
-    url2 = "https://filesender.renater.fr/download.php?token=80050e2e-f52b-44ed-8bad-ff4d77649cb3&files_ids=22772325"
-    add_path = os.path.join(env_path, "temp", "img_align_celeba.zip")
-    wget.download(url2, out=add_path)
-    url3 = "https://filesender.renater.fr/download.php?token=c11040a4-e2dd-4198-baa7-f40bf9ae7d96&files_ids=22873415"
-    add_path = os.path.join(env_path, "temp", "idkit.png")
-    wget.download(url3, out=add_path)
-
+if len(sys.argv) == 2 :
+    if sys.argv[1] == "uninstall" :
+        IdKit.utils.remove_env_prog(env_path)
+        print("- Successfully uninstall idkit")
+        sys.exit()
 
 # Generate environement of the program
 
-test = input("Créer l'environnement du programme ? (Y/N)")
-
-if test == "Y":
+if not os.path.exists(os.path.join(env_path, "Idkit")):
+    
+    print("- Generating environement")
+    
     IdKit.utils.create_folders(env_path)
-
-    # Temp as no option for downloading dataset exist
-    path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
-    dst = IdKit.utils.get_path(env_path, "Img")
-    dst = os.path.join(dst, "celeba", "list_attr_celeba.txt")
-    shutil.copy(path, dst)
-    path = os.path.join(env_path, "temp", "img_align_celeba.zip")
-    dst = IdKit.utils.get_path(env_path, "Img")
-    dst = os.path.join(dst, "celeba")
-    with zipfile.ZipFile(path, 'r') as zip_ref:
-        zip_ref.extractall(dst)
-
-    path = os.path.join(env_path, "temp", "idkit.png")
-    dst = IdKit.utils.get_path(env_path, "Interface")
-    dst = os.path.join(dst, "idkit.png")
-    shutil.copy(path, dst)
+    
+    # idkit.db database du programme
+    print(" - Downloading database")    
+    path = IdKit.utils.get_path(env_path, "Database")
+    add_path = os.path.join(path, "idkit.db")
+    url = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283443"
+    wget.download(url, add_path)
+    
+    # idkit.png pour le logo du programme 
+    path = IdKit.utils.get_path(env_path, "Interface")
+    url2 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283444"
+    add_path = os.path.join(path, "idkit.png")
+    wget.download(url2, out=add_path)
+    
+    # new_dataset.zip pour les images de la base de données
+    print(" - Downloading image dataset")
+    path = IdKit.utils.get_path(env_path, "Img_base")
+    add_path = os.path.join(path, "new_dataset.zip")
+    url3 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283445"
+    wget.download(url3, out=add_path)
+    with zipfile.ZipFile(add_path, 'r') as zip_ref:
+        zip_ref.extractall(path)
         
-    IdKit.create_db.create_database(env_path)
 
-    IdKit.autoencoder.launch_encoder(env_path)
-
-test3 = input("Lancer programme ? (Y/N)")
-
-if test3 == "Y" or test3 == "y":
-    IdKit.main_f.f1(env_path)
+    #IdKit.autoencoder.launch_encoder(env_path)
+    
+    print("- Environenement generated in %s" %(os.path.join(env_path, "Idkit")))
 
 
-test2 = input("Détruire environnemnt ? (Y/N)")
+print("- Launching program")
+IdKit.main_f.f1(env_path)
 
-if test2 == "Y" or test2 == "y":
-    IdKit.utils.remove_env_prog(env_path)
+
+
+
