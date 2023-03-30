@@ -150,8 +150,12 @@ def get_database_cursor(env_path):
     connect : database.connector
         Connector of the database
     """
-    connect = sqlite3.connect(get_database_path(env_path))
-    cursor = connect.cursor()
+    
+    if os.path.exists(get_database_path(env_path)) :
+        connect = sqlite3.connect(get_database_path(env_path))
+        cursor = connect.cursor()
+    else :
+        raise(Exception("Database do not exist"))
     return cursor, connect
 
 
