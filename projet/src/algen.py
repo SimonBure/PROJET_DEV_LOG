@@ -16,8 +16,7 @@ import autoencoder_v2 as ae2
 from projet import utils
 
 
-def flatten_img(img_path: str | list[str], img_type="tensor", encode=True)\
-        -> Tensor | ndarray:
+def flatten_img(img_path: str | list[str]) -> Tensor:
     """Uses the path stored in img_path to create a Tensor or a ndarray
     in a convenient shape for all the future modifications.
     This function can also encode the image if needed
@@ -26,23 +25,18 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=True)\
     ----------
     img_path: str or list[str]
         Path or paths of the images to be retrieved
-    img_type: str
-        Specifies the type of the object to be returned
     encode: bool
         True if the images need to be encoded by the autoencoder,
-        False otherwise
+        False otherwise. Default to True
 
     Returns
     -------
-    flat_img: torch.Tensor or numpy.ndarray
+    flat_img: torch.Tensor
         Contains the values for all the pixels of the images found in the
         given path. If several paths are given, all the images are stored
-        in one single object
+        in one single Tensor
 
     >>>path = "./projet/env/Database/img_dataset/celeba/img_align_celeba/000021.jpg"
-    >>>flatten_img(path, img_type="numpy").shape
-    (3, 38804)
-
     >>>flatten_img(path).size()
     torch.Size([3, 38804])
 
@@ -52,118 +46,82 @@ def flatten_img(img_path: str | list[str], img_type="tensor", encode=True)\
     >>>flatten_img(path_list).size()
     torch.Size([3, 3, 38804])
     """
+    # Path where to find a trained autoencoder
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
-    if img_type == "tensor":
-        # To transform a numpy array or a PIL image to a torch Tensor
-        to_tensor = transforms.ToTensor()
-        # To flatten a torch tensor to a tensor with two dimensions only
-        flatten = nn.Flatten(1, 2)
+    autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
 
-        if type(img_path) is list:
-            temp_img = Image.open(img_path[0])  # Temporary img to get its size
-            temp_tensor = to_tensor(temp_img)
-            size = temp_tensor.shape
+    # To transform a numpy array or a PIL image to a torch Tensor
+    to_tensor = transforms.ToTensor()
+    # To flatten a torch tensor to a tensor with two dimensions only
+    flatten = nn.Flatten(1, 2)
 
-            # Global Tensor containing all the images
-            flat_img_tensor = torch.zeros((len(img_path), size[0],
-                                           size[1] * size[2]))
-            # print(f"Global tensor shape: {flat_img_tensor.shape}")
-            for i, path in enumerate(img_path):
-                if type(path) is str:
-                    img = Image.open(path)  # PIL picture
+    if type(img_path) is list:
+        temp_img = Image.open(img_path[0])  # Temporary img to get its size
+        temp_tensor = to_tensor(temp_img)
+        size = temp_tensor.shape
 
-                    if encode:
-                        # TODO Aller chercher un autoencoder entraîné pour encoder les photos
-                        img = ae.encode()
+        # Global Tensor containing all the images
+        flat_img_tensor = torch.zeros((len(img_path), size[0],
+                                       size[1] * size[2]))
+        print(f"Global tensor shape: {flat_img_tensor.shape}")
 
-                    img_tensor = to_tensor(img)  # Transform PIL to torch Tensor
-                    # print(f"Image tensor shape: {img_tensor.shape}")
-                    flat_img_tensor[i] = flatten(img_tensor)
+        for i, path in enumerate(img_path):
+            if type(path) is str:
+                img = Image.open(path)  # PIL Image
+                img_tensor = to_tensor(img)  # Image -> Tensor
 
-                else:
-                    raise TypeError("List should contain paths (str)")
-            return flat_img_tensor
+                # Cropping the tensor to 160x160 pixels
+                img_tensor_crop = ae2.crop_image_tensor(img_tensor)
 
-        elif type(img_path) is str:
-            img = Image.open(img_path)  # PIL picture
-            img_tensor = to_tensor(img)
-            img_tensor = ae2.crop_image_tensor(img_tensor)
+                encoded_tensor = ae2.encode(autoencoder, img_tensor_crop)
 
-            if encode:
-                model = ae.load_model(model_path)
-                img_tensor = ae2.encode(model, img_tensor)
+                # print(f"Image tensor shape: {img_tensor.shape}")
+                flat_img_tensor[i] = flatten(encoded_tensor)
 
-            return flatten(img_tensor)
+            else:
+                raise TypeError("List should contain paths (str)")
 
-        else:
-            raise TypeError("Input should either be a path (str)\
-                or a list of paths")
+        return flat_img_tensor
 
-    elif img_type == "numpy":
-        if type(img_path) is list:
-            flat_img_list = [0] * len(img_path)
-            for i, path in enumerate(img_path):
-                if type(path) is str:
-                    img = Image.open(path)  # PIL picture
+    elif type(img_path) is str:
+        img = Image.open(img_path)  # PIL Image
+        img_tensor = to_tensor(img)  # Image -> Tensor
 
-                    if encode:
-                        # TODO Aller chercher un autoencoder entraîné
-                        img = ae.encode()
+        # Cropping the tensor to 160x160 pixels
+        img_tensor_crop = ae2.crop_image_tensor(img_tensor)
 
-                    img_arr = np.array(img)
-                    flat_img_list[i] = np.concatenate(img_arr)
+        encoded_tensor = ae2.encode(autoencoder, img_tensor_crop)
 
-                else:
-                    raise TypeError("List should contain paths (str)")
-            return np.array(flat_img_list)
-
-        elif type(img_path) is str:
-            img = Image.open(img_path)  # PIL picture
-
-            if encode:
-                # TODO Aller chercher un autoencoder entraîné
-                img = ae.encode()
-                img = img.numpy()
-
-            # Uniformization of the data dimension
-            img_arr = np.transpose(np.array(img), (2, 0, 1))
-            print(f"Array of the img is: {img_arr.shape}")
-            return img_arr.reshape(img_arr.shape[0], -1)
-
-        else:
-            raise TypeError("Input should either be a path (str)\
-                or a list of paths")
+        return flatten(encoded_tensor)
 
     else:
-        raise ValueError("Wrong parameter img_type value. Should either\
-                         be tensor or numpy")
+        raise TypeError("Input should either be a path (str)\
+            or a list of paths")
 
 
-def deflatten_img(flat_tensor: Tensor, base_width: int = 18,
-                  base_length: int = 18, decode=True) -> Image:
-    base_dim = (base_width, base_length, 3)
-    if decode:
-        model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
-        model = ae.load_model(model_path)
-        unflat_img = flat_tensor.reshape((64, 18, 18))
-        decoded_img = ae.decode(model, unflat_img)
-        return decoded_img
+def deflatten_img(flat_tensor: Tensor,
+                  base_encoded_dim: tuple[int, int, int]) -> Image:
+    # Path where to find a trained autoencoder
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
+    autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
 
-    else:
-        rev_tf = transforms.ToPILImage()
-        unflat_tensor = flat_tensor.reshape(base_dim)
-        return rev_tf(unflat_tensor)
+    # Reform the original encoded tensor
+    unflat_tensor = flat_tensor.reshape(base_encoded_dim)
+
+    decoded_img = ae.decode(autoencoder, unflat_tensor)
+
+    return decoded_img
 
 
-def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2,
-               noise: float = 1, mut_type="random") -> ndarray | Tensor:
+def mutate_img(img_encoded: Tensor, mutation_rate: float = 0.2,
+               noise: float = 1, mut_type="random") -> Tensor:
     """Slightly modifies a or several images given in a ndarray or a
     Tensor with random noise.
 
     Parameters
     ----------
-    img_encoded: numpy.ndarray or torch.Tensor
-        Object containing an or several images pixels values
+    img_encoded: torch.Tensor
+        Tensor containing one or several images pixels values
     mutation_rate: float
         Probability for a pixel to be modified
     noise: float
@@ -175,7 +133,7 @@ def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2,
 
     Returns
     -------
-    img_mut: numpy.ndarray or torch.Tensor
+    img_mut: torch.Tensor
         Image or images built on img_encoded with Gaussian random noise
         added to it
 
@@ -194,62 +152,42 @@ def mutate_img(img_encoded: ndarray | Tensor, mutation_rate: float = 0.2,
     """
     # Randomly selects the pixels to be modified
     if mut_type == "random":
-        if type(img_encoded) is ndarray:
-            img_encoded: ndarray
-            # Random draw for each pixel of img_encoded
-            mut_proba_arr = np.random.random(size=img_encoded.shape)
-            img_mut = img_encoded
-            noise_arr = noise * np.random.normal(size=img_encoded.shape)
-            # Adding noise only on pixels where mut_proba_arr is lower than mutation_rate
-            img_mut[mut_proba_arr < mutation_rate] += noise_arr[mut_proba_arr < mutation_rate]
-
-        elif type(img_encoded) is Tensor:
-            img_encoded: Tensor
+        if type(img_encoded) is Tensor:
             mut_proba_tensor = torch.rand(size=img_encoded.size())
             img_mut = img_encoded
             noise_tensor = noise * torch.randn(size=img_encoded.size())
             img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
 
         else:
-            raise TypeError(f"Input should either be of type np.ndarray \
-                or torch.Tensor and not a {type(img_encoded)}")
-
-        return img_mut
+            raise TypeError(f"Input should either be of type or torch.Tensor \
+                            and not a {type(img_encoded)}")
 
     # Modify every pixel with a random noise
     elif mut_type == "uniform":
         # Add random noise on each pixel
-        if type(img_encoded) is np.ndarray:
-            img_encoded: ndarray
-            # Adding white noise to the numpy array
-            img_mut = img_encoded + noise \
-                * np.random.normal(size=img_encoded.shape)
-
-        elif type(img_encoded) is torch.Tensor:
-            img_encoded: Tensor
+        if type(img_encoded) is Tensor:
             # Adding white noise to a torch Tensor
             img_mut = img_encoded + noise \
                 * torch.randn(size=img_encoded.size())
 
         else:
-            raise TypeError(f"Input should either be of type np.ndarray \
-                or torch.Tensor and not a {type(img_encoded)}")
-
-        return img_mut
+            raise TypeError(f"Input should either be of type or torch.Tensor \
+                            and not a {type(img_encoded)}")
 
     else:
         raise ValueError("Chose a valid value for the modif parameter")
 
+    return img_mut
 
-def crossing_over(images_encoded: ndarray | Tensor,
-                  crossing_rate: float) -> ndarray | Tensor:
+
+def crossing_over(img_encoded: Tensor, crossing_rate: float) -> Tensor:
     """Swaps pixels between the given input images. Swaps are made
     randomly for each pixels.
 
     Parameters
     ----------
-    images_encoded: numpy.ndarray or torch.Tensor
-        Object containing one or several images pixels values. The images
+    img_encoded: torch.Tensor
+        Tensor containing one or several images pixels values. The image
         where the pixel are drawn is chosen randomly between all the
         input images, with a uniform distribution
     crossing_rate: float
@@ -257,41 +195,27 @@ def crossing_over(images_encoded: ndarray | Tensor,
 
     Returns
     -------
-    new_img: numpy.ndarray or torch.Tensor
-        Image or images on which the crossing-overs are performed
+    new_img: torch.Tensor
+        Image or images on which the crossing-overs were performed
 
     # TODO Test de code pour les crossing over
     """
-    if type(images_encoded) is ndarray:
-        images_encoded: ndarray
-        for i, img in enumerate(images_encoded):
-            crossing_arr = np.random.random(size=img.shape)
-            # Randomly choosing which image to swap pixels with
-            other_ind = [j for j in range(images_encoded.shape[0]) if j != i]
-            chosen_ind = np.random.choice(other_ind)
-
-            new_img = deepcopy(img)
-            # Swapping
-            new_img[crossing_arr < crossing_rate] = images_encoded[chosen_ind][crossing_arr < crossing_rate]
-            return new_img
-
-    elif type(images_encoded) is Tensor:
-        images_encoded: Tensor
-        for i, img in enumerate(images_encoded):
+    if type(img_encoded) is Tensor:
+        for i, img in enumerate(img_encoded):
             crossing_tensor = torch.rand(size=img.size())
 
             # Randomly choosing which image to swap pixels with
-            other_ind = [k for k in range(images_encoded.size()[0]) if k != i]
+            other_ind = [k for k in range(img_encoded.size()[0]) if k != i]
             chosen_ind = np.random.choice(other_ind)
 
             new_img = deepcopy(img)
             # Swapping
-            new_img[crossing_tensor < crossing_rate] = images_encoded[chosen_ind][crossing_tensor < crossing_rate]
+            new_img[crossing_tensor < crossing_rate] = img_encoded[chosen_ind][crossing_tensor < crossing_rate]
             return new_img
 
     else:
-        raise TypeError(f"Input should either be of type np.ndarray \
-            or torch.Tensor and not a {type(images_encoded)}")
+        raise TypeError(f"Input should either be of type or torch.Tensor \
+                        and not a {type(img_encoded)}")
 
 
 if __name__ == "__main__":
