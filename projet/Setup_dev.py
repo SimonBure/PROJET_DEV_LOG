@@ -11,7 +11,7 @@ import zipfile
 import logging
 
 #Setup log file
-logging.basicConfig(filename='Idkit.log', encoding='utf-8', level=logging.DEBUG,
+logging.basicConfig(filename='Idkit.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s : %(message)s')
 
 
