@@ -42,22 +42,22 @@ if not os.path.exists(os.path.join(env_path, "Idkit")):
     wget.download(url, add_path)
     
     # idkit.png pour le logo du programme 
-    path = IdKit.utils.get_path(env_path, "Interface")
+    path2 = IdKit.utils.get_path(env_path, "Interface")
     url2 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283444"
-    add_path = os.path.join(path, "idkit.png")
+    add_path2 = os.path.join(path2, "idkit.png")
     logging.info('Download from %s' %(url2))
-    wget.download(url2, out=add_path)
+    wget.download(url2, out=add_path2)
     
     # new_dataset.zip pour les images de la base de données
     print(" - Downloading image dataset")
-    path = IdKit.utils.get_path(env_path, "Img_base")
-    add_path = os.path.join(path, "new_dataset.zip")
+    path3 = IdKit.utils.get_path(env_path, "Img_base")
+    add_path3 = os.path.join(path3, "new_dataset.zip")
     url3 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283445"
     logging.info('Download from %s' %(url3))
-    wget.download(url3, out=add_path)
+    wget.download(url3, out=add_path3)
     logging.info('Exctract new_dataset.zip')
-    with zipfile.ZipFile(add_path, 'r') as zip_ref:
-        zip_ref.extractall(path)
+    with zipfile.ZipFile(add_path3, 'r') as zip_ref:
+        zip_ref.extractall(path3)
     logging.info(' - Done')
         
 
@@ -65,6 +65,9 @@ if not os.path.exists(os.path.join(env_path, "Idkit")):
     
     print("- Environenement generated in %s" %(os.path.join(env_path, "Idkit")))
 
+if not os.path.exists(add_path) and os.path.exists(add_path2) and os.path.exists(add_path3):
+    logging.error('Files missings')
+    raise(Exception("Files missings, please reinstall the program"))
 
 print("- Launching program")
 logging.info('Launching program')
