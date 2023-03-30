@@ -546,24 +546,24 @@ def f5(env_path, image_finale):
        '''
        DOCSTRING A FAIRE
        '''
-        chemin=T1.get("1.0","end-1c")
+       chemin=T1.get("1.0","end-1c")
        
-        nom   =T2.get("1.0","end-1c")
+       nom   =T2.get("1.0","end-1c")
         
-        if (nom != None): 
-            jpg = '.jpg'
-            nom_final = nom+jpg
-        elif (chemin == None):
-            nom_final = 'image_finale.jpg'
+       if (nom != None): 
+           jpg = '.jpg'
+           nom_final = nom+jpg
+       elif (chemin == None):
+           nom_final = 'image_finale.jpg'
         
-        if (chemin == None):
-            chemin = '../env/Result'
-       
-        path_defaut = chemin
-        img_save = image_finale
-        img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
+       if (chemin == None):
+           chemin = '../env/Result'
+      
+       path_defaut = chemin
+       img_save = image_finale
+       img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
         
-        showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
+       showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
 
     ## VOIR QUE FAIRE QUAND LE CHEMIN N EST PAS BON (afficher une erreur), ou nom existe déjà (AFFICHER UNE ERREUR)
               
