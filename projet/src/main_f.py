@@ -120,8 +120,9 @@ def f2(env_path):
         lunet = vlun.get()
         mous = vmous.get() 
         brd = vbrd.get()
+        auc = vauc.get()
         nsp = vnsp.get()
-        liste_acc = [lunet, mous, brd, nsp]
+        liste_acc = [lunet, mous, brd, auc, nsp]
         return liste_acc
     
     def verif_reponses():
@@ -238,14 +239,16 @@ def f2(env_path):
     vlun = IntVar()
     vmous = IntVar()
     vbrd = IntVar()
+    vauc = IntVar()
     vnsp = IntVar()
     labelChoix = tk.Label(f2_flr, text = " Veuillez cocher les accessoires particuliers:", font='Helvetica 12 bold')
     labelChoix.pack()
     boutLun = Checkbutton(f2_flr, text="Lunettes", font='Helvetica 12', variable=vlun, onvalue=1, offvalue=0, command = recup_valCkB)
     boutMoust = Checkbutton(f2_flr, text="Moustache", font='Helvetica 12', variable=vmous, onvalue=1, offvalue=0, command = recup_valCkB)
     boutbrd = Checkbutton(f2_flr, text="Barbe", font='Helvetica 12', variable=vbrd, onvalue=1, offvalue=0, command = recup_valCkB)
-    boutnsp = Checkbutton(f2_flr, text="Aucun/Ne sait pas", font='Helvetica 12', variable=vnsp, onvalue=1, offvalue=0, command = recup_valCkB)
-
+    boutauc = Checkbutton(f2_flr, text="Aucun", font='Helvetica 12', variable=vauc, onvalue=1, offvalue=0, command = recup_valCkB)
+    boutnsp = Checkbutton(f2_flr, text="Je ne sait pas", font='Helvetica 12', variable=vnsp, onvalue=1, offvalue=0, command = recup_valCkB)
+    
     boutLun.pack()
     boutMoust.pack()
     boutbrd.pack()
