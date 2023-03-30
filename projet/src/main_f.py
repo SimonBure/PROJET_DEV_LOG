@@ -188,7 +188,7 @@ def f2(env_path):
         test = verif_reponses()
         ans_user = liste_db()
             # Retrieve 5 images
-        array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][4], ans_user[1][3], ans_user[1][5])
+        array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][3], ans_user[1][4], ans_user[1][5])
         img_list = database.get_5_img(env_path, array_metadata) # liste de path
     
         if test==FALSE:
