@@ -22,6 +22,8 @@ def get_database_path(env_path, who = "idkit"):
     path = utils.get_path(env_path, "Database")
     if who == "Project" :
         data_loc = os.path.join(path, "project.db")
+    elif who == "Auto" :
+        data_loc = os.path.join(path, "autoencode.db")
     else :
         data_loc = os.path.join(path, "idkit.db")
     return data_loc
@@ -463,7 +465,7 @@ if __name__ == '__main__':
 
     print(request_data_by_id(env_path, numbers))
 
-    print(len(print_database(env_path, "Project")))
+    print(len(print_database(env_path, "Auto")))
     
     print(create_querry_array())
     
