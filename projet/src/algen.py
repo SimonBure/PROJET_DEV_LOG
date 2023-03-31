@@ -386,7 +386,7 @@ if __name__ == "__main__":
 
     id_nb = 20
     # Path of the 20th image
-    pic_path = request_data_by_id(env_path, id_nb)
+    pic_path = request_data_by_id(env_path, id_nb, who='idkit')
     # print(f"Path for the picture(s): {pic_path}")
 
     # Path of the 3 images
