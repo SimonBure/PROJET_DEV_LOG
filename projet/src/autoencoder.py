@@ -48,7 +48,7 @@ class Autoencoder(nn.Module):
         return x
 
 
-def encode(model, img):
+def encode(model: Autoencoder, img: Image) -> torch.Tensor:
     """
     Encodes an input image using the given PyTorch model.
     Parameters:
@@ -64,7 +64,7 @@ def encode(model, img):
     return recon
 
 
-def decode(model, tensor):
+def decode(model: Autoencoder, tensor: torch.Tensor) -> Image:
     """
     Decodes a tensor representation of an image using the given PyTorch model.
     Parameters:
@@ -144,7 +144,7 @@ def save_model(model, name_file):
     torch.save(model.state_dict(), name_file)
 
 
-def load_model(name_file):
+def load_model(name_file: str) -> Autoencoder:
     """
     Loads the state dictionary of a PyTorch model from a file with the given name
     and returns the corresponding model object.
