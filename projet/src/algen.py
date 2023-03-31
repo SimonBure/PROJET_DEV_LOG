@@ -22,7 +22,6 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
     in a convenient shape for all the future modifications.
     This function can also encode the image if needed
 
-
     Parameters
     ----------
     img_path: str or list[str]
@@ -64,12 +63,11 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
         # Global Tensor containing all the images
         flat_img_tensor = torch.zeros((len(img_path), size[0],
                                        size[1] * size[2]))
-        print(f"Global tensor shape: {flat_img_tensor.shape}")
 
         for i, path in enumerate(img_path):
             if type(path) is str:
                 img = Image.open(path)  # PIL Image
-                img_tensor = to_tensor(img)  # Image -> Tensor
+                img_tensor: Tensor = to_tensor(img)  # Image -> Tensor
 
                 # Cropping the tensor to 160x160 pixels
                 img_tensor_crop = ae2.crop_image_tensor(img_tensor)
@@ -77,7 +75,7 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
                 encoded_tensor = ae2.encode(autoencoder, img_tensor_crop)
 
                 # print(f"Image tensor shape: {img_tensor.shape}")
-                flat_img_tensor[i] = flatten(encoded_tensor)
+                flat_img_tensor[i]: Tensor = flatten(encoded_tensor)
 
             else:
                 raise TypeError("List should contain paths (str)")
@@ -91,27 +89,48 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
         # Cropping the tensor to 160x160 pixels
         img_tensor_crop = ae2.crop_image_tensor(img_tensor)
 
-        encoded_tensor = ae2.encode(autoencoder, img_tensor_crop)
+        encoded_tensor: Tensor = ae2.encode(autoencoder, img_tensor_crop)
+        flat_tensor: Tensor = flatten(encoded_tensor)
 
-        return flatten(encoded_tensor)
+        return flat_tensor
 
     else:
         raise TypeError("Input should either be a path (str)\
             or a list of paths")
 
 
-def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size) -> Image:
+def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
+        -> Image.Image | list[Image.Image]:
     # TODO Docstring here
     # Path where to find a trained autoencoder
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
 
-    # Reform the original encoded tensor
-    unflat_tensor = flat_tensor.reshape(base_encoded_dim)
+    if flat_tensor.dim() == 2:
+        # Reform the original encoded tensor
+        unflat_tensor = flat_tensor.reshape(base_encoded_dim)
 
-    decoded_img = ae.decode(autoencoder, unflat_tensor)
+        decoded_img = ae.decode(autoencoder, unflat_tensor)
 
-    return decoded_img
+        return decoded_img
+
+    elif flat_tensor.dim() == 3:
+        # Creating a list for the images
+        img_list = [0] * flat_tensor.size()[0]
+
+        for i, flat_img in enumerate(flat_tensor):
+            # Reform the original encoded tensor
+            unflat_img = flat_img.reshape(base_encoded_dim)
+
+            decoded_img = ae.decode(autoencoder, unflat_img)
+
+            img_list[i] = decoded_img
+
+        return img_list
+
+    else:
+        raise Exception(f"Wrong tensor dimension. Expected: 2 or 3, got\
+                        {flat_tensor.dim()}")
 
 
 def mutate_img(img_encoded: Tensor, mutation_rate: float = 0.2,
@@ -152,24 +171,47 @@ def mutate_img(img_encoded: Tensor, mutation_rate: float = 0.2,
         [ 1.8747, -0.3136,  0.4488]])
     """
     if type(img_encoded) is Tensor:
-        # Add random noise to random pixels
-        if mut_type == "random":
-            # Randomly selects the pixels to be modified
-            mut_proba_tensor = torch.rand(size=img_encoded.size())
-            img_mut = img_encoded
-            noise_tensor = noise * torch.randn(size=img_encoded.size())
-            img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
-            return img_mut
+        if img_encoded.dim() == 2:
+            # Add random noise to random pixels
+            if mut_type == "random":
+                # Randomly selects the pixels to be modified
+                mut_proba_tensor = torch.rand(size=img_encoded.size())
+                img_mut = img_encoded
+                noise_tensor = noise * torch.randn(size=img_encoded.size())
+                img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
+                return img_mut
 
-        # Add random noise on each pixel
-        elif mut_type == "uniform":
-            # Adding white noise to a torch Tensor
-            img_mut = img_encoded + noise \
-                      * torch.randn(size=img_encoded.size())
-            return img_mut
+            # Add random noise on each pixel
+            elif mut_type == "uniform":
+                # Adding white noise to a torch Tensor
+                img_mut = img_encoded + noise \
+                          * torch.randn(size=img_encoded.size())
+                return img_mut
+
+        elif img_encoded.dim() == 3:
+            for img in img_encoded:
+                img: Tensor
+                # Add random noise to random pixels
+                if mut_type == "random":
+                    # Randomly selects the pixels to be modified
+                    mut_proba_tensor = torch.rand(size=img.size())
+                    img_mut = img
+                    noise_tensor = noise * torch.randn(size=img.size())
+                    img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
+                    return img_mut
+
+                # Add random noise on each pixel
+                elif mut_type == "uniform":
+                    # Adding white noise to a torch Tensor
+                    img_mut = img + noise * torch.randn(size=img.size())
+                    return img_mut
+
+        else:
+            raise TypeError(f"Wrong Tensor dimension, expected 2 or 3, \
+                            having {img_encoded.dim()}")
 
     else:
-        raise TypeError(f"Input should either be of type or torch.Tensor \
+        raise TypeError(f"Input should be of type or torch.Tensor \
                         and not a {type(img_encoded)}")
 
 
@@ -207,7 +249,7 @@ def crossing_over(img_encoded: Tensor, crossing_rate: float) -> Tensor:
             return new_img
 
     else:
-        raise TypeError(f"Input should either be of type or torch.Tensor \
+        raise TypeError(f"Input should be of type or torch.Tensor \
                         and not a {type(img_encoded)}")
 
 
@@ -260,17 +302,24 @@ if __name__ == "__main__":
 
     # Testing flatten on several images
     flat_several = flatten_img(pic_path_list)
+    print(type(flat_several))
     print(f"Several image tensor size: {flat_several.size()}")
+    print(f"Dim of the tensor: {flat_several.dim()}")
 
-    # Testing resize
+    # Testing deflatten
     deflat_img = deflatten_img(flat_encoded_tensor, encoded_img.size())
-    deflat_img.show()
+    # deflat_img.show()
 
-    # Testing mutation on flat encoded image
-    mut_img = mutate_img(flat_encoded_tensor, mut_type="uniform")
-    deflat_img = deflatten_img(mut_img, encoded_img.size())
-    deflat_img.show()
+    # Testing deflatten on several images
+    deflat_several = deflatten_img(flat_several, encoded_img.size())
+    for img in deflat_several:
+        img.show()
 
-    mut_img = mutate_img(flat_encoded_tensor, mut_type="random")
-    deflat_img = deflatten_img(mut_img, encoded_img.size())
-    deflat_img.show()
+    # # Testing mutation on flat encoded image
+    # mut_img = mutate_img(flat_encoded_tensor, mut_type="uniform")
+    # deflat_img = deflatten_img(mut_img, encoded_img.size())
+    # deflat_img.show()
+    #
+    # mut_img = mutate_img(flat_encoded_tensor, mut_type="random")
+    # deflat_img = deflatten_img(mut_img, encoded_img.size())
+    # deflat_img.show()
