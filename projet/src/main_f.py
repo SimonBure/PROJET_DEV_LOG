@@ -494,7 +494,7 @@ def f3(env_path, img_list):
     label5 = Label(frame5, image = new_image5)
     label5.pack()
 
-    labelChoix = tk.Label(f3_img, text = " Veuillez cocher l'image la plus juste:", font='Helvetica 16 bold')
+    labelChoix = tk.Label(f3_img, text = " Veuillez choisir la ou les images correspondant le mieux au suspect. Pour plus de détails, cliquez sur le bouton Aide ", font='Helvetica 16 bold')
     labelChoix.pack()
 
     vb1 = IntVar()
@@ -586,6 +586,8 @@ def f4(env_path, path_final_img):
 def f5(env_path, img_f5):
 
     f5_xprt = Tk()
+    f5_xprt.geometry("500x300")
+    f5_xprt.configure(bg='white')
 
     def export():
        '''
@@ -602,38 +604,33 @@ def f5(env_path, img_f5):
 
        if (chemin == ''):
            chemin = utils.get_path(env_path, 'Result')
-
+           
        path_defaut = chemin
        img_save = img_f5
-       img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
+       
+       try: 
+           img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
+           showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
+       except:
+           showinfo('Attention', "Le chemin ou le nom de l'image ne sont pas au bon format.")
 
-       showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
-
-    ## VOIR QUE FAIRE QUAND LE CHEMIN N EST PAS BON (afficher une erreur), ou nom existe déjà (AFFICHER UNE ERREUR)
-
-    def quitter():
-        """
-        Evenement associé au menu Quitter: destruction de la fenetre courante
-        """
-        f5_xprt.destroy()
-
-
-    txt1 = Label(f5_xprt, text="chemin de sauvegarde", bg="white", font = "Arial 14 italic")
+       f5_xprt.destroy()
+        
+    
+    # préciser le format à l'utilisateur (mettre un exemple...)
+    txt1 = Label(f5_xprt, text="Chemin de sauvegarde", bg="white", font = "Arial 14 italic")
     txt1.pack()
-    T1 = Text(f5_xprt, height = 3, width = 52)
+    T1 = Text(f5_xprt, height = 2, width = 52)
     T1.pack()
 
     txt2 = Label(f5_xprt, text="Nom de l'image", bg="white", font = "Arial 14 italic")
     txt2.pack()
-    T2 = Text(f5_xprt, height = 3, width = 52)
+    T2 = Text(f5_xprt, height = 2, width = 52)
     T2.pack()
 
-    boutSend=Button(f5_xprt, text="OK", font='Arial 8', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= export)
-    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.4, rely= 0.8)
-
-    boutSend=Button(f5_xprt, text="Fermer", font='Arial 8', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= quitter)
-    boutSend.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.6, rely= 0.8)
-
+    boutSend=Button(f5_xprt, text="OK", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= export)
+    boutSend.place(anchor=tk.N, relheight=0.3, relwidth=0.3, relx=0.5, rely= 0.7)
+ 
     f5_xprt.mainloop()
 
 
