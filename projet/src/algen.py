@@ -5,10 +5,8 @@ import torch.nn as nn
 import torch
 from PIL import Image
 from copy import deepcopy
-from numpy import ndarray
 from torch import Tensor
 from torchvision import transforms
-from torchsummary import summary
 
 from database import request_data_by_id
 import autoencoder as ae
@@ -133,35 +131,45 @@ def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
                         {flat_tensor.dim()}")
 
 
-def mutate_img(img_encoded: Tensor, mutation_rate: float = 0.2,
-               noise: float = 1, mut_type="random") -> Tensor:
-    """Slightly modifies a or several images given in a ndarray or a
-    Tensor with random noise.
+def mutate_img(tensor_encoded: Tensor, mutation_rate: float = 0.05,
+               noise: float = 1, mode: str = 'add',
+               scale: str = 'partial') -> Tensor:
+    # TODO Update doc
+    """Slightly modifies a or several images given in a Tensor with
+    random noise.
 
     Parameters
     ----------
-    img_encoded: torch.Tensor
-        Tensor containing one or several images pixels values
+    tensor_encoded: torch.Tensor
+        Tensor containing one or several images pixels values.
     mutation_rate: float
-        Probability for a pixel to be modified
+        Probability for a pixel to be modified.
     noise: float
-        Strength of the random noise, coefficient multiplying the noise
-    mut_type: str
-        Either random or uniform. If uniform every pixel is perturbed
-        with a Gaussian random noise. If random, the pixels to be
-        modified are randomly chosen according to mutation_rate
+        Strength of the random noise, coefficient multiplying the noise.
+    scale: str
+        Either 'partial' or 'total'. If 'total' than every pixel is
+        perturbed with a Gaussian random noise. If 'partial' than the
+        modified pixels are randomly chosen according to mutation_rate.
+        Default to 'partial'.
+    mode: str
+        Either 'add' or 'reconstruct'.
+        Specifies the type of modifications to perform. If 'add' than
+        the noise is added to chosen tensor values. The noise is a
+        random number drawn from a gaussian distribution with mean 0
+        and a standard deviation of 1. If 'reconstruct' than the tensor
+        is rebuilt
 
     Returns
     -------
     img_mut: torch.Tensor
         Image or images built on img_encoded with Gaussian random noise
-        added to it
+        added to it.
 
     >>>tensor = torch.randn((3, 3))
     tensor([[-3.3558,  1.5579, -0.2904],
         [-0.2572, -0.7410, -0.8748],
         [ 1.2381, -0.4762,  0.3762]])
-    >>>mutate_img(tensor, mut_type='uniform')
+    >>>mutate_img(tensor, scale='uniform')
     tensor([[-3.6974,  1.9027, -0.6431],
         [-0.0740,  0.5979, -1.3189],
         [ 0.7544, -1.8443,  0.2005]])
@@ -170,59 +178,122 @@ def mutate_img(img_encoded: Tensor, mutation_rate: float = 0.2,
         [-0.2572, -0.7410, -0.8748],
         [ 1.8747, -0.3136,  0.4488]])
     """
-    if type(img_encoded) is Tensor:
-        if img_encoded.dim() == 2:
-            # Add random noise to random pixels
-            if mut_type == "random":
-                # Randomly selects the pixels to be modified
-                mut_proba_tensor = torch.rand(size=img_encoded.size())
-                img_mut = img_encoded
-                noise_tensor = noise * torch.randn(size=img_encoded.size())
-                img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
-                return img_mut
-
-            # Add random noise on each pixel
-            elif mut_type == "uniform":
-                # Adding white noise to a torch Tensor
-                img_mut = img_encoded + noise \
-                          * torch.randn(size=img_encoded.size())
-                return img_mut
-
-        elif img_encoded.dim() == 3:
-            for img in img_encoded:
-                img: Tensor
+    if type(tensor_encoded) is Tensor:
+        if tensor_encoded.dim() == 2:
+            img_mut = tensor_encoded
+            if mode == 'add':
                 # Add random noise to random pixels
-                if mut_type == "random":
+                if scale == 'partial':
                     # Randomly selects the pixels to be modified
-                    mut_proba_tensor = torch.rand(size=img.size())
-                    img_mut = img
-                    noise_tensor = noise * torch.randn(size=img.size())
+                    mut_proba_tensor = torch.rand(size=tensor_encoded.size())
+                    noise_tensor = noise * torch.randn(size=tensor_encoded.size())
                     img_mut[mut_proba_tensor < mutation_rate] += noise_tensor[mut_proba_tensor < mutation_rate]
-                    return img_mut
 
                 # Add random noise on each pixel
-                elif mut_type == "uniform":
-                    # Adding white noise to a torch Tensor
-                    img_mut = img + noise * torch.randn(size=img.size())
-                    return img_mut
+                elif scale == 'total':
+                    # Adding white noise to all the tensor values
+                    img_mut += noise * torch.randn(size=tensor_encoded.size())
+
+                else:
+                    raise ValueError(f"Wrong value for the scale parameter. \
+                    Expected 'partial' or 'total' got {scale} instead")
+
+            # Building a new tensor based on the mean and deviation
+            # of the input tensor
+            elif mode == 'reconstruct':
+                mu = tensor_encoded.mean()
+                std = tensor_encoded.std()
+
+                if scale == 'partial':
+                    # Randomly selects the pixels to be modified
+                    mut_proba_tensor = torch.rand(size=tensor_encoded.size())
+                    # Size of the selected region
+                    selected_size = img_mut[mut_proba_tensor < mutation_rate].size()
+                    # Reconstruction of the selected region
+                    img_mut[mut_proba_tensor < mutation_rate] = mu \
+                        + torch.randn(selected_size) * std
+
+                elif scale == 'total':
+                    # Reconstruction of the whole tensor
+                    img_mut = mu + torch.randn(tensor_encoded.size()) * std
+
+                else:
+                    raise ValueError(f"Wrong value for the scale parameter. \
+                    Expected 'partial' or 'total' got {scale} instead")
+
+            else:
+                raise ValueError(f"Wrong value for the modif parameter. \
+                Expected 'add' or 'reconstruct' got {mode} instead")
+
+            return img_mut
+
+        elif tensor_encoded.dim() == 3:
+            global_tensor = torch.zeros(tensor_encoded.size())
+            for i, tensor in enumerate(tensor_encoded):
+                img_mut = tensor
+                # Adding gaussian noise to the tensors
+                if mode == 'add':
+                    # Act on random values
+                    if scale == 'partial':
+                        # Randomly selects the pixels to be modified
+                        mut_proba_tensor = torch.rand(size=tensor.size())
+                        # Creating the gaussian noise
+                        noise_tensor = noise * torch.randn(size=tensor.size()) + img_mut
+
+                        img_mut = torch.where(mut_proba_tensor < mutation_rate, noise_tensor, img_mut)
+                    # Act on every value
+                    elif scale == 'total':
+                        # Adding white noise to all the tensor values
+                        img_mut = img_mut + noise * torch.randn(size=tensor.size())
+
+                    else:
+                        raise ValueError(f"Wrong value for the scale parameter. \
+                        Expected 'partial' or 'total' got {scale} instead")
+
+                # Building a new tensor based on the mean and deviation
+                # of the input tensor
+                elif mode == 'reconstruct':
+                    mu = tensor.mean()
+                    std = tensor.std()
+
+                    if scale == 'partial':
+                        # Randomly selects the pixels to be modified
+                        mut_proba_tensor = torch.rand(size=tensor.size())
+                        # Size of the selected region
+                        selected_size = img_mut[mut_proba_tensor < mutation_rate].size()
+                        # Reconstruction of the selected region
+                        img_mut[mut_proba_tensor < mutation_rate] = mu \
+                            + torch.randn(selected_size) * std
+
+                    elif scale == 'total':
+                        # Reconstruction of the whole tensor
+                        img_mut = mu + torch.randn(tensor.size()) * std
+
+                else:
+                    raise ValueError(f"Wrong value for the modif parameter. \
+                    Expected 'add' or 'reconstruct' got {mode} instead")
+
+                global_tensor[i] = img_mut
+
+            return global_tensor
 
         else:
             raise TypeError(f"Wrong Tensor dimension, expected 2 or 3, \
-                            having {img_encoded.dim()}")
+                            having {tensor_encoded.dim()}")
 
     else:
         raise TypeError(f"Input should be of type or torch.Tensor \
-                        and not a {type(img_encoded)}")
+                        and not a {type(tensor_encoded)}")
 
 
-def crossing_over(img_encoded: Tensor, crossing_rate: float) -> Tensor:
+def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
     """Swaps pixels between the given input images. Swaps are made
     randomly for each pixels.
 
     Parameters
     ----------
-    img_encoded: torch.Tensor
-        Tensor containing one or several images pixels values. The image
+    tensor_encoded: torch.Tensor
+        Tensor containing several images pixels values. The image
         where the pixel are drawn is chosen randomly between all the
         input images, with a uniform distribution
     crossing_rate: float
@@ -230,27 +301,27 @@ def crossing_over(img_encoded: Tensor, crossing_rate: float) -> Tensor:
 
     Returns
     -------
-    new_img: torch.Tensor
+    new_tensor: torch.Tensor
         Image or images on which the crossing-overs were performed
 
     # TODO Test de code pour les crossing over
     """
-    if type(img_encoded) is Tensor:
-        for i, img in enumerate(img_encoded):
-            crossing_tensor = torch.rand(size=img.size())
+    if type(tensor_encoded) is Tensor:
+        for i, tensor in enumerate(tensor_encoded):
+            crossing_tensor = torch.rand(size=tensor.size())
 
             # Randomly choosing which image to swap pixels with
-            other_ind = [k for k in range(img_encoded.size()[0]) if k != i]
+            other_ind = [k for k in range(tensor_encoded.size()[0]) if k != i]
             chosen_ind = np.random.choice(other_ind)
 
-            new_img = deepcopy(img)
-            # Swapping
-            new_img[crossing_tensor < crossing_rate] = img_encoded[chosen_ind][crossing_tensor < crossing_rate]
-            return new_img
+            new_tensor = deepcopy(tensor)
+            # Swapping pixels between tensors
+            new_tensor[crossing_tensor < crossing_rate] = tensor_encoded[chosen_ind][crossing_tensor < crossing_rate]
+            return new_tensor
 
     else:
         raise TypeError(f"Input should be of type or torch.Tensor \
-                        and not a {type(img_encoded)}")
+                        and not a {type(tensor_encoded)}")
 
 
 if __name__ == "__main__":
@@ -259,12 +330,12 @@ if __name__ == "__main__":
     id_nb = 20
     # Path of the 20th image
     pic_path = request_data_by_id(env_path, id_nb)
-    print(f"Path for the picture(s): {pic_path}")
+    # print(f"Path for the picture(s): {pic_path}")
 
     # Path of the first 3 images
     id_array = np.arange(start=0, stop=3, step=1)
     pic_path_list = request_data_by_id(env_path, id_array)
-    print(f"Path list: {pic_path_list}")
+    # print(f"Path list: {pic_path_list}")
 
     # Open the image with PIL
     pic = Image.open(pic_path)
@@ -302,24 +373,68 @@ if __name__ == "__main__":
 
     # Testing flatten on several images
     flat_several = flatten_img(pic_path_list)
-    print(type(flat_several))
     print(f"Several image tensor size: {flat_several.size()}")
     print(f"Dim of the tensor: {flat_several.dim()}")
 
     # Testing deflatten
     deflat_img = deflatten_img(flat_encoded_tensor, encoded_img.size())
-    # deflat_img.show()
+    deflat_img.show()
 
     # Testing deflatten on several images
     deflat_several = deflatten_img(flat_several, encoded_img.size())
-    for img in deflat_several:
-        img.show()
+    # for img in deflat_several:
+    #     img.show()
 
-    # # Testing mutation on flat encoded image
-    # mut_img = mutate_img(flat_encoded_tensor, mut_type="uniform")
+    # Testing mutations on one flat encoded tensor
+    # Adding white noise on every pixel
+    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.01, noise=0.5, scale='total', mode='add')
     # deflat_img = deflatten_img(mut_img, encoded_img.size())
     # deflat_img.show()
-    #
-    # mut_img = mutate_img(flat_encoded_tensor, mut_type="random")
+    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.7, noise=0.5, scale='total', mode='add')
     # deflat_img = deflatten_img(mut_img, encoded_img.size())
     # deflat_img.show()
+
+    # Adding white noise on some pixel
+    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.01, noise=0.8, scale='partial', mode='add')
+    # deflat_img = deflatten_img(mut_img, encoded_img.size())
+    # deflat_img.show()
+    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.5, noise=0.8, scale='partial', mode='add')
+    # deflat_img = deflatten_img(mut_img, encoded_img.size())
+    # deflat_img.show()
+
+    # Reconstructing tensor
+    # Totally
+    # mut_img = mutate_img(flat_encoded_tensor, mode='reconstruct', scale='total')
+    # deflat_img = deflatten_img(mut_img, encoded_img.size())
+    # deflat_img.show()
+
+    # Partially
+    # mut_img = mutate_img(flat_encoded_tensor, mode='reconstruct', scale='partial')
+    # deflat_img = deflatten_img(mut_img, encoded_img.size())
+    # deflat_img.show()
+
+    # Testing mutations on several flat encoded tensors
+    # Adding white noise on some pixel
+    # mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='partial')
+    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
+    # for img in deflat_sev:
+    #     img.show()
+
+    # Adding white noise on some pixel
+    # mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='total')
+    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
+    # for img in deflat_sev:
+    #     img.show()
+
+    # Reconstructing tensor
+    # Totally
+    # mut_several = mutate_img(flat_several, mode='reconstruct', scale='total')
+    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
+    # for img in deflat_sev:
+    #     img.show()
+
+    # Partially
+    mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='total')
+    deflat_sev = deflatten_img(mut_several, encoded_img.size())
+    for img in deflat_sev:
+        img.show()
