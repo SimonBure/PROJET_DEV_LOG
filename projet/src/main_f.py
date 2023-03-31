@@ -272,6 +272,11 @@ def f2(env_path):
 def f3(env_path, img_list):
     """
     Création de la fenetre 3 depuis l'execution de openf3
+    
+    parameters : 
+    ------------
+    env_path : 
+    img_list : une liste contenant les chemins de chaque image dans l'environnement
     """
     f3_img = Tk()
     w, h = f3_img.winfo_screenwidth(), f3_img.winfo_screenheight()
@@ -339,7 +344,7 @@ def f3(env_path, img_list):
                 stop = TRUE
             if (checkbfinal[5]==1):
                 finale = TRUE
-        return stop, index, finale
+        return stop, finale, index
 
 
     def chemin_choix(index_choix):
@@ -369,9 +374,13 @@ def f3(env_path, img_list):
         """
         refresh_3 = verif_rep_3()
         pass_4 = verif_rep_1()
-        i_fin=pass_4[1]
+        i_fin=pass_4[2]
 
-        if (refresh_3[0]==TRUE):
+    
+
+        ####### SI ON REFRESH LA PAGE ########
+        if (refresh_3[0]==TRUE and pass_4[1]==FALSE):
+           
             # - boucle de temps : à voir combien de temps prend l'algo gen, mais AC rapide
             # - si boucle de temps ne marche pas, faire un break de temps de 30 sec
             # - sur cette boucle de temps, appeler à un intervalle dt une fonction de l'AC qui renvoie un
@@ -384,18 +393,32 @@ def f3(env_path, img_list):
             #directory_test = utils.get_path(env_path, "Encoder")
             #path1 = os.path.join(directory_test, "base_im.png")
             ## le seul souci : il faudrait que les 5 images de l'autoencodeur aient toujours le meme nom --> ok, se mettre d'accord du nom avec Jesus
-
-           # img_refresh = path1
-           # img_list[0]=path1
-           # f3_img.destroy()
-            openf3(env_path, img_list)
-        elif (pass_4[0]==TRUE and pass_4[2]==TRUE):
+            # img_refresh = path1
+            # img_list[0]=path1
+           
+           #### récupérer les 5 nouvelles images de l'autoencodeur
+           # POUR QUE CA FONCTIONNE, il faut img0.jpg à img4.jpg dans env/Auto_encoder/gen_img
+           chemin_dossier = utils.get_path(env_path, 'gen_img')
+            
+           # joindre les path et les noms des images, et écraser les anciens path d'image_list par les nouveaux
+           # attention les images sont numérotées de 0 à 4
+           for i in range(len(img_list)):
+               nom_img_ac = "img"+str(i)+".jpg"
+               img_list[i]=os.path.join(chemin_dossier, nom_img_ac)
+               
+           f3_img.destroy()
+           openf3(env_path, img_list)
+            
+        
+        ####### SI PASSE A LA P.4 ########
+        elif (pass_4[0]==TRUE and pass_4[1]==TRUE):
             path_final_img = img_list[i_fin]
             f3_img.destroy()
             f4(env_path, path_final_img)
-        elif((pass_4[0]==FALSE and refresh_3[0]==FALSE)or(pass_4[2]==FALSE and refresh_3[0]==TRUE)or(pass_4[0]==TRUE and pass_4[2]==FALSE)or(pass_4[0]==FALSE and pass_4[2]==TRUE)):
-        # A VERIFIER si on n'a pas 1 ou 3 images, ou qu'on a coché mais qu'on en a 3, ou qu'on en a une mais pas finale, ou finale pas mais qu'une
-            showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image et cocher la case "Finale" ou sélectionner 3 images''')
+            
+        ####### S'IL Y A UN PB DANS LES CHOIX ########    
+        elif((pass_4[0]==FALSE and refresh_3[0]==FALSE)or(pass_4[0]==TRUE and pass_4[1]==FALSE)or(pass_4[0]==FALSE and pass_4[1]==TRUE)or(refresh_3[0]==TRUE and pass_4[1]==TRUE)):
+             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image et cocher la case "Finale" ou sélectionner 3 images''')
 
     def aidef3():
         """
