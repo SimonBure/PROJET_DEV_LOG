@@ -10,32 +10,38 @@ import utils
 import database
 import utils
 
-################################################# FENETRE 1 #########################################################
+################################################# WINDOW 1 #########################################################
 def f1(env_path):
 
     """
-    Création de la fenetre 1 depuis l'execution de main.py
+    Creates the window 1 from the execution of main.py 
+    
+    Parameter 
+    ---------
+    env_path : <string> : the relative path to the environment (à vérifier ?)
+        
     """
-
-    f1_acc = Tk()
-
-    w, h = f1_acc.winfo_screenwidth(), f1_acc.winfo_screenheight()
-    f1_acc.geometry("%dx%d" % (w, h))
-    f1_acc.configure(bg='white')
-
 
     def aide():
         """
-        Evenement associé au bouton Help: affichage d'un panneau aide suite à un clic sur le boutton Aide
+        Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
         showinfo('Aide', 'Sprint 1 : interface graphique minimaliste capable de récupérer et afficher des images de la base de données')
 
     def openf2():
         """
-        Evenement associé au boutton Start: destruction de la fenetre courante et ouverture de la fenetre 2
+        Event linked to the "Commencer" button : destroys the current window and opens the window 2 
         """
         f1_acc.destroy()
         f2(env_path)
+        
+    # creation of the window 
+    
+    f1_acc = Tk()
+
+    w, h = f1_acc.winfo_screenwidth(), f1_acc.winfo_screenheight()
+    f1_acc.geometry("%dx%d" % (w, h))
+    f1_acc.configure(bg='white')
 
     logo_path = utils.get_path(env_path, "Interface")
     logo_path = os.path.join(logo_path, "idkit.png")
@@ -61,61 +67,61 @@ def f1(env_path):
 
 
 
-
     f1_acc.mainloop()
 
 
-################################################# FENETRE 2 #########################################################
+################################################# WINDOW 2 #########################################################
 
 def f2(env_path):
 
     """
-    Création de la fenetre 2 depuis l'execution de openf2
+    Creates the window 1 from the execution of openf2 
+    
+    Parameter 
+    ---------
+    env_path : <string> : the relative path to the environment (à vérifier ?)
     """
-
-    f2_flr = Tk()
-    w, h = f2_flr.winfo_screenwidth(), f2_flr.winfo_screenheight()
-    f2_flr.geometry("%dx%d" % (w, h))
 
     def recup_RB_genre():
         """
-        Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Button genre
+        Event : get the value linked to the user's input for the widget Button 'Genre'
         Returns
         -------
-        <int>
+        rbg : <int> : 1 if woman, 2 if man, 0 if unknown
         """
         rbg = vari.get()
         return(rbg)
 
     def recup_RB_age():
         """
-        Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Button age
+        Event : get the value linked to the user's input for the widget Button 'Age'
         Returns
         -------
-        <int>
+        rba : <int> : 3 if young, 4 if old, 0 if unknown
         """
         rba = valeur.get( )
         return(rba)
 
     def recup_valCBX(menucombo):
         """
-        Evenement : recuperer la valeur saisie par l'utilisateur dans le widget Combobox cheveux
-        Parametrs :
-        -------
-        Le
-        Returns :
-        -------
-        <string>
+        Event : get the value linked to the user's input for the widget Button 'Age'
+        Parameters
+        ----------
+        The assiociated combobox
+        Returns
+        ----------
+        cb : <string> : the value chosen by the user
         """
         cb = menucombo.get()
         return cb
 
     def recup_valCkB():
         """
-        Evenement : recuperer la valeur saisie par l'utilisateur dans le widget CheckButton accessoires
+        Event : get the value linked to the user's input for the checkButtons 'Accessoires'
         Returns
         -------
-        <list>
+        liste_acc : <list of int> : for each value, 1 if the checkbutton was selected, 0 if not
+
         """
         lunet = vlun.get()
         mous = vmous.get()
@@ -127,10 +133,10 @@ def f2(env_path):
 
     def verif_reponses():
         """
-        Verifier que tous les champs ont été remplis par l'utilisateur
+        Verify that all the questions were answered by the user
         Returns
         -------
-        <boolean>
+        stop : <boolean> : True if one of the questions was left unaswered answered, False if all were answered
         """
         g=recup_RB_genre()
         a=recup_RB_age()
@@ -145,10 +151,10 @@ def f2(env_path):
 
     def liste_db():
         """
-        Renvoie un array 2D correspondant à la sélection des paramètres par l'utilisateur
+        Returns a 2D array that corresponds to the selection of the parameters by the user
         Returns
         -------
-        <2D array>
+        liste_acc : <2D array> : containing the values associated to the inputs of the user : 1 if present, 2 if not, 0 if unkown
         """
         g=recup_RB_genre()
         a=recup_RB_age()
@@ -157,23 +163,26 @@ def f2(env_path):
 
         liste_acc = [['Genre', 'Age', "Cheveux", "Lunettes", "Moustache", "Barbe"],[0,0,0,0,0,0]]
 
+        # test sexe
         if (g=='1'): # 0 : nsp, 1 : femme, 2 : homme
             liste_acc[1][0]=1
         elif (g=='2'):
             liste_acc[1][0]=2
 
+        # test âge
         if (a=='3'): # 0 : nsp, 1 : jeune, 2 : vieux
             liste_acc[1][1]=1
         elif (a=='4'):
             liste_acc[1][1]=2
 
+        # test cheveux
         list_cheveux=["Noirs", "Blonds","Bruns","Gris", "Chauve", "Autre"]
         # 0 : ne sait pas, noirs : 1, blonds : 2, bruns : 3, gris : 4, chauve : 5, Autre : 6
         for i in range(len(list_cheveux)):
             if (list_cheveux[i] == c):
                 liste_acc[1][2]=i+1
 
-        # accessoires : dans l'ordre des cases 3 à 6, 0 : ne sait pas ou non présent, 1 : présent
+        # test accessoires : dans l'ordre des cases 3 à 6; 0 : ne sait pas ou non présent, 1 : présent
         for i in range(3,5):
             if (acc[i-3] == 1): # Si acc est choisi on le met dans la requête
                 liste_acc[1][i]=1
@@ -192,21 +201,29 @@ def f2(env_path):
 
     def openf3(env_path):
         """
-        Evenement associé au bouton Envoyer: destruction de la fenetre courante et ouverture de la fenetre 3
-        """
+        Event linked to the "Envoyer" button : destroys the current window and opens the window 3         """
 
         test = verif_reponses()
         ans_user = liste_db()
-            # Retrieve 5 images
+        
+        # Retrieve 5 images according to the aswers
         array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][3], ans_user[1][4], ans_user[1][5])
         img_list = database.get_5_img(env_path, array_metadata) # liste de path
 
+        # if some questions were not answered, an error pops up and the user must complete the questions
         if test==FALSE:
             f2_flr.destroy()
             f3(env_path, img_list)
         elif(test==TRUE):
             showinfo('ATTENTION', 'Veuillez remplir tous les champs')
 
+
+    # creation of the window
+    
+    f2_flr = Tk()
+    w, h = f2_flr.winfo_screenwidth(), f2_flr.winfo_screenheight()
+    f2_flr.geometry("%dx%d" % (w, h))
+    f2_flr.configure(bg='white')
 
     boutSend=Button(f2_flr, text="Envoyer", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= lambda : openf3(env_path))
     boutSend.place(anchor=tk.N, relheight=0.07, relwidth=0.10, relx=0.5, rely= 0.7)
@@ -218,9 +235,9 @@ def f2(env_path):
     labelSEXE.pack()
 
     vari = StringVar()
-    bF = Radiobutton(f2_flr, text="Femme", font='Helvetica 12', variable=vari, value=1, command=recup_RB_genre)
-    bH = Radiobutton(f2_flr, text="Homme", font='Helvetica 12', variable=vari, value=2, command=recup_RB_genre)
-    bg_nsp = Radiobutton(f2_flr, text="Ne sais pas", font='Helvetica 12', variable=vari, value=0, command=recup_RB_genre)# à laisser pour qu'on puisse être sûrs qu'on a tout rempli
+    bF = Radiobutton(f2_flr, text="Femme", font='Helvetica 12', variable=vari, value=1, command=recup_RB_genre, bg = 'white')
+    bH = Radiobutton(f2_flr, text="Homme", font='Helvetica 12', variable=vari, value=2, command=recup_RB_genre, bg = 'white')
+    bg_nsp = Radiobutton(f2_flr, text="Ne sais pas", font='Helvetica 12', variable=vari, value=0, command=recup_RB_genre, bg = 'white')# à laisser pour qu'on puisse être sûrs qu'on a tout rempli
     bF.pack()
     bH.pack()
     bg_nsp.pack()
@@ -230,9 +247,9 @@ def f2(env_path):
     labelAGE.pack()
 
     valeur = StringVar()
-    bJ = Radiobutton(f2_flr, text="Jeune", font='Helvetica 12', variable=valeur, value=3, command=recup_RB_age)
-    bA = Radiobutton(f2_flr, text="Âgé", font='Helvetica 12', variable=valeur, value=4, command=recup_RB_age)
-    bA_nsp = Radiobutton(f2_flr, text="Ne sais pas", font='Helvetica 12', variable=valeur, value=0, command=recup_RB_age)# à laisser pour qu'on puisse être sûrs qu'on a tout rempli
+    bJ = Radiobutton(f2_flr, text="Jeune", font='Helvetica 12', variable=valeur, value=3, command=recup_RB_age, bg = 'white')
+    bA = Radiobutton(f2_flr, text="Âgé", font='Helvetica 12', variable=valeur, value=4, command=recup_RB_age, bg = 'white')
+    bA_nsp = Radiobutton(f2_flr, text="Ne sais pas", font='Helvetica 12', variable=valeur, value=0, command=recup_RB_age, bg = 'white')# à laisser pour qu'on puisse être sûrs qu'on a tout rempli
     bJ.pack()
     bA.pack()
     bA_nsp.pack()
@@ -252,11 +269,11 @@ def f2(env_path):
     vnsp = IntVar()
     labelChoix = tk.Label(f2_flr, text = " Veuillez cocher les accessoires particuliers:", font='Helvetica 12 bold')
     labelChoix.pack()
-    boutLun = Checkbutton(f2_flr, text="Lunettes", font='Helvetica 12', variable=vlun, onvalue=1, offvalue=0, command = recup_valCkB)
-    boutMoust = Checkbutton(f2_flr, text="Moustache", font='Helvetica 12', variable=vmous, onvalue=1, offvalue=0, command = recup_valCkB)
-    boutbrd = Checkbutton(f2_flr, text="Barbe", font='Helvetica 12', variable=vbrd, onvalue=1, offvalue=0, command = recup_valCkB)
-    boutauc = Checkbutton(f2_flr, text="Aucun", font='Helvetica 12', variable=vauc, onvalue=1, offvalue=0, command = recup_valCkB)
-    boutnsp = Checkbutton(f2_flr, text="Ne sais pas", font='Helvetica 12', variable=vnsp, onvalue=1, offvalue=0, command = recup_valCkB)
+    boutLun = Checkbutton(f2_flr, text="Lunettes", font='Helvetica 12', variable=vlun, onvalue=1, offvalue=0, command = recup_valCkB, bg = 'white')
+    boutMoust = Checkbutton(f2_flr, text="Moustache", font='Helvetica 12', variable=vmous, onvalue=1, offvalue=0, command = recup_valCkB, bg = 'white')
+    boutbrd = Checkbutton(f2_flr, text="Barbe", font='Helvetica 12', variable=vbrd, onvalue=1, offvalue=0, command = recup_valCkB, bg = 'white')
+    boutauc = Checkbutton(f2_flr, text="Aucun", font='Helvetica 12', variable=vauc, onvalue=1, offvalue=0, command = recup_valCkB, bg = 'white')
+    boutnsp = Checkbutton(f2_flr, text="Ne sais pas", font='Helvetica 12', variable=vnsp, onvalue=1, offvalue=0, command = recup_valCkB, bg = 'white')
 
     boutLun.pack()
     boutMoust.pack()
@@ -267,28 +284,25 @@ def f2(env_path):
 
     f2_flr.mainloop()
 
-################################################# FENETRE 3 #########################################################
+################################################# Window 3 #########################################################
 
 def f3(env_path, img_list):
     """
-    Création de la fenetre 3 depuis l'execution de openf3
+    Creates the window 3 from the execution of openf3
     
-    parameters : 
+    Parameters : 
     ------------
-    env_path : 
-    img_list : une liste contenant les chemins de chaque image dans l'environnement
+    env_path : <string> : the relative path to the environment (à vérifier ?)
+    img_list : a list containing the paths of each image to display (from the database, or the auto-encoder)
     """
-    f3_img = Tk()
-    w, h = f3_img.winfo_screenwidth(), f3_img.winfo_screenheight()
-    f3_img.geometry("%dx%d" % (w, h))
 
 
     def recup_valCheckB():
         """
-        Evenement : recuperer la valeur saisie par l'utilisateur dans le widget CheckButton image
+        Event : gets the index of the images selected by the user in the CheckButton widgets 
         Returns
         -------
-        <list> : ensemble des valeurs des checkbuttons après que l'utilisateur ait fait son choix
+        <list> : containing ensemble des valeurs des checkbuttons après que l'utilisateur ait fait son choix
         """
         repb1 = vb1.get()
         repb2 = vb2.get()
@@ -298,15 +312,16 @@ def f3(env_path, img_list):
         rep_finale = vfinal.get()
         rep_tot = [repb1, repb2, repb3, repb4, repb5, rep_finale]
         return rep_tot
+    
 
     def verif_rep_3():
         """
-        Verifier si 3 images ont étées choisies par l'utilisateur
+        Checks if 3 images where chosen by the user 
 
         Returns
         -------
-        stop : <boolean> : TRUE si l'utilisateur a bien choisi 3 images
-        index_choix : <list of int> : liste contenant les index des images choisies par l'utilisateur
+        stop : <boolean> : TRUE if the user chose exactly 3 images
+        index_choix : <list of int> : list containg the indexes of the chosen images 
         """
         checkbut=recup_valCheckB()
         compte = 0
@@ -319,16 +334,17 @@ def f3(env_path, img_list):
         if (compte==3):
             stop = TRUE
         return stop, index_choix
+    
 
     def verif_rep_1():
         """
-        Verifier qu'une seule image a étée choisie par l'utilisateur, et laquelle.
+        Checks if 1 image was chosen by the user, and which one
 
         Returns
         -------
-        stop : <boolean> : TRUE si l'utilisateur a bien choisi 1 seule image
-        final : <boolean> : TRUE si l'utilisateur a bien coché "final"
-        index : <int> : correspond à l'index de l'image choisie par l'utilisateur
+        stop : <boolean> : TRUE if the user has chosen exactly 1 image 
+        final : <boolean> : TRUE if the user check the "final" checkButton 
+        index : <int> : the index of the selected image 
         """
         checkbfinal=recup_valCheckB()
         index = 0
@@ -349,10 +365,13 @@ def f3(env_path, img_list):
 
     def chemin_choix(index_choix):
         """
-        Récuperer les chemins des images sélectionnées par l'utilisateur pour les envoyer à l'algorithme génétique
+        Gets the paths of all the selected images 
+        Parameter
+        -------
+        index_choix : <list> : the list containing the indexes of the selected images
         Returns
         -------
-        liste_chemin : <list> : liste contenant les chemins des 3 images sélectionnées
+        liste_chemin : <list> : list containg the paths 
         """
         liste_chemin = []
         for i in range(img_list):
@@ -363,14 +382,20 @@ def f3(env_path, img_list):
 
     def openf3(env_path, img_list):
         """
-        Refresh la fenetre courante
+        Opens the current window (f3) : gives a illusion of refreshing the window
+        Parameters
+        --------
+        env_path : <string> : the relative path to the environment (à vérifier ?)
+        img_list : <list> : the list containing the paths towards the images to display
+        
         """
         f3(env_path, img_list)
 
+
     def openf4(env_path):
         """
-        Evenement associé au bouton Valider: selon les résultats des fonctions verif_rep_1 et
-        verif_rep_3, destruction de la fenetre courante et ouverture de la fenetre 4 ou actualisation de la fenetre 3
+        Event  linked to the "Valider" button : depending on the number of images the user selected, 
+        refreshes the window 3 or opens the window 4 
         """
         refresh_3 = verif_rep_3()
         pass_4 = verif_rep_1()
@@ -378,7 +403,7 @@ def f3(env_path, img_list):
 
     
 
-        ####### SI ON REFRESH LA PAGE ########
+        # if 3 images were selected : open f3 and display the new images produced by the genetic algorithm
         if (refresh_3[0]==TRUE and pass_4[1]==FALSE):
            
             # - boucle de temps : à voir combien de temps prend l'algo gen, mais AC rapide
@@ -396,60 +421,60 @@ def f3(env_path, img_list):
             # img_refresh = path1
             # img_list[0]=path1
            
-           #### récupérer les 5 nouvelles images de l'autoencodeur
-           # POUR QUE CA FONCTIONNE, il faut img0.jpg à img4.jpg dans env/Auto_encoder/gen_img
+           # get the 5 images from the autoencoder
+           ######  /!\/!\/!\ POUR QUE CA FONCTIONNE, il faut img0.jpg à img4.jpg dans env/Auto_encoder/gen_img
            chemin_dossier = utils.get_path(env_path, 'gen_img')
             
-           # joindre les path et les noms des images, et écraser les anciens path d'image_list par les nouveaux
-           # attention les images sont numérotées de 0 à 4
+           ######  /!\/!\/!\ attention les images sont numérotées de 0 à 4
+           # replace the old paths by the new
            for i in range(len(img_list)):
                nom_img_ac = "img"+str(i)+".jpg"
                img_list[i]=os.path.join(chemin_dossier, nom_img_ac)
                
            f3_img.destroy()
-           openf3(env_path, img_list)
-            
+           openf3(env_path, img_list)         
         
-        ####### SI PASSE A LA P.4 ########
+        #if 1 image was selected : close f3 and open f4
         elif (pass_4[0]==TRUE and pass_4[1]==TRUE):
             path_final_img = img_list[i_fin]
             f3_img.destroy()
             f4(env_path, path_final_img)
             
-        ####### S'IL Y A UN PB DANS LES CHOIX ########    
+        # if the user selected the images incorrectly : display a message of error    
         elif((pass_4[0]==FALSE and refresh_3[0]==FALSE)or(pass_4[0]==TRUE and pass_4[1]==FALSE)or(pass_4[0]==FALSE and pass_4[1]==TRUE)or(refresh_3[0]==TRUE and pass_4[1]==TRUE)):
-             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image et cocher la case "Finale" ou sélectionner 3 images''')
+             showinfo('ATTENTION', '''Veuillez ne sélectionner qu'une image et cocher la case "Finale" ou sélectionner 3 images. ''')
 
+                      
     def aidef3():
         """
-        Evenement associé au bouton Help: affichage d'un panneau aide suite à un clic sur le boutton Aide
+        Event linked to the "Aide" button : display an "Aide" pannel when the user clicks on the button 
         """
-        showinfo('Aide', """Veuillez choisir les images correspondant le mieux au suspect, parmi les images proposées. Choisissez les 3 images les plus exactes jusqu'à ce que l'une d'elles vous satisfasse. Pour sélectionner l'image finale, veuillez cocher la case "Finale" """)
+        showinfo('Aide', """Veuillez choisir les images correspondant le mieux au suspect parmi les images proposées. Choisissez les 3 images les plus exactes jusqu'à ce que l'une d'elles vous satisfasse. Pour sélectionner l'image finale, veuillez cocher la case "Finale" poru confirmer votre choix. """)
+
+
+    # creation of the 3rd window
+
+    f3_img = Tk()
+    w, h = f3_img.winfo_screenwidth(), f3_img.winfo_screenheight()
+    f3_img.geometry("%dx%d" % (w, h))
+    f3_img.configure(bg='white')
 
 
     boutHelp = Button(text='Aide', command=aidef3, font='Arial 14',borderwidth=4, bg = "#D2B48C")
     boutHelp.place(anchor=tk.E, relheight=0.1, relwidth=0.1, relx=0.6, rely= 0.75)
 
     vfinal = IntVar()
-    checkbfinal = Checkbutton(f3_img, text="Finale", font='Helvetica 10', variable=vfinal, onvalue=1, offvalue=0)
+    checkbfinal = Checkbutton(f3_img, text="Finale", font='Helvetica 10', variable=vfinal, onvalue=1, offvalue=0, bg = 'white')
     checkbfinal.place(anchor=tk.E, relheight=0.1, relwidth=0.1, relx=0.6, rely= 0.65)
 
-    """
-    # Retrieve an image created by the encoder
-    directory_test = utils.get_path(env_path, "Encoder")
-    print(directory_test)
-    path1 = os.path.join(directory_test, "base_im.png")
-    print(path1)
-    path2 = os.path.join(directory_test, "recon_im.png")
-    """
 
-
-    # Créer une fenêtre d'erreur :
+    # Creation of an error message if less than 5 images can fit the user's criteres 
     if img_list == 0 :
         showinfo('ATTENTION', '''Il n'existe pas assez d'images correspondantes à cette sélection dans la base de données. Veuillez élargir vos critères.''')
         f3_img.destroy()
         f2(env_path)
-        # Fenêtre d'erreur
+       
+        # ligne à garder ?
         a = 0 # sert à rien mais pour ne pas avoir de problèmes d'indentation
 
 
@@ -494,7 +519,7 @@ def f3(env_path, img_list):
     label5 = Label(frame5, image = new_image5)
     label5.pack()
 
-    labelChoix = tk.Label(f3_img, text = " Veuillez choisir la ou les images correspondant le mieux au suspect. Pour plus de détails, cliquez sur le bouton Aide ", font='Helvetica 16 bold')
+    labelChoix = tk.Label(f3_img, text = " Veuillez choisir la ou les images correspondant le mieux au suspect. Pour plus de détails, cliquez sur le bouton Aide. ", font='Helvetica 16 bold', bg = 'white')
     labelChoix.pack()
 
     vb1 = IntVar()
@@ -521,37 +546,49 @@ def f3(env_path, img_list):
 
     f3_img.mainloop()
 
-################################################# FENETRE 4 #########################################################
+################################################# Window 4 #########################################################
 
 def f4(env_path, path_final_img):
     """
-    Création de la fenetre 4 depuis l'execution de openf4
+    Creates the window 4 from the execution of openf4
+    Parameters : 
+    ------------
+    env_path : <string> : the relative path to the environment (à vérifier ?)
+    path_final_img :the relative path of the final image selected by the user 
     """
-    f4_final = Tk()
-    w, h = f4_final.winfo_screenwidth(), f4_final.winfo_screenheight()
-    f4_final.geometry("%dx%d" % (w, h))
+
 
     def export():
         """
-        DOCSTRING A MAJ
-        Evenement associé au menu Exporter: export de l'image en format JGP
-        L'export se fait par défaut dans l'environnement, ou l'utilisateur entre un chemin d'accès
+        Event linked to the "Exporter" menu option
+        Opens the window 5 where the user can input the values for the export
         """
         f5(env_path, img_f5)
 
+
     def quit():
         """
-        Evenement associé au menu Quitter: destruction de la fenetre courante
+        Event linked to the "Quitter" menu option : destruction of the current window 
         """
         f4_final.destroy()
 
+
     def openf1(env_path):
         """
-        Evenement associé au menu Nouveau: destruction de la fenetre courante et ouverture de la fenetre 1
+        Event linked to the "Nouveau" menu option : destroys  of the current window and opens the window 1 
+        Parameters : 
+        ------------
+        env_path : <string> : the relative path to the environment (à vérifier ?)
         """
         f4_final.destroy()
         f1(env_path)
 
+
+    # creation of the window 4
+    f4_final = Tk()
+    w, h = f4_final.winfo_screenwidth(), f4_final.winfo_screenheight()
+    f4_final.geometry("%dx%d" % (w, h))
+    f4_final.configure(bg='white')
 
     labelexpl = Label(f4_final, text="Voici l'image finale. Vous pouvez utiliser le menu en onglet pour l'exporter, recommencer une session ou quitter l'application.", bg="white", font = "Arial 14 italic")
     labelexpl.pack()
@@ -566,12 +603,19 @@ def f4(env_path, path_final_img):
     menu1.add_command(label="Quitter", command=quit)
     menubar.add_cascade(label="Fichier", menu=menu1)
 
-
+    '''
     frame_final = Frame(f4_final, width=400, height=400)
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
     img_f5 = Image.open(path_final_img)
     image_finale = ImageTk.PhotoImage(img_f5)
-    print(type(image_finale))
+    label_final = Label(frame_final, image = image_finale)
+    label_final.pack()
+    '''
+    frame_final = Frame(f4_final, width=400, height=400)
+    frame_final.place(anchor='center', relx=0.5, rely=0.45)
+    img_f5 = Image.open(path_final_img)
+    resized_image= img_f5.resize((600,600), Image.ANTIALIAS)
+    image_finale = ImageTk.PhotoImage(img_f5)
     label_final = Label(frame_final, image = image_finale)
     label_final.pack()
 
@@ -591,7 +635,9 @@ def f5(env_path, img_f5):
 
     def export():
        '''
-       DOCSTRING A FAIRE
+       Exports the final image selected by the user. The images is exported in the directory "Result" under the name "image_finale".
+       If the user enters a specific path or name, it is taken into account for the export. If the path or the name are incorrect, a message of error pops up.
+       The image can only be exported in ".jpg" format
        '''
        chemin = T1.get("1.0","end-1c")
        nom    = T2.get("1.0","end-1c")
@@ -608,6 +654,7 @@ def f5(env_path, img_f5):
        path_defaut = chemin
        img_save = img_f5
        
+       # export if possible
        try: 
            img_save.save(os.path.join(path_defaut, nom_final), "JPEG" )
            showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou fermer le logiciel à partir de l'onglet menu de la fenêtre précédente.""")
@@ -617,7 +664,7 @@ def f5(env_path, img_f5):
        f5_xprt.destroy()
         
     
-    # préciser le format à l'utilisateur (mettre un exemple...)
+    ##### /!\/!\/!\ préciser le format à l'utilisateur (mettre un exemple...)
     txt1 = Label(f5_xprt, text="Chemin de sauvegarde", bg="white", font = "Arial 14 italic")
     txt1.pack()
     T1 = Text(f5_xprt, height = 2, width = 52)
@@ -627,6 +674,7 @@ def f5(env_path, img_f5):
     txt2.pack()
     T2 = Text(f5_xprt, height = 2, width = 52)
     T2.pack()
+    
 
     boutSend=Button(f5_xprt, text="OK", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= export)
     boutSend.place(anchor=tk.N, relheight=0.3, relwidth=0.3, relx=0.5, rely= 0.7)
