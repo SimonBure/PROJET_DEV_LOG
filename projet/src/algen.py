@@ -4,7 +4,7 @@ import numpy as np
 import torch.nn as nn
 import torch
 from PIL import Image
-from copy import deepcopy
+from PIL import ImageFilter
 from torch import Tensor
 from torchvision import transforms
 
@@ -15,15 +15,14 @@ from projet import utils
 
 
 def flatten_img(img_path: str | list[str]) -> Tensor:
-    # TODO Update doc
-    """Uses the path stored in img_path to create a Tensor or a ndarray
-    in a convenient shape for all the future modifications.
-    This function can also encode the image if needed
+    """Uses the path stored in img_path to create a Tensor in a smaller
+    dimension for the future mutations and crossing-overs.
+    This function also encodes the image retrieved from the given path.
 
     Parameters
     ----------
     img_path: str or list[str]
-        Path or paths of the images to be retrieved
+        Path or paths of the images to retrieve
 
     Returns
     -------
@@ -33,14 +32,15 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
         in one single Tensor
 
     >>>path = "./projet/env/Database/img_dataset/celeba/img_align_celeba/000021.jpg"
+    >>>Image.open(path).size
     >>>flatten_img(path).size()
-    torch.Size([3, 38804])
+    torch.Size([64, 324])
 
     >>>path_list = ['./projet/env/Database/img_dataset/celeba/img_align_celeba/000001.jpg',
     >>>             './projet/env/Database/img_dataset/celeba/img_align_celeba/000002.jpg',
     >>>             './projet/env/Database/img_dataset/celeba/img_align_celeba/000003.jpg']
     >>>flatten_img(path_list).size()
-    torch.Size([3, 3, 38804])
+    torch.Size([3, 64, 324])
     """
     # Path where to find a trained autoencoder
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
@@ -99,7 +99,28 @@ def flatten_img(img_path: str | list[str]) -> Tensor:
 
 def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
         -> Image.Image | list[Image.Image]:
-    # TODO Docstring here
+    """Resize a Tensor containing one or several encoded images into the
+    specified size then decode it using the trained model.
+
+    Parameters
+    ----------
+    flat_tensor: torch.Tensor
+        Tensor containing the encoded version of one or several images.
+    base_encoded_dim: torch.Size
+        Size of the tensor before going into flatten_img function.
+
+    Returns
+    -------
+    decoded_img: PIL.Image
+        Decoded version of the image
+    or
+    img_list: list[PIL.Image]
+        Decoded versions of the images
+
+    >>>tensor = torch.randn((64, 324))
+    >>>deflatten_img(tensor, torch.Size((64, 18, 18))).size
+    (160, 160)
+    """
     # Path where to find a trained autoencoder
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
@@ -122,7 +143,11 @@ def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
 
             decoded_img = ae.decode(autoencoder, unflat_img)
 
-            img_list[i] = decoded_img
+            # Enhancing the image
+            filter = ImageFilter.SMOOTH  # SHARPEN, SMOOTH, EDGE_ENHANCE are quite good
+            enhanced_img = decoded_img.filter(filter)
+
+            img_list[i] = enhanced_img
 
         return img_list
 
@@ -134,9 +159,9 @@ def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
 def mutate_img(tensor_encoded: Tensor, mutation_rate: float = 0.05,
                noise: float = 1, mode: str = 'add',
                scale: str = 'partial') -> Tensor:
-    # TODO Update doc
-    """Slightly modifies a or several images given in a Tensor with
-    random noise.
+    """Slightly modifies a or several images given in a Tensor.
+    The modifications can be classic random noise or specific pixel
+    reconstruction according to the tensor mean and standard deviation.
 
     Parameters
     ----------
@@ -165,18 +190,30 @@ def mutate_img(tensor_encoded: Tensor, mutation_rate: float = 0.05,
         Image or images built on img_encoded with Gaussian random noise
         added to it.
 
-    >>>tensor = torch.randn((3, 3))
-    tensor([[-3.3558,  1.5579, -0.2904],
-        [-0.2572, -0.7410, -0.8748],
-        [ 1.2381, -0.4762,  0.3762]])
-    >>>mutate_img(tensor, scale='uniform')
-    tensor([[-3.6974,  1.9027, -0.6431],
-        [-0.0740,  0.5979, -1.3189],
-        [ 0.7544, -1.8443,  0.2005]])
-    >>>mutate_img(tensor, mutation_rate=0.4)
+    >>>a = torch.randn((3, 3))
+    tensor([[-0.2015,  0.4780,  1.1307],
+        [ 1.6018,  0.4684,  0.2649],
+        [ 1.0546,  1.3608,  0.6707]])
+    >>>mutate_img(a, mutation_rate=0.3, mode='add', scale='partial')
+    tensor([[-0.6087,  0.4780,  0.3646],
+        [ 1.6018, -0.0372,  0.2649],
+        [ 1.0546,  1.3608,  0.6707]])
+    >>>mutate_img(a, mode='add', scale='total')
     tensor([[-3.3558,  1.5579, -0.2904],
         [-0.2572, -0.7410, -0.8748],
         [ 1.8747, -0.3136,  0.4488]])
+    >>>b = torch.zeros((3, 3)) + 2
+    tensor([[ 3.5582,  4.3696,  1.3062],
+        [-0.6573,  3.4122,  1.5021],
+        [ 5.4977,  2.1273,  2.0095]])
+    >>>mutate_img(a, mode='reconstruct', scale='partial')
+    tensor([[ 4.7168,  4.3696,  1.3062],
+        [-0.6573,  3.4122,  1.5021],
+        [ 6.6994,  1.3877, -0.0979]])
+    >>>mutate_img(a, mode='reconstruct', scale='total')
+    tensor([[ 2.6608,  4.7125,  5.6431],
+        [ 1.2003,  0.7265, -0.4394],
+        [ 5.1246,  0.6733,  0.6792]])
     """
     if type(tensor_encoded) is Tensor:
         if tensor_encoded.dim() == 2:
@@ -240,7 +277,8 @@ def mutate_img(tensor_encoded: Tensor, mutation_rate: float = 0.05,
                         # Creating the gaussian noise
                         noise_tensor = noise * torch.randn(size=tensor.size()) + img_mut
 
-                        img_mut = torch.where(mut_proba_tensor < mutation_rate, noise_tensor, img_mut)
+                        img_mut = torch.where(mut_proba_tensor < mutation_rate,
+                                              noise_tensor, img_mut)
                     # Act on every value
                     elif scale == 'total':
                         # Adding white noise to all the tensor values
@@ -304,9 +342,24 @@ def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
     new_tensor: torch.Tensor
         Image or images on which the crossing-overs were performed
 
-    # TODO Test de code pour les crossing over
+    >>>a = torch.randn((2, 3, 3))
+    tensor([[[-0.1689, -1.0904, -0.6837],
+         [ 0.7088,  1.5056, -1.0236],
+         [ 0.9674, -1.3691,  0.3151]],
+        [[-1.3492,  1.3077, -0.3023],
+         [-0.2509,  0.4455, -1.4012],
+         [ 0.2429, -0.4856, -1.4789]]])
+    >>>crossing_over(a, crossing_rate=0.3)
+    tensor([[[-1.3492, -1.0904, -0.6837],
+         [ 0.7088,  1.5056, -1.4012],
+         [ 0.9674, -1.3691,  0.3151]],
+
+        [[-1.3492,  1.3077, -0.3023],
+         [-0.2509,  1.5056, -1.4012],
+         [ 0.9674, -1.3691,  0.3151]]])
     """
     if type(tensor_encoded) is Tensor:
+        global_tensor = torch.zeros(tensor_encoded.size())
         for i, tensor in enumerate(tensor_encoded):
             crossing_tensor = torch.rand(size=tensor.size())
 
@@ -314,10 +367,14 @@ def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
             other_ind = [k for k in range(tensor_encoded.size()[0]) if k != i]
             chosen_ind = np.random.choice(other_ind)
 
-            new_tensor = deepcopy(tensor)
+            chosen_tensor = tensor_encoded[chosen_ind]
             # Swapping pixels between tensors
-            new_tensor[crossing_tensor < crossing_rate] = tensor_encoded[chosen_ind][crossing_tensor < crossing_rate]
-            return new_tensor
+            new_tensor = torch.where(crossing_tensor < crossing_rate,
+                                     chosen_tensor, tensor)
+
+            global_tensor[i] = new_tensor
+
+        return global_tensor
 
     else:
         raise TypeError(f"Input should be of type or torch.Tensor \
@@ -332,8 +389,8 @@ if __name__ == "__main__":
     pic_path = request_data_by_id(env_path, id_nb)
     # print(f"Path for the picture(s): {pic_path}")
 
-    # Path of the first 3 images
-    id_array = np.arange(start=0, stop=3, step=1)
+    # Path of the 3 images
+    id_array = np.arange(start=3, stop=6, step=1)
     pic_path_list = request_data_by_id(env_path, id_array)
     # print(f"Path list: {pic_path_list}")
 
@@ -378,12 +435,12 @@ if __name__ == "__main__":
 
     # Testing deflatten
     deflat_img = deflatten_img(flat_encoded_tensor, encoded_img.size())
-    deflat_img.show()
+    # deflat_img.show()
 
     # Testing deflatten on several images
     deflat_several = deflatten_img(flat_several, encoded_img.size())
-    # for img in deflat_several:
-    #     img.show()
+    for img in deflat_several:
+        img.show()
 
     # Testing mutations on one flat encoded tensor
     # Adding white noise on every pixel
@@ -434,7 +491,14 @@ if __name__ == "__main__":
     #     img.show()
 
     # Partially
-    mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='total')
-    deflat_sev = deflatten_img(mut_several, encoded_img.size())
+    # mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='total')
+    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
+    # for img in deflat_sev:
+    #     img.show()
+
+    # Testing crossing-overs
+    crossed_tensors = crossing_over(flat_several, crossing_rate=0.6)
+    deflat_sev = deflatten_img(crossed_tensors, encoded_img.size())
     for img in deflat_sev:
         img.show()
+
