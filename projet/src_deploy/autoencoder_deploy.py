@@ -5,7 +5,8 @@ from torch.utils.data import Dataset
 import os
 from PIL import Image
 import database
-import torchvision.transforms.functional as TF
+import torchvision.transforms as T
+import utils
 
 
 class Autoencoder(nn.Module):
@@ -82,7 +83,7 @@ def load_dataset(width, height, nb_samples=-1, crop_images=False):
         for i, tensor in enumerate(samples):
             img = tensor
             img = img.permute(2, 0, 1)
-            img = TF.crop(img, top, left, crop_height, crop_width)
+            img = T.functional.crop(img, top, left, crop_height, crop_width)
             img = img.permute(1, 2, 0)
             cropped_samples[i] = img
         samples = cropped_samples
@@ -211,7 +212,7 @@ def fin(algogen_path, interface_path):
     Returns:
     True when the images are saved in the interface_path
     """
-      try:
+    try:
         # Load the mutated tensors created by the algogen
         tensors = utils.load_tensor(algogen_path)
 
