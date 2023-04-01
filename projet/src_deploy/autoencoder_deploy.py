@@ -36,6 +36,7 @@ class Autoencoder(nn.Module):
         x = self.decoder(x)
         return x
 
+
 class MyDataset(Dataset):
     def __init__(self, samples):
         self.samples = samples
