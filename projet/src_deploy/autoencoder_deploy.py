@@ -34,7 +34,7 @@ class Autoencoder(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
-    
+
 class MyDataset(Dataset):
     def __init__(self, samples):
         self.samples = samples
@@ -45,7 +45,7 @@ class MyDataset(Dataset):
     def __getitem__(self, idx):
         sample = self.samples[idx]
         return sample
-    
+
 
 def load_dataset(width, height, nb_samples=-1, crop_images=False):
     # define crop parameters
@@ -198,3 +198,34 @@ def decode(tensor,model):
     decoded = model.decoder(tensor)
     decoded_shor = decoded.squeeze(0)
     return (decoded_shor)
+
+
+def fin(algogen_path, interface_path):
+    """
+    Lets the interface know when the decoded images are saved in it's corresponding path
+    Calls the decode function, takes the tensors created by the algogen from the algogen_path
+    and saves them in the interface_path
+    Parameters:
+        algogen_path : path where the mutated tensors are stored
+        interface_path : path to store the images from the decoded tensors
+    Returns:
+    True when the images are saved in the interface_path
+    """
+      try:
+        # Load the mutated tensors created by the algogen
+        tensors = utils.load_tensor(algogen_path)
+
+        # Loop through the tensors and save each one as an image
+        for i in range(tensors.shape[0]):
+            # Get the i-th tensor
+            tensor = tensors[i]
+            decoded = decode(tensor, model)
+            transform = T.ToPILImage()
+            img = transform(decoded)
+            img.save(os.path.join(interface_path, f'img{i}.jpg'))
+
+        return True
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return False
