@@ -26,7 +26,20 @@ def f1(env_path):
         """
         Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
-        showinfo('Aide', 'Sprint 1 : interface graphique minimaliste capable de récupérer et afficher des images de la base de données')
+        showinfo('Aide', """
+                 Bienvenu dans Idkit, le logiciel de génération de portrait robot ! \n
+                 \n
+                 Afin de lancer le programme, appuyer sur Commencer. \n
+                 Une nouvelle fenêtre apparaitra afin de vous permettre de sélectionner les attributs que présente votre agresseur. \n
+                 Veuillez à bien séléctionner judicieusement ces attributs car ils permettront de sélectionner les images ressemblant le plus à la personne souhaitée. \n
+                 De plus, l'option 'Je ne sais pas' permet de ne pas prendre en compte la caractéristique. \n
+                 Cette option peut être utile si trop d'attributs sont séléctionnés et ainsi s'assurer que le programme soit capable de renvoyer suffisament de photos. \n
+                 \n
+                 Une fois les attributs sélectionnés, plusieurs images vous seront présentées et vous devrez sélectionner les 3 images les plus pertinentes à chaque fois. \n
+                 Si une des images présenté vous semblent convenables vous pouvez arrêter la recherche en séléctionnant une unique photo et en sélectionnnant 'Image finale'. \n
+                 \n
+                 
+                 """)
 
     def openf2():
         """
