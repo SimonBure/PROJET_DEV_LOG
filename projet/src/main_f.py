@@ -8,7 +8,7 @@ import sys
 import os
 import utils
 import database
-import utils
+#import autoencoder_deploy 
 
 ################################################# WINDOW 1 #########################################################
 def f1(env_path):
@@ -18,7 +18,7 @@ def f1(env_path):
     
     Parameter 
     ---------
-    env_path : <string> : the relative path to the environment (à vérifier ?)
+    env_path : <string> : the relative path to file Setup_dev 
         
     """
 
@@ -79,7 +79,7 @@ def f2(env_path):
     
     Parameter 
     ---------
-    env_path : <string> : the relative path to the environment (à vérifier ?)
+    env_path : <string> : the relative path to file Setup_dev 
     """
 
     def recup_RB_genre():
@@ -143,7 +143,7 @@ def f2(env_path):
         c=recup_valCBX(menucombo)
         acc=recup_valCkB()
         stop = FALSE
-        if (g==None or a==None or c=='Veuillez choisir un élément' or acc==[]):
+        if (g==None or a==None or c=='Veuillez choisir un élément' or acc==[0,0,0,0,0]):
             stop = TRUE
 
         testliste=liste_db()
@@ -206,12 +206,11 @@ def f2(env_path):
         test = verif_reponses()
         ans_user = liste_db()
         
-        # Retrieve 5 images according to the aswers
-        array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][3], ans_user[1][4], ans_user[1][5])
-        img_list = database.get_5_img(env_path, array_metadata) # liste de path
-
         # if some questions were not answered, an error pops up and the user must complete the questions
         if test==FALSE:
+            # Retrieve 5 images according to the aswers
+            array_metadata = database.create_querry_array(ans_user[1][0], ans_user[1][1], ans_user[1][2], ans_user[1][3], ans_user[1][4], ans_user[1][5])
+            img_list = database.get_5_img(env_path, array_metadata) # liste de path
             f2_flr.destroy()
             f3(env_path, img_list)
         elif(test==TRUE):
@@ -292,7 +291,7 @@ def f3(env_path, img_list):
     
     Parameters : 
     ------------
-    env_path : <string> : the relative path to the environment (à vérifier ?)
+    env_path : <string> : the relative path to file Setup_dev 
     img_list : a list containing the paths of each image to display (from the database, or the auto-encoder)
     """
 
@@ -385,7 +384,7 @@ def f3(env_path, img_list):
         Opens the current window (f3) : gives a illusion of refreshing the window
         Parameters
         --------
-        env_path : <string> : the relative path to the environment (à vérifier ?)
+        env_path : <string> : the relative path to file Setup_dev 
         img_list : <list> : the list containing the paths towards the images to display
         
         """
@@ -406,33 +405,15 @@ def f3(env_path, img_list):
         # if 3 images were selected : open f3 and display the new images produced by the genetic algorithm
         if (refresh_3[0]==TRUE and pass_4[1]==FALSE):
            
-            # - boucle de temps : à voir combien de temps prend l'algo gen, mais AC rapide
-            # - si boucle de temps ne marche pas, faire un break de temps de 30 sec
-            # - sur cette boucle de temps, appeler à un intervalle dt une fonction de l'AC qui renvoie un
-            # booléen quand les nouvelles images ont bien été encodées
-            # - une fois que ce booléen (le résultat de la fonction) est true, aller chercher les nouvelles img
-            # - écraser les anciennes images dans img_list
-            # - refresh la fenetre : appeller openf3 ?
-
-            ## code pour refresh : récupérer le path d'une image de l'AC, modifier img_list avec puis tout réafficher
-            #directory_test = utils.get_path(env_path, "Encoder")
-            #path1 = os.path.join(directory_test, "base_im.png")
-            ## le seul souci : il faudrait que les 5 images de l'autoencodeur aient toujours le meme nom --> ok, se mettre d'accord du nom avec Jesus
-            # img_refresh = path1
-            # img_list[0]=path1
-           
-           # get the 5 images from the autoencoder
-           ######  /!\/!\/!\ POUR QUE CA FONCTIONNE, il faut img0.jpg à img4.jpg dans env/Auto_encoder/gen_img
-           chemin_dossier = utils.get_path(env_path, 'gen_img')
-            
-           ######  /!\/!\/!\ attention les images sont numérotées de 0 à 4
-           # replace the old paths by the new
-           for i in range(len(img_list)):
-               nom_img_ac = "img"+str(i)+".jpg"
-               img_list[i]=os.path.join(chemin_dossier, nom_img_ac)
-               
-           f3_img.destroy()
-           openf3(env_path, img_list)         
+            # def fin
+            chemin_dossier = utils.get_path(env_path, 'gen_img')
+            # replace the old paths by the new
+            for i in range(len(img_list)):
+                nom_img_ac = "img"+str(i)+".jpg"
+                img_list[i]=os.path.join(chemin_dossier, nom_img_ac)
+                
+            f3_img.destroy()
+            openf3(env_path, img_list)         
         
         #if 1 image was selected : close f3 and open f4
         elif (pass_4[0]==TRUE and pass_4[1]==TRUE):
@@ -453,7 +434,6 @@ def f3(env_path, img_list):
 
 
     # creation of the 3rd window
-
     f3_img = Tk()
     w, h = f3_img.winfo_screenwidth(), f3_img.winfo_screenheight()
     f3_img.geometry("%dx%d" % (w, h))
@@ -474,9 +454,6 @@ def f3(env_path, img_list):
         f3_img.destroy()
         f2(env_path)
        
-        # ligne à garder ?
-        a = 0 # sert à rien mais pour ne pas avoir de problèmes d'indentation
-
 
     frame = Frame(f3_img, width=200, height=200)
     frame.place(anchor='center', relx=0.10, rely=0.4)
@@ -553,7 +530,7 @@ def f4(env_path, path_final_img):
     Creates the window 4 from the execution of openf4
     Parameters : 
     ------------
-    env_path : <string> : the relative path to the environment (à vérifier ?)
+    env_path : <string> : the relative path to file Setup_dev 
     path_final_img :the relative path of the final image selected by the user 
     """
 
@@ -566,7 +543,7 @@ def f4(env_path, path_final_img):
         f5(env_path, img_f5)
 
 
-    def quit():
+    def quitter():
         """
         Event linked to the "Quitter" menu option : destruction of the current window 
         """
@@ -578,7 +555,7 @@ def f4(env_path, path_final_img):
         Event linked to the "Nouveau" menu option : destroys  of the current window and opens the window 1 
         Parameters : 
         ------------
-        env_path : <string> : the relative path to the environment (à vérifier ?)
+        env_path : <string> : the relative path to file Setup_dev 
         """
         f4_final.destroy()
         f1(env_path)
@@ -600,7 +577,7 @@ def f4(env_path, path_final_img):
     menu1.add_command(label="Exporter", command=export)
     menu1.add_command(label="Nouveau", command= lambda : openf1(env_path))
     menu1.add_separator()
-    menu1.add_command(label="Quitter", command=quit)
+    menu1.add_command(label="Quitter", command=quitter)
     menubar.add_cascade(label="Fichier", menu=menu1)
 
     '''
