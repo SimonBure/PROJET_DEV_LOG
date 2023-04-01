@@ -64,7 +64,10 @@ def request_data_by_id(env_path, numbers):
     -------
     query : str, list of str
         filename of the selected id number
-
+        
+    
+    >> request_data_by_id("../", 1)[-10:]
+    001239.jpg
     """
     cursor, con = get_database_cursor(env_path)
     path = utils.get_path(env_path, "Database")
@@ -100,7 +103,14 @@ def request_data_by_metadata(env_path, array):
     -------
     query : str, list of str
         filename of possible img according to metadata gave
-
+        
+    >> request_data_by_metadata("../", 
+                                ["0", "0", "0", "0", "0", "0", "0", "0",
+                                 "0", "0", "0", "1", "0", "0", "0", "0",
+                                 "0", "0", "0","0", "0", "0", "0", "0", 
+                                 "0", "0", "0", "0", "0", "0", "0", "0", 
+                                 "0", "0", "0", "0", "0", "0", "0", "1"])[0][-10:]
+    007612.jpg
     """
     cursor, con = get_database_cursor(env_path)
     path = utils.get_path(env_path, "Database")
@@ -207,7 +217,9 @@ def print_database(env_path):
     -------
     query : list of str
         All rows and lines of the dataset
-
+        
+    >> len(print_database("../"))
+    634
     """
     cursor, con = get_database_cursor(env_path)
 
@@ -250,7 +262,9 @@ def create_query_array(genre = 0, age = 0, hair_col = 0,
     -------
     array : 1D array
         metadata array of 0 and 1
-
+        
+    >> create_querry_array()
+    ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "-1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"]
     """
 
     array = ['0'] * 40
@@ -325,7 +339,13 @@ def get_numb_response(env_path, array):
     -------
     len(resp)
         Number of image
-
+        
+    >> get_numb_response("../", ["0", "0", "0", "0", "0", "0", "0", "0",
+                                 "0", "0", "0", "1", "0", "0", "0", "0",
+                                 "0", "0", "0","0", "0", "0", "0", "0", 
+                                 "0", "0", "0", "0", "0", "0", "0", "0", 
+                                 "0", "0", "0", "0", "0", "0", "0", "1"])
+    59
     """
 
     resp = request_data_by_metadata(env_path, array)
