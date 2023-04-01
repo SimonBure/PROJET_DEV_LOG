@@ -314,7 +314,7 @@ def print_database(env_path, who = "idkit"):
     querry = res.fetchall()
     return querry
 
-def create_querry_array(genre = 0, age = 0, hair_col = 0, 
+def create_query_array(genre = 0, age = 0, hair_col = 0, 
                         glasses = 0, mustache = 0, beard = 0):
     """
     Create the metadata array from users choice
