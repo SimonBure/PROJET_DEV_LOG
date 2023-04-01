@@ -30,16 +30,14 @@ def f1(env_path):
                  Bienvenu dans Idkit, le logiciel de génération de portrait robot ! \n
                  \n
                  Afin de lancer le programme, appuyer sur Commencer. \n
-                 Une nouvelle fenêtre apparaitra afin de vous permettre de sélectionner les attributs que présente votre agresseur. \n
-                 Veuillez à bien séléctionner judicieusement ces attributs car ils permettront de sélectionner les images ressemblant le plus à la personne souhaitée. \n
-                 De plus, l'option 'Je ne sais pas' permet de ne pas prendre en compte la caractéristique. \n
-                 Cette option peut être utile si trop d'attributs sont séléctionnés et ainsi s'assurer que le programme soit capable de renvoyer suffisament de photos. \n
+                 Une nouvelle fenêtre apparaitra afin de vous permettre de sélectionner les attributs que présente le suspect. \n
+                 Veillez à  séléctionner judicieusement ces attributs car ils permettront de choisir les images ressemblant le plus à la personne souhaitée. \n
                  \n
                  Une fois les attributs sélectionnés, plusieurs images vous seront présentées et vous devrez sélectionner les 3 images les plus pertinentes à chaque fois. \n
-                 Si une des images présenté vous semblent convenables vous pouvez arrêter la recherche en séléctionnant une unique photo et en sélectionnnant 'Image finale'. \n
+                 Si une des images présentée vous semble convenable, vous pouvez arrêter la recherche en séléctionnant une unique photo et en sélectionnnant 'Image finale'. \n
                  \n
                  Ainsi la fenêtre d'export apparaitra et en utilisant le menu déroulant en haut à gauche, vous pourrez :
-                     - Exporter la photo au lieu de votre choix
+                     - Exporter la photo à l'endroit de votre choix
                      - Recommencer une nouvelle recherche 
                      - Quitter le programme
                  """)
@@ -230,7 +228,7 @@ def f2(env_path):
             f2_flr.destroy()
             f3(env_path, img_list)
         elif(test==TRUE):
-            showinfo('ATTENTION', 'Veuillez remplir tous les champs')
+            showinfo('ATTENTION', 'Veuillez remplir tous les champs.')
 
 
     # creation of the window
@@ -243,7 +241,7 @@ def f2(env_path):
     boutSend=Button(f2_flr, text="Envoyer", font='Arial 12', height = 2, width = 20, borderwidth = 4, bg = '#BDECB6', command= lambda : openf3(env_path))
     boutSend.place(anchor=tk.N, relheight=0.07, relwidth=0.10, relx=0.5, rely= 0.7)
 
-    labelT = Label(f2_flr, text="Ce formulaire vise à affiner la base de données pour vous présenter les solutions les plus pertinentes dans un temps minimal", bg="white", font = "Arial 14 italic")
+    labelT = Label(f2_flr, text="Ce formulaire vise à affiner la base de données pour vous présenter les solutions les plus pertinentes dans un temps minimal.", bg="white", font = "Arial 14 italic")
     labelT.pack()
 
     labelSEXE = Label(f2_flr, text="Quel est le genre de l'individu ?", font='Helvetica 12 bold')
@@ -466,7 +464,7 @@ def f3(env_path, img_list):
 
     # Creation of an error message if less than 5 images can fit the user's criteres 
     if img_list == 0 :
-        showinfo('ATTENTION', '''Il n'existe pas assez d'images correspondantes à cette sélection dans la base de données. Veuillez élargir vos critères.''')
+        showinfo('ATTENTION', '''Il n'existe pas assez d'images correspondantes à cette sélection dans la base de données. Veuillez élargir vos critères en sélectionnant "ne sais pas" pour certains attributs.''')
         f3_img.destroy()
         f2(env_path)
        
