@@ -38,7 +38,10 @@ def f1(env_path):
                  Une fois les attributs sélectionnés, plusieurs images vous seront présentées et vous devrez sélectionner les 3 images les plus pertinentes à chaque fois. \n
                  Si une des images présenté vous semblent convenables vous pouvez arrêter la recherche en séléctionnant une unique photo et en sélectionnnant 'Image finale'. \n
                  \n
-                 
+                 Ainsi la fenêtre d'export apparaitra et en utilisant le menu déroulant en haut à gauche, vous pourrez :
+                     - Exporter la photo au lieu de votre choix
+                     - Recommencer une nouvelle recherche 
+                     - Quitter le programme
                  """)
 
     def openf2():
