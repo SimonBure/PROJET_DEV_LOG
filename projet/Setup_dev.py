@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import src.database as db
-import src.main_f as main
+import src.interface as main
 import src.autoencoder as auto
 import utils
 import shutil
@@ -10,7 +10,7 @@ import wget
 import zipfile
 import logging
 
-#Setup log file
+# Setup log file
 logging.basicConfig(filename='Idkit.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s : %(message)s')
 logging.getLogger('PIL').setLevel(logging.WARNING) # Merci PIL ...

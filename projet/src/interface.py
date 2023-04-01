@@ -1,14 +1,11 @@
 from tkinter import *
 import tkinter as tk
-import tkinter.font as font
 from PIL import ImageTk, Image
 from tkinter.messagebox import *
 from tkinter import ttk
-import sys
 import os
 import utils
 import database
-#import autoencoder_deploy
 
 
 def f1(env_path):
@@ -25,30 +22,21 @@ def f1(env_path):
         """
         Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
-        showinfo('Aide', """
-                 Bienvenu dans Idkit, le logiciel de génération de portrait \
-                 robot ! \n
-                 \n
-                 Afin de lancer le programme, appuyer sur Commencer. \n
-                 Une nouvelle fenêtre apparaitra afin de vous permettre \
-                 de sélectionner les attributs que présente le suspect. \n
-                 Veillez à  séléctionner judicieusement ces attributs car \
-                 ils permettront de choisir les images ressemblant le plus \
-                 à la personne souhaitée. \n
-                 \n
-                 Une fois les attributs sélectionnés, plusieurs images vous \
-                 seront présentées et vous devrez sélectionner les 3 images \
-                 les plus pertinentes à chaque fois. \n
-                 Si une des images présentée vous semble convenable, \
-                 vous pouvez arrêter la recherche en séléctionnant une \
-                 unique photo et en sélectionnnant 'Image finale'. \n
-                 \n
-                 Ainsi la fenêtre d'export apparaitra et en utilisant le \
-                 menu déroulant en haut à gauche, vous pourrez :
-                     - Exporter la photo à l'endroit de votre choix
-                     - Recommencer une nouvelle recherche
-                     - Quitter le programme
-                 """)
+        showinfo('Aide', "Bienvenue dans Idkit, le logiciel de génération de \
+    portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. \
+    \nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner \
+    les attributs que présente le suspect. \nVeillez à  séléctionner \
+    judicieusement ces attributs car ils permettront de choisir les images \
+    ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs \
+    sélectionnés, plusieurs images vous seront présentées et vous devrez \
+    sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une \
+    des images présentée vous semble convenable, vous pouvez arrêter la \
+    recherche en séléctionnant une unique photo et en sélectionnnant \
+    'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant \
+    le menu déroulant en haut à gauche, vous pourrez:\n\
+        - Exporter la photo à l'endroit de votre choix\n\
+        - Recommencer une nouvelle recherche\n\
+        - Quitter le programme")
 
     def openf2():
         """
@@ -270,9 +258,8 @@ def f2(env_path):
                    relwidth=0.10, relx=0.5, rely=0.7)
 
     labelT = Label(f2_flr, text="Ce formulaire vise à affiner la base de \
-                  données pour vous présenter les solutions les plus \
-                  pertinentes dans un temps minimal.", bg="white",
-                   font="Arial 14 italic")
+    données pour vous présenter les solutions les plus pertinentes dans un \
+    temps minimal.", bg="white", font="Arial 14 italic")
     labelT.pack()
 
     labelSEXE = Label(f2_flr, text="Quel est le genre de l'individu ?",
