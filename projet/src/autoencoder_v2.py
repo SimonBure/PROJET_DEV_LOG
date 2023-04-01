@@ -84,7 +84,7 @@ def load_dataset(width, height, nb_samples=-1, crop_images=False):
     crop_width = 160
 
     # Get a list of all image files in the input directory
-    file_list = database.request_data_by_id(env_path, range(nb_samples), who= "Auto")
+    file_list = database.request_data_by_id(env_path, range(nb_samples))#, who= "Auto")
 
     # Save the total number of images in the folder
     total_nb_images = len(file_list)
@@ -316,7 +316,7 @@ if __name__ == "__main__":
         print("Number of tensors: ", len(CelebA.samples))
     else:
         print("The database is not loaded yet")
-        CelebA = load_dataset(178, 218, nb_samples=-1, crop_images=True)
+        CelebA = load_dataset(178, 218, nb_samples=40000, crop_images=True)
         print("Number of tensors: ", len(CelebA.samples))
         utils.save_tensor_to_disk_numpy(CelebA.samples, CelebA_ds_tensor_path)
     #print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
