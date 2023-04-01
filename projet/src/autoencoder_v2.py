@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-# from torchsummary import summary
+from torchsummary import summary
 from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset, Dataset, DataLoader
 import matplotlib.pyplot as plt
@@ -131,11 +131,11 @@ def crop_image_tensor(tensor):
     left = 18
     crop_height = 160
     crop_width = 160
-    img = tensor.permute(2, 0, 1)
-    img = TF.crop(img, top, left, crop_height, crop_width)
+    # img = tensor.permute(2, 0, 1)
+    img = TF.crop(tensor, top, left, crop_height, crop_width)
     cropped_tensor = img.permute(1, 2, 0)
-    #print(cropped_tensor.shape)
-    return(cropped_tensor)
+    # print(cropped_tensor.shape)
+    return cropped_tensor
 
 def plot_5_images(dataset, width, height):
 
@@ -280,7 +280,7 @@ def encode_decode_tensor (tensor):
     return (decoded_shor)
 
 
-def encode(image):
+def encode(model, image: Image):
     """
     Encodes an input image using the given PyTorch model.
     Parameters:
@@ -295,7 +295,7 @@ def encode(image):
     # Changing the image to the correct dimensions order for the autoencoder
     x = x.permute(0, 3, 1, 2)
     encoded = model.encoder(x)
-    return encoded
+    return encoded[0]
 
 def decode (encoded_tensor):
     decoded = model.decoder(encoded_tensor)

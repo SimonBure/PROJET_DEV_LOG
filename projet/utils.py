@@ -42,6 +42,7 @@ def get_path(env_path, where):
         Path of the dataset download.
 
     """
+    path = ''
     if where == "Env":
         path = os.path.join(env_path, "env")
     elif where == "Database":
@@ -60,6 +61,10 @@ def get_path(env_path, where):
         path = os.path.join(env_path, "env", "Result")
     elif where == "Temp":
         path = os.path.join(env_path, "temp")
+    elif where == "Auto_encoder":
+        path = os.path.join(env_path, "env", "Auto_encoder")
+    elif where == "gen_img":
+        path = os.path.join(env_path, "env", "Auto_encoder", "gen_img")
     return path  # Collect the path
 
 
