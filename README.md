@@ -40,7 +40,18 @@ Si un problème se présente ou pour désinstaller le logiciel il suffit de lanc
 
 `python3 <path_to:>/Setup_user.py uninstall`
 
-Rapide description des différents boutons et fonctionnalités implémentées
+Afin d'utiliser le programme, appuyez sur Commencer.
+
+Une nouvelle fenêtre apparaitra afin de vous permettre de sélectionner les attributs que présente le suspect. 
+Veillez à séléctionner judicieusement ces attributs car ils permettront de choisir les images ressemblant le plus à la personne souhaitée. 
+
+Une fois les attributs sélectionnés, plusieurs images vous seront présentées et vous devrez sélectionner les 3 images les plus pertinentes à chaque fois. 
+Si une des images présentée vous semble convenable, vous pouvez arrêter la recherche en séléctionnant une unique photo et en sélectionnnant 'Image finale'. 
+
+Ainsi la fenêtre d'export apparaitra et en utilisant le menu déroulant en haut à gauche, vous pourrez :
+    - Exporter la photo à l'endroit de votre choix
+    - Recommencer une nouvelle recherche 
+    - Quitter le programme
 
 Description de IDKIT dans sa version actuelle ?
 
