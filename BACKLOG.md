@@ -19,6 +19,7 @@ Version 0.1
 	Déployé le 15/03/2023.
 
 0.1.4
+	Mise à jour finale interface graphique avant implémentation des fonctions de génération d'image
 
 0.1.3-36
 	Mise à jour de l'interface grphique et de l'architecture de l'environnement du programme
