@@ -232,12 +232,12 @@ def f2(env_path):
         # user must complete the questions
         if test == FALSE:
             # Retrieve 5 images according to the answers
-            array_metadata = database.create_querry_array(ans_user[1][0],
-                                                          ans_user[1][1],
-                                                          ans_user[1][2],
-                                                          ans_user[1][3],
-                                                          ans_user[1][4],
-                                                          ans_user[1][5])
+            array_metadata = database.create_query_array(ans_user[1][0],
+                                                         ans_user[1][1],
+                                                         ans_user[1][2],
+                                                         ans_user[1][3],
+                                                         ans_user[1][4],
+                                                         ans_user[1][5])
             # Liste de path
             img_list = database.get_5_img(env_path, array_metadata)
             f2_flr.destroy()
@@ -437,7 +437,7 @@ def f3(env_path, img_list):
             List containing the paths
         """
         liste_chemin = []
-        for i in range(img_list):
+        for i in range(len(img_list)):
             if (i == index_choix[0]) or (i == index_choix[1]) or \
                     (i == index_choix[2]):
                 liste_chemin.append(img_list[i])
@@ -480,7 +480,7 @@ def f3(env_path, img_list):
                 chemin_dossier = utils.get_path(env_path, 'gen_img')
                 # replace the old paths by the new
                 for i in range(len(img_list)):
-                    nom_img_ac = "img"+str(i)+".jpg"
+                    nom_img_ac = "image"+str(i)+".png"
                     img_list[i] = os.path.join(chemin_dossier, nom_img_ac)
 
             f3_img.destroy()
