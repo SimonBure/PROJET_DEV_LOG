@@ -476,7 +476,7 @@ def f3(env_path, img_list):
             # wait for the new images to be created and stored
             img_ready = algen.create_new_images(img_path, env_path)
             
-            if (img_ready==TRUE):
+            if img_ready == TRUE:
                 chemin_dossier = utils.get_path(env_path, 'gen_img')
                 # replace the old paths by the new
                 for i in range(len(img_list)):

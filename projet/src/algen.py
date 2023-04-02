@@ -20,7 +20,7 @@ def flatten_img(img_path, env_path):
 
     Parameters
     ----------
-    img_path: str or list[str]
+    img_path: list of str
         Path or paths of the images to retrieve
     env_path: str
         Path of the current environment, used to retrieve the
@@ -112,7 +112,7 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
     ----------
     flat_tensor: torch.Tensor
         Tensor containing the encoded version of one or several images.
-    base_encoded_dim: tuple of ints
+    base_encoded_dim: tuple of int
         Size of the tensor before going into flatten_img function.
     env_path: str
         Path of the current environment, used to retrieve the
@@ -120,10 +120,10 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
 
     Returns
     -------
-    decoded_img: PIL.Image
+    decoded_img: PIL.Image.Image
         Decoded version of the image
     or
-    img_list: list[PIL.Image]
+    img_list: list of PIL.Image.Image
         Decoded versions of the images
 
     >>>tensor = torch.randn((64, 324))
@@ -153,10 +153,10 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
             decoded_img = ae.decode(autoencoder, unflat_img)
 
             # Reducing the noise with a filter
-            filter = ImageFilter.EDGE_ENHANCE
+            filter = ImageFilter.SMOOTH_MORE
             enhanced_img = decoded_img.filter(filter)
-            enhanced_img = enhanced_img.filter(ImageFilter.SMOOTH)
-
+            filter = ImageFilter.SHARPEN
+            enhanced_img = enhanced_img.filter(filter)
             img_list[i] = enhanced_img
 
         return img_list
@@ -173,7 +173,7 @@ def mutate_img(tensor_encoded, mutation_rate=0.05, mode='add', scale='partial'):
 
     Parameters
     ----------
-    tensor_encoded: torch.Tensor
+    tensor_encoded: Tensor
         Tensor containing one or several images pixels values.
     mutation_rate: float
         Probability for a pixel to be modified.
@@ -360,7 +360,6 @@ def chose_closest_tensor(input_tensor, other_tensors):
     # Computing euclidian distance between input and the other tensors
     dist_list = [torch.dist(input_tensor, t, p=2) for t in other_tensors]
     dist_tensor = Tensor(dist_list)
-    # print(dist_tensor)
     # Choosing the tensor that has the closest distance to input_tensor
     closest_tensor = other_tensors[torch.argmin(dist_tensor)]
     return closest_tensor
@@ -406,7 +405,6 @@ def crossing_over(tensor_encoded, crossing_rate):
 
         crossing_tensor = torch.rand(size=tensor_encoded[0].size())
         fst_tensor = tensor_encoded[0]
-
         chosen_tensor = chose_closest_tensor(fst_tensor, tensor_encoded[1:])
 
         # List of bool, True if the tensor has been used before
@@ -419,7 +417,6 @@ def crossing_over(tensor_encoded, crossing_rate):
         bool_tensor = ~Tensor(is_tensor_used).bool()
         # Only tensor remaining to be swapped
         remaining_tensor = tensor_encoded[bool_tensor][0]
-        print(remaining_tensor.size())
         last_cross_tens = torch.rand(size=remaining_tensor.size())
         last_chosen_tens = chose_closest_tensor(remaining_tensor,
                                                 tensor_encoded[~bool_tensor])
@@ -457,13 +454,57 @@ def crossing_over(tensor_encoded, crossing_rate):
 
 
 def remove_worst_tensor(input_tensor):
-    # TODO doc
-    std_tensor = input_tensor.std(dim=(1, 2))
-    worst_tensor = input_tensor[torch.argmax(std_tensor)]
-    select_ind = [False if i == torch.argmax(std_tensor) else True for i in range(input_tensor.size()[0])]
-    bool_tensor = Tensor(select_ind).bool()
-    good_tensors = input_tensor[bool_tensor]
-    return good_tensors
+    """Returns a truncated version of input_tensor where the tensor with
+    the biggest euclidian distances with the other is removed.
+
+    Parameters
+    ----------
+    input_tensor: torch.Tensor
+        Tensor object of dimension 3
+
+    Returns
+    -------
+    best_tensors: torch.Tensor
+        Tensors with the lowest euclidian distance between each other
+    >>>a = torch.randn((3, 3)) + 2.3
+    tensor([[3.0174, 2.3837, 2.4347],
+        [3.2638, 4.1361, 1.5455],
+        [2.2102, 4.6333, 1.7257]])
+    >>>b = torch.randn((3, 3)) + 12.9
+    tensor([[11.9757, 12.4747, 12.2593],
+        [14.0547, 12.2040, 10.5324],
+        [11.1283, 12.4093, 11.5780]])
+    >>>c = torch.randn((3, 3)) + 5.43
+    tensor([[6.1780, 5.0044, 5.2440],
+        [4.8488, 5.7857, 6.1550],
+        [5.9140, 5.0360, 3.1640]])
+    >>>cat = torch.cat((a.unsqueeze(0), b.unsqueeze(0), c.unsqueeze(0)), 0)
+    >>>remove_worst_tensor(cat)
+    tensor([[[3.0174, 2.3837, 2.4347],
+         [3.2638, 4.1361, 1.5455],
+         [2.2102, 4.6333, 1.7257]],
+
+        [[6.1780, 5.0044, 5.2440],
+         [4.8488, 5.7857, 6.1550],
+         [5.9140, 5.0360, 3.1640]]])
+    """
+    sum_dist_tensor = torch.zeros(input_tensor.size()[0])
+    for i, tensor in enumerate(input_tensor):
+        is_other_tensor = [False if torch.equal(tensor, t)
+                           else True for t in input_tensor]
+        other_tensor = input_tensor[Tensor(is_other_tensor).bool()]
+        dist_to_other = torch.dist(tensor, other_tensor)
+        sum_dist_tensor[i] = torch.sum(dist_to_other)
+
+    # Create a list of bool containing False if the parsing index is the
+    # one of the tensor with the greatest total distance to the others
+    to_select = [False if i == torch.argmax(sum_dist_tensor)
+                 else True for i in range(input_tensor.size()[0])]
+    # Converting to boolean Tensor
+    bool_tensor = Tensor(to_select).bool()
+    # Selecting the tensors with the lowest standard deviation
+    best_tensors = input_tensor[bool_tensor]
+    return best_tensors
 
 
 def create_new_images(img_path, env_path):
@@ -524,47 +565,6 @@ if __name__ == "__main__":
     # Converting the image to a Tensor
     tf_tensor = transforms.ToTensor()
     pic_tensor = tf_tensor(pic)
-
-    # Testing mutation on all pixels
-    # some_tensor = torch.randn(size=(3, 3))
-    # print(f"Base tensor: {some_tensor}")
-    # print(f"Mutated tensor: {mutate_img(some_tensor, mut_type='uniform')}")
-
-    # Testing mutation on random pixels
-    # mut_tensor_rdm = mutate_img(some_tensor, mutation_rate=0.2)
-    # print(f"Mutated tensor (random): {mut_tensor_rdm}")
-    # mut_arr_rdm = mutate_img(some_array, mutation_rate=0.2)
-    # print(f"Mutated array (random): {mut_arr_rdm}")
-
-    # Load an autoencoder and encode an img
-    # pic.show("Image de base")
-    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model40k.pt")
-    pic_cropped = ae.crop_image_tensor(pic_tensor)
-    print(f"Base size: {pic_tensor.size()}")
-    print(f"Cropped size: {pic_cropped.size()}")
-    autoencoder = ae.load_model(model_path)  # Loading the trained model
-    encoded_img = ae.encode(autoencoder, pic_cropped)  # Encoding the tensor
-    print(f"Image tensor : {encoded_img.size()}")
-    decoded = ae.decode(autoencoder, encoded_img)  # Decoding the tensor
-    # decoded.show("Image décodée")
-
-    # Testing flatten on an image
-    flat_encoded_tensor = flatten_img(pic_path, env_path)
-    print(f"Flat encoded size: {flat_encoded_tensor.size()}")
-
-    # Testing flatten on several images
-    flat_several = flatten_img(pic_path_list, env_path)
-    print(f"Several image tensor size: {flat_several.size()}")
-    print(f"Dim of the tensor: {flat_several.dim()}")
-
-    # Testing deflatten
-    # deflat_img = deflatten_img(flat_encoded_tensor, encoded_img.size())
-    # deflat_img.show()
-
-    # Testing deflatten on several images
-    # deflat_several = deflatten_img(flat_several, encoded_img.size())
-    # for img in deflat_several:
-    #     img.show()
 
     # Testing mutations on one flat encoded tensor
     # Adding white noise on every pixel
