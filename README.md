@@ -29,7 +29,7 @@ Linux : `sudo apt-get python3-pip `
 `pip install pillow==9.4.0 numpy==1.24.2 torch==1.13.1 tk==0.1.0`
 
 ## Comment installer et utiliser IDKIT ?
-IDKIT est disponible sur `pip`, le package manager de python. Pour installer notre logiciel il suffit donc de taper dans une console python `pip install -i https://test.pypi.org/simple/ INSA-IdKit` ou alors, directement dans un terminal, `python3 -m pip install -i https://test.pypi.org/simple/ INSA-IdKit`. Ce n'est pas tout, pour pouvoir fonctionner correctement, IDKIT a besoin avant tout autre chose d'exécuter un script python, contenu dans un fichier `setup.py`. Ce fichier est diponible sur Github dans le dossier projet à l'adresse suivante : https://github.com/Fallog/PROJET_DEV_LOG. Ce script initialise l'environnement et l'arborescence de dossiers nécessaire à IDKIT pour stocker et retrouver les images entre autres.
+IDKIT est disponible sur `pip`, le package manager de python. Pour installer notre logiciel il suffit donc de taper dans une console python `pip install -i https://test.pypi.org/simple/ INSA-IdKit` ou alors, directement dans un terminal, `python3 -m pip install -i https://test.pypi.org/simple/ INSA-IdKit`. Ce n'est pas tout, pour pouvoir fonctionner correctement, IDKIT a besoin avant tout autre chose d'exécuter un script python, contenu dans un fichier setup. Ce fichier est diponible sur Github dans le dossier projet à l'adresse suivante : https://github.com/Fallog/PROJET_DEV_LOG. Ce script initialise l'environnement et l'arborescence de dossiers nécessaire à IDKIT pour stocker et retrouver les images entre autres.
 
 Une fois les librairies installées, il est possible de lancer le programme avec la commande :
 
@@ -50,7 +50,11 @@ Une fois les attributs sélectionnés, plusieurs images vous seront présentées
 Si une des images présentée vous semble convenable, vous pouvez arrêter la recherche en séléctionnant une unique photo et en sélectionnnant 'Image finale'. 
 
 Ainsi la fenêtre d'export apparaitra et en utilisant le menu déroulant en haut à gauche, vous pourrez :
+
     - Exporter la photo à l'endroit de votre choix
+
     - Recommencer une nouvelle recherche 
+
     - Quitter le programme
+    
 
