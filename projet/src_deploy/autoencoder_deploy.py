@@ -1,13 +1,11 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torchvision.transforms
 from torch.utils.data import Dataset
 import os
 from PIL import Image
 import database
 import torchvision.transforms as T
-import utils
 
 
 class Autoencoder(nn.Module):
