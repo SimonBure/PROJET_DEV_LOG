@@ -146,6 +146,9 @@ def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
             # Enhancing the image with a filter
             filter = ImageFilter.SMOOTH  # SHARPEN, SMOOTH, EDGE_ENHANCE are quite good
             enhanced_img = decoded_img.filter(filter)
+            # enhanced_img = decoded_img.filter(filter)
+            filter = ImageFilter.SHARPEN
+            enhanced_img = enhanced_img.filter(filter)
 
             img_list[i] = enhanced_img
 
@@ -415,9 +418,35 @@ def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
                         and not a {type(tensor_encoded)}")
 
 
-def create_new_images(img_path: list[str, str, str]) -> bool:
+def remove_worst_tensor(input_tensor: Tensor) -> Tensor:
+    # TODO doc
+    std_tensor = input_tensor.std(dim=(1, 2))
+    worst_tensor = input_tensor[torch.argmax(std_tensor)]
+    select_ind = [False if i == torch.argmax(std_tensor) else True for i in range(input_tensor.size()[0])]
+    bool_tensor = Tensor(select_ind).bool()
+    good_tensors = input_tensor[bool_tensor]
+    return good_tensors
+
+
+def create_new_images(img_path: list[str, str, str], env_path: str) -> bool:
     # TODO doc
     img_encoded_tensor = flatten_img(img_path)
+
+    # 3 new images with crossing-overs
+    crossed_img = crossing_over(img_encoded_tensor, crossing_rate=0.4)
+    # 6 new images with crossing-overs
+    more_crossing = crossing_over(img_encoded_tensor, crossing_rate=0.4)
+    # Concatenation of the 6 tensors
+    new_tensors = torch.cat((crossed_img, more_crossing), dim=0)
+    # Keep the 5 best images in terms of deviation
+    good_5_tensors = remove_worst_tensor(new_tensors)
+    # Decoding and converting to PIL Images
+    new_images = deflatten_img(good_5_tensors, (64, 18, 18))
+    # Saving the generated pictures
+    for i, img in enumerate(new_images):
+        name = f"image{i}.png"
+        path = utils.get_path(env_path, 'gen_img') + "/" + name
+        img.save(path)
 
     return True
 
@@ -547,20 +576,24 @@ if __name__ == "__main__":
     # chose_closest_tensor(random_img_tensor[0], random_img_tensor[1:])
 
     # Showing the 3 selected images
-    for img in deflatten_img(random_img_tensor, encoded_img.size()):
-        img.show()
+    # for path in random_img_path:
+    #     img = Image.open(path)
+    #     img.show()
 
     # Mutating the images
     mut_rand_tensor = mutate_img(random_img_tensor, mutation_rate=0.1,
-                                 mode='reconstruct', scale='total')
+                                 mode='reconstruct', scale='partial')
 
     # Testing crossing-overs
-    crossed_tensors = crossing_over(random_img_tensor, crossing_rate=0.4)
-    crossed_tensors_mut = crossing_over(mut_rand_tensor, crossing_rate=0.4)
+    crossed_tensors = crossing_over(random_img_tensor, crossing_rate=0.3)
+    # crossed_tensors_mut = crossing_over(mut_rand_tensor, crossing_rate=0.4)
     deflat_sev = deflatten_img(crossed_tensors, encoded_img.size())
-    deflat_sev_mut = deflatten_img(crossed_tensors_mut, encoded_img.size())
-    for img in deflat_sev:
-        img.show()
+    # deflat_sev_mut = deflatten_img(crossed_tensors_mut, encoded_img.size())
+    # for img in deflat_sev:
+    #     img.show()
 
-    for img in deflat_sev_mut:
-        img.show()
+    # Testing to remove the worst img
+    # a = remove_worst_tensor(crossed_tensors)
+    create_new_images(random_img_path, env_path)
+    # for img in deflat_sev_mut:
+    #     img.show()
