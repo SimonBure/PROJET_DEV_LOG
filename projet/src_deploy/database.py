@@ -183,7 +183,7 @@ def get_5_img(env_path, array=[]):
         Absolute path of the 5 images.
 
     """
-    logging.info('Generating 5 images')
+    logging.info('Database - Retrieving 5 images')
     if array == []:
         numbers = np.random.randint(1, 634, size=5)
         path_img_list = request_data_by_id(env_path, numbers)
