@@ -143,8 +143,8 @@ def deflatten_img(flat_tensor: Tensor, base_encoded_dim: torch.Size)\
 
             decoded_img = ae.decode(autoencoder, unflat_img)
 
-            # Enhancing the image
-            filter = ImageFilter.SMOOTH_MORE # SHARPEN, SMOOTH, EDGE_ENHANCE are quite good
+            # Enhancing the image with a filter
+            filter = ImageFilter.SMOOTH  # SHARPEN, SMOOTH, EDGE_ENHANCE are quite good
             enhanced_img = decoded_img.filter(filter)
 
             img_list[i] = enhanced_img
@@ -289,11 +289,11 @@ def mutate_img(tensor_encoded: Tensor, mutation_rate: float = 0.05,
                     if scale == 'partial':
                         # Randomly selects the pixels to be modified
                         mut_proba_tensor = torch.rand(size=tensor.size())
-                        # Size of the selected region
-                        selected_size = img_mut[mut_proba_tensor < mutation_rate].size()
+                        # Reconstructed tensor
+                        recons_tensor = mu + torch.randn(tensor.size()) * std
                         # Reconstruction of the selected region
-                        img_mut[mut_proba_tensor < mutation_rate] = mu \
-                            + torch.randn(selected_size) * std
+                        img_mut = torch.where(mut_proba_tensor < mutation_rate,
+                                              recons_tensor, img_mut)
 
                     elif scale == 'total':
                         # Reconstruction of the whole tensor
@@ -399,7 +399,6 @@ def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
         global_tensor = torch.zeros(tensor_encoded.size())
         for i, tensor in enumerate(tensor_encoded):
             crossing_tensor = torch.rand(size=tensor.size())
-
             # Swap with the closest image between the two others
             other_ind = [k for k in range(tensor_encoded.size()[0]) if k != i]
             chosen_tensor = chose_closest_tensor(tensor, tensor_encoded[other_ind])
@@ -551,8 +550,17 @@ if __name__ == "__main__":
     for img in deflatten_img(random_img_tensor, encoded_img.size()):
         img.show()
 
+    # Mutating the images
+    mut_rand_tensor = mutate_img(random_img_tensor, mutation_rate=0.1,
+                                 mode='reconstruct', scale='total')
+
     # Testing crossing-overs
     crossed_tensors = crossing_over(random_img_tensor, crossing_rate=0.4)
+    crossed_tensors_mut = crossing_over(mut_rand_tensor, crossing_rate=0.4)
     deflat_sev = deflatten_img(crossed_tensors, encoded_img.size())
+    deflat_sev_mut = deflatten_img(crossed_tensors_mut, encoded_img.size())
     for img in deflat_sev:
+        img.show()
+
+    for img in deflat_sev_mut:
         img.show()
