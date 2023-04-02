@@ -11,6 +11,24 @@ import utils
 
 
 class Autoencoder(nn.Module):
+    """
+    A convolutional autoencoder neural network.
+
+    The autoencoder has two main components: an encoder and a decoder. The encoder consists of a sequence of
+    convolutional layers that encode the input image into a lower-dimensional latent space. The decoder takes the
+    encoded representation and reconstructs the original image.
+
+    Args:
+        None
+
+    Attributes:
+        encoder (nn.Sequential): A sequence of convolutional layers that make up the encoder.
+        decoder (nn.Sequential): A sequence of convolutional layers that make up the decoder.
+
+    Methods:
+        forward(x: torch.Tensor): Computes the forward pass of the autoencoder given an input tensor `x`. Returns the
+        reconstructed output tensor.
+    """
     def __init__(self):
         super(Autoencoder, self).__init__()
 
@@ -39,6 +57,20 @@ class Autoencoder(nn.Module):
 
 
 class MyDataset(Dataset):
+    """
+    A PyTorch dataset that represents a collection of samples.
+
+    Args:
+        samples (torch.Tensor): A 4D tensor of shape (batch_size, height, width, channels) representing the samples.
+
+    Attributes:
+        samples (torch.Tensor): A 4D tensor of shape (batch_size, height, width, channels) representing the samples.
+
+    Methods:
+        __len__(): Returns the number of samples in the dataset.
+        __getitem__(idx: int): Returns the sample at the given index.
+
+    """
     def __init__(self, samples):
         self.samples = samples
 
@@ -51,6 +83,22 @@ class MyDataset(Dataset):
 
 
 def load_dataset(width, height, nb_samples=-1, crop_images=False):
+    """
+    Loads image data from a folder and returns a PyTorch dataset object.
+
+    parameters:
+        width (int): The desired width of the images in pixels.
+        height (int): The desired height of the images in pixels.
+        nb_samples (int, optional): The maximum number of images to load from the folder. Defaults to -1, which loads all images.
+        crop_images (bool, optional): Whether to crop the images to a fixed size. Defaults to False.
+
+    Returns:
+        MyDataset: A PyTorch dataset object containing the loaded image data.
+
+    Raises:
+        IOError: If the folder path is invalid or cannot be accessed.
+
+    """
     # define crop parameters
     top = 40
     left = 18
@@ -102,14 +150,21 @@ def load_dataset(width, height, nb_samples=-1, crop_images=False):
 
 
 def crop_image_tensor(tensor):
+    """
+    Crops an image tensor to a fixed size.
+
+    Parameters:
+        tensor (torch.Tensor): A 3D tensor of shape (height, width, channels) representing an RGB image.
+
+    Returns:
+        torch.Tensor: A 3D tensor of shape (crop_height, crop_width, channels) representing the cropped image.
+
+    """
     top = 40
     left = 18
     crop_height = 160
     crop_width = 160
-    # img = tensor.permute(2, 0, 1)
     img = T.functional.crop(tensor, top, left, crop_height, crop_width)
-    # cropped_tensor = img.permute(1, 2, 0)
-    # print(cropped_tensor.shape)
     return img
 
 
@@ -204,34 +259,3 @@ def decode(model, tensor):
     decoded_shor = decoded.squeeze(0)
     img_tf = T.ToPILImage()
     return img_tf(decoded_shor)
-
-
-def fin(algogen_path, interface_path):
-    """
-    Lets the interface know when the decoded images are saved in it's corresponding path
-    Calls the decode function, takes the tensors created by the algogen from the algogen_path
-    and saves them in the interface_path
-    Parameters:
-        algogen_path : path where the mutated tensors are stored
-        interface_path : path to store the images from the decoded tensors
-    Returns:
-    True when the images are saved in the interface_path
-    """
-    try:
-        # Load the mutated tensors created by the algogen
-        tensors = utils.load_tensor(algogen_path)
-
-        # Loop through the tensors and save each one as an image
-        for i in range(tensors.shape[0]):
-            # Get the i-th tensor
-            tensor = tensors[i]
-            decoded = decode(tensor, model)
-            transform = T.ToPILImage()
-            img = transform(decoded)
-            img.save(os.path.join(interface_path, f'img{i}.jpg'))
-
-        return True
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
