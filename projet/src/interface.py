@@ -6,6 +6,7 @@ from tkinter import ttk
 import os
 import utils
 import database
+import algen
 
 
 def f1(env_path):
@@ -464,16 +465,23 @@ def f3(env_path, img_list):
         refresh_3 = verif_rep_3()
         pass_4 = verif_rep_1()
         i_fin = pass_4[2]
+        
 
         # if 3 images were selected : open f3 and display the new images produced by the genetic algorithm
         if (refresh_3[0] == TRUE and pass_4[1] == FALSE):
-
-            # def fin
-            chemin_dossier = utils.get_path(env_path, 'gen_img')
-            # replace the old paths by the new
-            for i in range(len(img_list)):
-                nom_img_ac = "img"+str(i)+".jpg"
-                img_list[i] = os.path.join(chemin_dossier, nom_img_ac)
+            
+            idx_chx = verif_rep_3()
+            img_path = chemin_choix(idx_chx[1])
+            
+            # wait for the new images to be created and stored
+            img_ready = algen.create_new_images(img_path, env_path)
+            
+            if (img_ready==TRUE):
+                chemin_dossier = utils.get_path(env_path, 'gen_img')
+                # replace the old paths by the new
+                for i in range(len(img_list)):
+                    nom_img_ac = "img"+str(i)+".jpg"
+                    img_list[i] = os.path.join(chemin_dossier, nom_img_ac)
 
             f3_img.destroy()
             openf3(env_path, img_list)
