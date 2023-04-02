@@ -33,19 +33,19 @@ if test == "Y" or test == "y":
     logging.info('Creating environement')
     utils.create_folders(env_path, dev = True)
     
-    # idkit.db database du programme
+    # idkit.db database of program
     path = utils.get_path(env_path, "Database")
     add_path = os.path.join(path, "idkit.db")
     url = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283443"
     wget.download(url, add_path)
     
-    # idkit.png pour le logo du programme
+    # idkit.png for program logo
     path = utils.get_path(env_path, "Interface")
     url2 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283444"
     add_path = os.path.join(path, "idkit.png")
     wget.download(url2, out=add_path)
     
-    # new_dataset.zip pour les images de la base de données
+    # new_dataset.zip for images of database
     path = utils.get_path(env_path, "Img_base")
     add_path = os.path.join(path, "new_dataset.zip")
     url3 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283445"
@@ -53,6 +53,11 @@ if test == "Y" or test == "y":
     with zipfile.ZipFile(add_path, 'r') as zip_ref:
         zip_ref.extractall(path)
     
+    # model.pt for trained auto encodeur
+    path = utils.get_path(env_path, "Encoder")
+    add_path = os.path.join(path, "model.pt")
+    url4 = "https://filesender.renater.fr/download.php?token=376da0cb-3715-41be-9851-fb27af1aba89&files_ids=23539804"
+    wget.download(url4, out=add_path)
     
     # Temp as no option for downloading dataset exist
     path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
