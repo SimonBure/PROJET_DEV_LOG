@@ -22,6 +22,24 @@ import math
 from projet import utils                   # Mathematical functions
 
 class Autoencoder(nn.Module):
+    """
+    A convolutional autoencoder neural network.
+
+    The autoencoder has two main components: an encoder and a decoder. The encoder consists of a sequence of
+    convolutional layers that encode the input image into a lower-dimensional latent space. The decoder takes the
+    encoded representation and reconstructs the original image.
+
+    Args:
+        None
+
+    Attributes:
+        encoder (nn.Sequential): A sequence of convolutional layers that make up the encoder.
+        decoder (nn.Sequential): A sequence of convolutional layers that make up the decoder.
+
+    Methods:
+        forward(x: torch.Tensor): Computes the forward pass of the autoencoder given an input tensor `x`. Returns the
+        reconstructed output tensor.
+    """
     def __init__(self):
         super(Autoencoder, self).__init__()
 
@@ -66,6 +84,20 @@ def load_model(path):
 
 #################### Create a custom dataset class #########
 class MyDataset(Dataset):
+    """
+    A PyTorch dataset that represents a collection of samples.
+
+    Args:
+        samples (torch.Tensor): A 4D tensor of shape (batch_size, height, width, channels) representing the samples.
+
+    Attributes:
+        samples (torch.Tensor): A 4D tensor of shape (batch_size, height, width, channels) representing the samples.
+
+    Methods:
+        __len__(): Returns the number of samples in the dataset.
+        __getitem__(idx: int): Returns the sample at the given index.
+
+    """
     def __init__(self, samples):
         self.samples = samples
 
@@ -77,6 +109,22 @@ class MyDataset(Dataset):
         return sample
 ################## Load Database ###########################
 def load_dataset(width, height, nb_samples=-1, crop_images=False):
+    """
+    Loads image data from a folder and returns a PyTorch dataset object.
+
+    parameters:
+        width (int): The desired width of the images in pixels.
+        height (int): The desired height of the images in pixels.
+        nb_samples (int, optional): The maximum number of images to load from the folder. Defaults to -1, which loads all images.
+        crop_images (bool, optional): Whether to crop the images to a fixed size. Defaults to False.
+
+    Returns:
+        MyDataset: A PyTorch dataset object containing the loaded image data.
+
+    Raises:
+        IOError: If the folder path is invalid or cannot be accessed.
+
+    """
     # define crop parameters
     top = 40
     left = 18
@@ -262,24 +310,6 @@ decoded2 = decoded.squeeze(0)
 print("Decoded Tensor with the batch dimension erased: ", decoded2.shape)
 """
 
-
-# transform = T.ToPILImage()
-# img = transform(decoded2)
-# img.save('my_image.png')
-# img.show()
-# Encoded -> Decoded
-# img.save('/path/to/my_image.png')
-
-def encode_decode_tensor (tensor):
-    x = tensor.unsqueeze(0)
-    x = x.permute(0,3,1,2)
-    encoded = model.encoder(x)
-    decoded = model.decoder(encoded)
-    decoded_shor = decoded.squeeze(0)
-    #print(decoded_shor.shape)
-    return (decoded_shor)
-
-
 def encode(model, image: Image):
     """
     Encodes an input image using the given PyTorch model.
@@ -319,9 +349,8 @@ if __name__ == "__main__":
         CelebA = load_dataset(178, 218, nb_samples=40000, crop_images=True)
         print("Number of tensors: ", len(CelebA.samples))
         utils.save_tensor_to_disk_numpy(CelebA.samples, CelebA_ds_tensor_path)
-    #print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
+    print("This is the shape of the tensors in CelebA: ", CelebA.samples[0].shape)
 
-    #CelebA = load_dataset(178, 218, nb_samples=100, crop_images=True)
     print(type(CelebA))
 
 
@@ -329,10 +358,17 @@ if __name__ == "__main__":
     p_valid = 0.1
 
     train_ds, valid_ds, test_ds = split_train_valid_test_set(CelebA, p_train, p_valid)
-    # valid_ds[0].shape
+
 
     ############################## Loading the dataset into a DataLoader ###################
     my_batch_size = 10
+
+    """
+    #Full dataloader
+    CelebA_dl = DataLoader(CelebA, batch_size=my_batch_size, shuffle=True)
+    print(f"Full dataset contains : {len(CelebA)} images")
+    print(f"Full dataloader contains : {len(CelebA_dl)} batchs each containing {my_batch_size} images \n")
+    """
     # DataLoader d'entrainement
     train_dl = DataLoader(train_ds, batch_size=my_batch_size, shuffle=True)
     print(f"Training dataset contains : {len(train_ds)} images")
@@ -349,19 +385,18 @@ if __name__ == "__main__":
 
     ###################### Showing some images from the CelebA dataset constructed#############
     print("This is are images obtained from tensors in the CelebA dataset:")
+    plot_5_images(CelebA, 160, 160)
 
-    # plot_5_images(CelebA, 160, 160)
-
-    ##Architecture
+    ##Architecture Summary
     width = 160
     height = 160
     nb_chan_out = 64
     AutoEncoder = Autoencoder()  # width, height, nb_chan_out)
     print("AutoEncoder model:")
-    # print(summary(AutoEncoder, (3, width, height)))
+    print(summary(AutoEncoder, (3, width, height)))
 
-    model = Autoencoder()
     # Before actually training the model check if there is a trained model already
+    model = Autoencoder()
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model40k.pt")
     print(model_path)
     """
@@ -378,15 +413,13 @@ if __name__ == "__main__":
         # Save Model
         torch.save(model.state_dict(), model_path)
     """
+    ################################## Training the Autoencoder
     model = test_train_model(model, train_dl, valid_dl, nb_epochs = 100, learning_rate = 0.001)
     torch.save(model.state_dict(), model_path)
 
+    ################################ Save some decoded images
     for i, image in enumerate(CelebA[:5]):
         decoded = encode_decode_tensor(image)
         transform = T.ToPILImage()
         img = transform(decoded)
-        #img.show()
         img.save(os.path.join(utils.get_path(env_path, "Encoder"),"gen_img",f'img{i}.jpg'))
-
-    # print(train_dl.shape)
-    # utils.save_tensor_to_disk_numpy(train_dl, model_path)
