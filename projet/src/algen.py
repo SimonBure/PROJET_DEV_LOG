@@ -318,7 +318,7 @@ def mutate_img(tensor_encoded: Tensor, mutation_rate: float = 0.05,
 
 def chose_closest_tensor(input_tensor: Tensor, other_tensors: Tensor) -> Tensor:
     """Returns a sub-tensor inside other_tensors that is the closest, in
-    terms of mean of its value, to input_tensor.
+    terms of euclidian distance of its value, to input_tensor.
 
     Parameters
     ----------
@@ -351,13 +351,12 @@ def chose_closest_tensor(input_tensor: Tensor, other_tensors: Tensor) -> Tensor:
             [3.1876, 3.6320, 4.1872],
             [3.4574, 2.3627, 3.7312]])
     """
-    # Computing the means of the tensors
-    other_mean = other_tensors.mean(dim=(1, 2))
-    self_mean = input_tensor.mean()
-    # Computing the mean distances between the tensors
-    dist_to_other = torch.abs(self_mean - other_mean)
+    # Computing euclidian distance between input and the other tensors
+    dist_list = [torch.dist(input_tensor, t, p=2) for t in other_tensors]
+    dist_tensor = Tensor(dist_list)
+    # print(dist_tensor)
     # Choosing the tensor that has the closest distance to input_tensor
-    closest_tensor = other_tensors[torch.argmin(dist_to_other)]
+    closest_tensor = other_tensors[torch.argmin(dist_tensor)]
     return closest_tensor
 
 
@@ -418,6 +417,7 @@ def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
 
 
 def create_new_images(img_path: list[str, str, str]) -> bool:
+    # TODO doc
     img_encoded_tensor = flatten_img(img_path)
 
     return True
