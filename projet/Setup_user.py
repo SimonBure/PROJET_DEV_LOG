@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import IdKit.utils
-import IdKit.database
-#import IdKit.autoencoder
-import IdKit.main_f
+import IdKit.interface
 import os
 import sys
 import wget
@@ -33,7 +31,7 @@ if not os.path.exists(os.path.join(env_path, "Idkit")):
     
     IdKit.utils.create_folders(env_path)
     
-    # idkit.db database du programme
+    # idkit.db database of program
     print(" - Downloading database")
     path = IdKit.utils.get_path(env_path, "Database")
     add_path = os.path.join(path, "idkit.db")
@@ -41,14 +39,14 @@ if not os.path.exists(os.path.join(env_path, "Idkit")):
     logging.info('Download from %s' %(url))
     wget.download(url, add_path)
     
-    # idkit.png pour le logo du programme 
+    # idkit.png for program logo 
     path2 = IdKit.utils.get_path(env_path, "Interface")
     url2 = "https://filesender.renater.fr/download.php?token=e08cc673-d83a-45c8-a7ed-cd924c3f92e5&files_ids=23283444"
     add_path2 = os.path.join(path2, "idkit.png")
     logging.info('Download from %s' %(url2))
     wget.download(url2, out=add_path2)
     
-    # new_dataset.zip pour les images de la base de données
+    # new_dataset.zip for images of database
     print(" - Downloading image dataset")
     path3 = IdKit.utils.get_path(env_path, "Img_base")
     add_path3 = os.path.join(path3, "new_dataset.zip")
@@ -58,20 +56,34 @@ if not os.path.exists(os.path.join(env_path, "Idkit")):
     logging.info('Exctract new_dataset.zip')
     with zipfile.ZipFile(add_path3, 'r') as zip_ref:
         zip_ref.extractall(path3)
-    logging.info(' - Done')
-        
-
-    #IdKit.autoencoder.launch_encoder(env_path)
+    
+    
+    # model.pt for trained auto encodeur
+    print(" - Downloading trained model")
+    path4 = IdKit.utils.get_path(env_path, "Encoder")
+    add_path4 = os.path.join(path4, "model.pt")
+    url4 = "https://filesender.renater.fr/download.php?token=376da0cb-3715-41be-9851-fb27af1aba89&files_ids=23539804"
+    wget.download(url4, out=add_path4)
+    logging.info(' - Done')   
     
     print("- Environenement generated in %s" %(os.path.join(env_path, "Idkit")))
 
-if not os.path.exists(add_path) and os.path.exists(add_path2) and os.path.exists(add_path3):
+path = IdKit.utils.get_path(env_path, "Database")
+add_path = os.path.join(path, "idkit.db")
+path2 = IdKit.utils.get_path(env_path, "Interface")
+add_path2 = os.path.join(path2, "idkit.png")
+path3 = IdKit.utils.get_path(env_path, "Img_base")
+add_path3 = os.path.join(path3, "new_dataset.zip")
+path4 = IdKit.utils.get_path(env_path, "Encoder")
+add_path4 = os.path.join(path4, "model.pt")
+
+if not os.path.exists(add_path) or not os.path.exists(add_path2) or not os.path.exists(add_path3) or not os.path.exists(add_path4):
     logging.error('Files missings')
     raise(Exception("Files missings, please reinstall the program"))
 
 print("- Launching program")
 logging.info('Launching program')
-IdKit.main_f.f1(env_path)
+IdKit.interface.f1(env_path)
 
 
 

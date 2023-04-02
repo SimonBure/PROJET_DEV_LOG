@@ -192,7 +192,7 @@ def get_5_img(env_path, array=[]):
         if len(path_img_list) > 5:
             path_img_list_temp = []
             numbers = np.random.choice(
-                list(range(len(path_img_list))), size=5, replace=True)
+                list(range(len(path_img_list))), size=5, replace=False)
             for i in numbers:
                 path_img_list_temp.append(path_img_list[i])
             path_img_list = path_img_list_temp
