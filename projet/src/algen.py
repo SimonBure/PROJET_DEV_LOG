@@ -9,8 +9,7 @@ from torch import Tensor
 from torchvision import transforms
 
 from database import request_data_by_id
-import autoencoder as ae
-import autoencoder_v2 as ae2
+from projet.src_deploy import autoencoder_deploy as ae
 from projet import utils
 
 
@@ -24,7 +23,7 @@ def flatten_img(img_path, env_path):
     img_path: str or list[str]
         Path or paths of the images to retrieve
     env_path: str
-        Path of the current environnement, used to retrieve the
+        Path of the current environment, used to retrieve the
         autoencoder trained model
 
     Returns
@@ -58,8 +57,8 @@ def flatten_img(img_path, env_path):
     if type(img_path) is list:
         temp_img = Image.open(img_path[0])  # Temporary img to get its size
         temp_tensor = to_tensor(temp_img)
-        temp_tensor = ae2.crop_image_tensor(temp_tensor)
-        temp_tensor = ae2.encode(autoencoder, temp_tensor)
+        temp_tensor = ae.crop_image_tensor(temp_tensor)
+        temp_tensor = ae.encode(autoencoder, temp_tensor)
         size = temp_tensor.shape
 
         # Global Tensor containing all the images
@@ -71,12 +70,16 @@ def flatten_img(img_path, env_path):
                 img = Image.open(path)  # PIL Image
                 img_tensor: Tensor = to_tensor(img)  # Image -> Tensor
 
-                # Cropping the tensor to 160x160 pixels
-                img_tensor_crop = ae2.crop_image_tensor(img_tensor)
+                if img_tensor.size() == torch.Size((3, 218, 178)):
+                    # Cropping the tensor to 160x160 pixels
+                    img_tensor_crop = ae.crop_image_tensor(img_tensor)
 
-                encoded_tensor = ae2.encode(autoencoder, img_tensor_crop)
+                else:
+                    img_tensor_crop = img_tensor
 
-                # print(f"Image tensor shape: {img_tensor.shape}")
+                # print(img_tensor_crop.size())
+                encoded_tensor = ae.encode(autoencoder, img_tensor_crop)
+
                 flat_img_tensor[i]: Tensor = flatten(encoded_tensor)
 
             else:
@@ -89,9 +92,9 @@ def flatten_img(img_path, env_path):
         img_tensor = to_tensor(img)  # Image -> Tensor
 
         # Cropping the tensor to 160x160 pixels
-        img_tensor_crop = ae2.crop_image_tensor(img_tensor)
+        img_tensor_crop = ae.crop_image_tensor(img_tensor)
 
-        encoded_tensor: Tensor = ae2.encode(autoencoder, img_tensor_crop)
+        encoded_tensor: Tensor = ae.encode(autoencoder, img_tensor_crop)
         flat_tensor: Tensor = flatten(encoded_tensor)
 
         return flat_tensor
@@ -112,7 +115,7 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
     base_encoded_dim: tuple of ints
         Size of the tensor before going into flatten_img function.
     env_path: str
-        Path of the current environnement, used to retrieve the
+        Path of the current environment, used to retrieve the
         autoencoder trained model
 
     Returns
@@ -149,12 +152,10 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
 
             decoded_img = ae.decode(autoencoder, unflat_img)
 
-            # Enhancing the image with a filter
-            filter = ImageFilter.SMOOTH_MORE  # SHARPEN, SMOOTH, EDGE_ENHANCE are quite good
+            # Reducing the noise with a filter
+            filter = ImageFilter.EDGE_ENHANCE
             enhanced_img = decoded_img.filter(filter)
-            # enhanced_img = decoded_img.filter(filter)
-            filter = ImageFilter.SHARPEN
-            enhanced_img = enhanced_img.filter(filter)
+            enhanced_img = enhanced_img.filter(ImageFilter.SMOOTH)
 
             img_list[i] = enhanced_img
 
@@ -365,7 +366,7 @@ def chose_closest_tensor(input_tensor, other_tensors):
     return closest_tensor
 
 
-def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
+def crossing_over(tensor_encoded, crossing_rate):
     """Swaps pixels between the given input images. Swaps are made
     randomly for each pixel but the choice of which images are to be
     swapped is made based on a mean distance criterion.
@@ -402,16 +403,51 @@ def crossing_over(tensor_encoded: Tensor, crossing_rate: float) -> Tensor:
     """
     if type(tensor_encoded) is Tensor:
         global_tensor = torch.zeros(tensor_encoded.size())
-        for i, tensor in enumerate(tensor_encoded):
-            crossing_tensor = torch.rand(size=tensor.size())
-            # Swap with the closest image between the two others
-            other_ind = [k for k in range(tensor_encoded.size()[0]) if k != i]
-            chosen_tensor = chose_closest_tensor(tensor, tensor_encoded[other_ind])
-            # Swapping pixels between tensors
-            new_tensor = torch.where(crossing_tensor < crossing_rate,
-                                     chosen_tensor, tensor)
 
-            global_tensor[i] = new_tensor
+        crossing_tensor = torch.rand(size=tensor_encoded[0].size())
+        fst_tensor = tensor_encoded[0]
+
+        chosen_tensor = chose_closest_tensor(fst_tensor, tensor_encoded[1:])
+
+        # List of bool, True if the tensor has been used before
+        is_tensor_used = [torch.equal(fst_tensor, t) or torch.equal(chosen_tensor, t) for t in tensor_encoded]
+        # Swapping the values between the tensors
+        new_tensor = torch.where(crossing_tensor < crossing_rate, chosen_tensor, fst_tensor)
+        chosen_tensor = torch.where(crossing_tensor < crossing_rate, fst_tensor, chosen_tensor)
+
+        # Boolean tensor, True if the tensor has not been used yet
+        bool_tensor = ~Tensor(is_tensor_used).bool()
+        # Only tensor remaining to be swapped
+        remaining_tensor = tensor_encoded[bool_tensor][0]
+        print(remaining_tensor.size())
+        last_cross_tens = torch.rand(size=remaining_tensor.size())
+        last_chosen_tens = chose_closest_tensor(remaining_tensor,
+                                                tensor_encoded[~bool_tensor])
+        # Swapping the values for the remaining tensor
+        final_tensor = torch.where(last_cross_tens < crossing_rate,
+                                   last_chosen_tens, remaining_tensor)
+
+        # Feeling the global tensor
+        global_tensor[0] = new_tensor
+        global_tensor[1] = chosen_tensor
+        global_tensor[2] = final_tensor
+
+        # for i, tensor in enumerate(tensor_encoded):
+        #     crossing_tensor = torch.rand(size=tensor.size())
+        #     # Swap with the closest image between the two others
+        #     other_ind = [k for k in range(tensor_encoded.size()[0]) if k != i]
+        #     chosen_tensor = chose_closest_tensor(tensor, tensor_encoded[other_ind])
+        #
+        #     equal_tensor_list = [torch.equal(chosen_tensor, t) for t in tensor_encoded]
+        #     bool_tensor = Tensor(equal_tensor_list).bool()
+        #     print(bool_tensor)
+        #     tensor_encoded = tensor_encoded[bool_tensor]
+        #     print(tensor_encoded.size())
+        #     # Swapping pixels between tensors
+        #     new_tensor = torch.where(crossing_tensor < crossing_rate,
+        #                              chosen_tensor, tensor)
+        #
+        #     global_tensor[i] = new_tensor
 
         return global_tensor
 
@@ -430,14 +466,30 @@ def remove_worst_tensor(input_tensor):
     return good_tensors
 
 
-def create_new_images(img_path, env_path) -> bool:
-    # TODO doc
-    img_encoded_tensor = flatten_img(img_path, env_path)
+def create_new_images(img_path, env_path):
+    """Generates 5 new images based on the 3 given with img_path.
+    It uses the crossing_over function to generate 6 new images by
+    swapping the values between the encoded tensors and then remove the
+    worst one in terms of standard deviation
 
-    # 3 new images with crossing-overs
-    crossed_img = crossing_over(img_encoded_tensor, crossing_rate=0.5)
-    # 6 new images with crossing-overs
-    more_crossing = crossing_over(img_encoded_tensor, crossing_rate=0.5)
+    Parameters
+    ----------
+    img_path: list of str
+        Path where to retrieve the selected images. These images are
+        used to create 5 new images.
+    env_path: str
+        Path of the current environment, used to save the generated
+        images at the correct place
+
+    Returns
+    -------
+    True to indicate to the interface that the image are generated
+    """
+    img_encoded_tensor = flatten_img(img_path, env_path)
+    # Create 3 new images with crossing-overs
+    crossed_img = crossing_over(img_encoded_tensor, crossing_rate=0.35)
+    # Create 3 more images with crossing-overs
+    more_crossing = crossing_over(img_encoded_tensor, crossing_rate=0.35)
     # Concatenation of the 6 tensors
     new_tensors = torch.cat((crossed_img, more_crossing), dim=0)
     # Keep the 5 best images in terms of deviation
@@ -487,11 +539,11 @@ if __name__ == "__main__":
     # Load an autoencoder and encode an img
     # pic.show("Image de base")
     model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model40k.pt")
-    pic_cropped = ae2.crop_image_tensor(pic_tensor)
+    pic_cropped = ae.crop_image_tensor(pic_tensor)
     print(f"Base size: {pic_tensor.size()}")
     print(f"Cropped size: {pic_cropped.size()}")
     autoencoder = ae.load_model(model_path)  # Loading the trained model
-    encoded_img = ae2.encode(autoencoder, pic_cropped)  # Encoding the tensor
+    encoded_img = ae.encode(autoencoder, pic_cropped)  # Encoding the tensor
     print(f"Image tensor : {encoded_img.size()}")
     decoded = ae.decode(autoencoder, encoded_img)  # Decoding the tensor
     # decoded.show("Image décodée")
@@ -606,10 +658,10 @@ if __name__ == "__main__":
     create_new_images(random_img_path, env_path)
 
     # Regenerating based on already generated images
-    path_gen_img = utils.get_path(env_path, 'gen_img')
-    path_img = [path_gen_img + "/" + f"image{i}.png" for i in range(3)]
-    tensor_regen = flatten_img(path_img, env_path)
-    crossing_over(tensor_regen, crossing_rate=0.8)
-    img_regen = deflatten_img(tensor_regen, encoded_img.size(), env_path)
-    for img in img_regen:
-        img.show()
+    # path_gen_img = utils.get_path(env_path, 'gen_img')
+    # path_img = [path_gen_img + "/" + f"image{i}.png" for i in range(3)]
+    # tensor_regen = flatten_img(path_img, env_path)
+    # crossing_over(tensor_regen, crossing_rate=0.5)
+    # img_regen = deflatten_img(tensor_regen, encoded_img.size(), env_path)
+    # for img in img_regen:
+    #     img.show()

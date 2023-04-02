@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torchvision.transforms
 from torch.utils.data import Dataset
 import os
 from PIL import Image
@@ -99,21 +100,36 @@ def load_dataset(width, height, nb_samples=-1, crop_images=False):
 
     return dataset
 
+
+def crop_image_tensor(tensor):
+    top = 40
+    left = 18
+    crop_height = 160
+    crop_width = 160
+    # img = tensor.permute(2, 0, 1)
+    img = T.functional.crop(tensor, top, left, crop_height, crop_width)
+    # cropped_tensor = img.permute(1, 2, 0)
+    # print(cropped_tensor.shape)
+    return img
+
+
 def load_model(name_file):
     """
     Loads the state dictionary of a PyTorch model from a file with the given name
     and returns the corresponding model object.
 
     Parameters:
-        model (torch.nn.Module): PyTorch model to be loaded.
-        name_file (str): Filename to load the model from.
+        name_file: str
+            Filename to load the model from.
 
     Returns:
-        torch.nn.Module: The loaded PyTorch model.
+        model: torch.nn.Module
+            The loaded PyTorch model.
     """
     model = Autoencoder()
     model.load_state_dict(torch.load(name_file))
     return model
+
 
 def save_img(img: Image, path: str, format: str):
     """
@@ -129,6 +145,7 @@ def save_img(img: Image, path: str, format: str):
     """
     img.show()  # Display the image
     img.save(os.path.join(path, format))  # Save the image
+
 
 def save_encoded_im(tensor, name_file):
     """
@@ -154,23 +171,8 @@ def load_encoded_im(name_file):
     tensor = torch.load(name_file)
     return tensor
 
-def load_model(name_file):
-    """
-    Loads the state dictionary of a PyTorch model from a file with the given name
-    and returns the corresponding model object.
 
-    Parameters:
-        model (torch.nn.Module): PyTorch model to be loaded.
-        name_file (str): Filename to load the model from.
-
-    Returns:
-        torch.nn.Module: The loaded PyTorch model.
-    """
-    model = Autoencoder()
-    model.load_state_dict(torch.load(name_file))
-    return model
-
-def encode(image,model):
+def encode(model, image):
     """
     Encodes an input image using the given PyTorch model.
     Parameters:
@@ -183,11 +185,12 @@ def encode(image,model):
     """
     x = image.unsqueeze(0)  # Adding one dimension for the autoencoder
     # Changing the image to the correct dimensions order for the autoencoder
-    x = x.permute(0, 3, 1, 2)
+    # x = x.permute(0, 3, 2, 1)
     encoded = model.encoder(x)
-    return encoded
+    return encoded[0]
 
-def decode(tensor,model):
+
+def decode(model, tensor):
     """
     Decodes an input tensor using the given PyTorch model.
     Parameters:
@@ -199,7 +202,8 @@ def decode(tensor,model):
     """
     decoded = model.decoder(tensor)
     decoded_shor = decoded.squeeze(0)
-    return (decoded_shor)
+    img_tf = T.ToPILImage()
+    return img_tf(decoded_shor)
 
 
 def fin(algogen_path, interface_path):
