@@ -1,6 +1,9 @@
 .idea/
 projet/src_deploy/__pycache__/
 Idkit.log
+docs/build/doctrees
+docs/build/html/_sources
+docs/build/html/_static
 docs/source/_static
 docs/source/_templates
 docs/source/*.rst
