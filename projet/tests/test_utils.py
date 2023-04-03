@@ -4,7 +4,8 @@ from projet import utils
 
 
 class TestUtils(unittest.TestCase):
-    """
+    """    remove_worst_tensor(crossed_tensors)
+
     Class for handling all the unit tests of the utils module
     """
 

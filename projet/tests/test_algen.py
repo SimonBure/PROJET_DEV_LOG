@@ -1,8 +1,6 @@
 import unittest
-from projet.src import algen as ag
 import torch
-from PIL import Image
-from torchvision import transforms
+from projet.idkit import algen as ag
 
 env_path = '../'
 
@@ -49,6 +47,7 @@ class TestUtils(unittest.TestCase):
         cat = torch.cat((a.unsqueeze(0), b.unsqueeze(0), c.unsqueeze(0)), 0)
         res = torch.cat((a.unsqueeze(0), c.unsqueeze(0)), 0)
         self.assertTrue(torch.equal(res, ag.remove_worst_tensor(cat)))
+
 
 if __name__ == "__main__":
     unittest.main()

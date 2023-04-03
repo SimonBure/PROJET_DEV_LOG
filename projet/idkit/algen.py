@@ -251,7 +251,7 @@ def mutate_img(tensor_encoded, mutation_rate=0.05, mode='add', scale='partial'):
                     Expected 'partial' or 'total' got {scale} instead")
 
             else:
-                raise ValueError(f"Wrong value for the modif parameter. \
+                raise ValueError(f"Wrong value for the mode parameter. \
                 Expected 'add' or 'reconstruct' got {mode} instead")
 
             return img_mut
@@ -300,7 +300,7 @@ def mutate_img(tensor_encoded, mutation_rate=0.05, mode='add', scale='partial'):
                         img_mut = mu + torch.randn(tensor.size()) * std
 
                 else:
-                    raise ValueError(f"Wrong value for the modif parameter. \
+                    raise ValueError(f"Wrong value for the mode parameter. \
                     Expected 'add' or 'reconstruct' got {mode} instead")
 
                 global_tensor[i] = img_mut
@@ -396,47 +396,76 @@ def crossing_over(tensor_encoded, crossing_rate):
     """
     if type(tensor_encoded) is Tensor:
         global_tensor = torch.zeros(tensor_encoded.size())
+        for i, tensor in enumerate(tensor_encoded):
+            # List of booleans, True when it is not tensor
+            is_not_this_tensor = [True if not torch.equal(tensor, t)
+                                  else False for t in tensor_encoded]
+            # Sub-tensor containing all the tensors inside tensor_encoded
+            # except tensor
+            other_tensor = tensor_encoded[Tensor(is_not_this_tensor).bool()]
+            # Chose the closest tensor to tensor in terms of euclidian
+            # distance. It values will be swapped with tensor values
+            chosen_tensor = chose_closest_tensor(tensor, other_tensor)
+            # Randomly chose the tensor values that will be swapped
+            is_crossing = torch.rand(chosen_tensor.size()) < crossing_rate
+            # Perform the swapping
+            crossed_tensor = torch.where(is_crossing, chosen_tensor, tensor)
 
-        crossing_tensor = torch.rand(size=tensor_encoded[0].size())
-        fst_tensor = tensor_encoded[0]
-
-        chosen_tensor = chose_closest_tensor(fst_tensor, tensor_encoded[1:])
-
-        # List of bool, True if the tensor has been used before
-        is_tensor_used = [torch.equal(fst_tensor, t) or torch.equal(chosen_tensor, t) for t in tensor_encoded]
-        # Swapping the values between the tensors
-        new_tensor = torch.where(crossing_tensor < crossing_rate, chosen_tensor, fst_tensor)
-        chosen_tensor = torch.where(crossing_tensor < crossing_rate, fst_tensor, chosen_tensor)
-
-        # Boolean tensor, True if the tensor has not been used yet
-        bool_tensor = ~Tensor(is_tensor_used).bool()
-        # Only tensor remaining to be swapped
-        remaining_tensor = tensor_encoded[bool_tensor][0]
-        last_cross_tens = torch.rand(size=remaining_tensor.size())
-        last_chosen_tens = chose_closest_tensor(remaining_tensor,
-                                                tensor_encoded[~bool_tensor])
-        # Swapping the values for the remaining tensor
-        final_tensor = torch.where(last_cross_tens < crossing_rate,
-                                   last_chosen_tens, remaining_tensor)
-
-        # Feeling the global tensor
-        global_tensor[0] = new_tensor
-        global_tensor[1] = chosen_tensor
-        global_tensor[2] = final_tensor
+            global_tensor[i] = crossed_tensor
 
         return global_tensor
 
     else:
-        raise TypeError(f"Input should be of type or torch.Tensor \
+        raise TypeError(f"Input should be of type torch.Tensor \
                         and not a {type(tensor_encoded)}")
 
 
 def remove_worst_tensor(input_tensor):
-    # TODO doc
-    std_tensor = input_tensor.std(dim=(1, 2))
-    worst_tensor = input_tensor[torch.argmax(std_tensor)]
-    select_ind = [False if i == torch.argmax(std_tensor) else True for i in range(input_tensor.size()[0])]
-    bool_tensor = Tensor(select_ind).bool()
+    """Returns a truncated version of the input_tensor where the tensor
+    that has the greatest euclidian distance with the other is removed
+
+    Parameters
+    ----------
+    input_tensor: Tensor
+        Tensor object with 3 dimensions
+
+    Returns
+    -------
+    good_tensors: Tensor
+        Tensor object with 3 dimensions as well but where the tensor
+        with the greatest euclidian distance was removed
+    >>>a = torch.randn((3, 3)) + 2.3
+    tensor([[1.6615, 0.7543, 1.6239],
+        [2.6538, 2.8430, 1.9353],
+        [2.1524, 1.5966, 2.4236]])
+    >>>b = torch.randn((3, 3)) + 12.9
+    tensor([[16.6363, 13.5585, 14.8932],
+        [12.5578, 12.4041, 13.0811],
+        [11.1850, 14.0882, 12.0674]])
+    >>>c = torch.randn((3, 3)) + 5.43
+    tensor([[6.7253, 3.4713, 7.6311],
+        [3.7403, 4.5557, 5.5945],
+        [5.8821, 6.7597, 6.3254]])
+    >>>cat = torch.cat((a.unsqueeze(0), b.unsqueeze(0), c.unsqueeze(0)), 0)
+    >>>remove_worst_tensor(cat)
+    tensor([[[1.6615, 0.7543, 1.6239],
+         [2.6538, 2.8430, 1.9353],
+         [2.1524, 1.5966, 2.4236]],
+
+        [[6.7253, 3.4713, 7.6311],
+         [3.7403, 4.5557, 5.5945],
+         [5.8821, 6.7597, 6.3254]]])
+    """
+    # Tensor to store the total distance from each tensor to the other
+    dist_tensor = torch.zeros(input_tensor.size()[0])
+    for i, tensor in enumerate(input_tensor):
+        # Compute euclidian distance to the other tensors
+        dist_tensor[i] = torch.dist(tensor, input_tensor)
+    # List of boolean, False for the maximum of dist_tensor
+    is_kept = [False if i == torch.argmax(dist_tensor) else True
+               for i in range(input_tensor.size()[0])]
+    # Transform to boolean tensor
+    bool_tensor = Tensor(is_kept).bool()
     good_tensors = input_tensor[bool_tensor]
     return good_tensors
 
@@ -486,7 +515,7 @@ if __name__ == "__main__":
     # Choosing 3 random images in the database
     random_id = np.random.randint(low=0, high=600, size=(3,))
     # print(random_id)
-    random_img_path = request_data_by_id(env_path, random_id, who='idkit')
+    random_img_path = request_data_by_id(env_path, random_id)
     print(random_img_path)
     random_img_tensor = flatten_img(random_img_path, env_path)
 
@@ -496,21 +525,16 @@ if __name__ == "__main__":
         img.show()
 
     # Mutating the images
-    # mut_rand_tensor = mutate_img(random_img_tensor, mutation_rate=0.1,
-    #                              mode='reconstruct', scale='partial')
+    mut_rand_tensor = mutate_img(random_img_tensor, mutation_rate=0.1,
+                                 mode='reconstruct', scale='partial')
 
     # Crossing-overs between the pictures
-    # crossed_tensors = crossing_over(random_img_tensor, crossing_rate=0.3)
+    crossed_tensors = crossing_over(random_img_tensor, crossing_rate=0.5)
     # crossed_tensors_mut = crossing_over(mut_rand_tensor, crossing_rate=0.4)
-    # deflat_sev = deflatten_img(crossed_tensors, encoded_img.size())
-    # deflat_sev_mut = deflatten_img(crossed_tensors_mut, encoded_img.size())
-    # for img in deflat_sev:
-    #     img.show()
-
-
-    # Testing to remove the worst tensor
-    # good_tensors = remove_worst_tensor(crossed_tensors)
-    # print(f"Size after removing the worst tensor: {good_tensors.size()}")
+    deflat_sev = deflatten_img(crossed_tensors, (64, 18, 18), env_path)
+    # deflat_sev_mut = deflatten_img(crossed_tensors_mut, (64, 18, 18), env_path)
+    for img in deflat_sev:
+        img.show()
 
     # for img in deflat_sev_mut:
     #     img.show()
