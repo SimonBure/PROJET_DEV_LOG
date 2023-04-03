@@ -4,6 +4,9 @@ Version 0.2
 	Version qui permet d'utiliser l'algorythme génétique et l'auto-encodeur pour générer de nouvelles images.
 	Déployé le 02/04/2023.
 
+0.2.3
+	Version finale : algorythme génétique dans sa version finale et ajout des loggings et bonnes dépendances
+
 0.2.2-24
 	Ajout de la dernière version de l'algorythme génétique
 	
