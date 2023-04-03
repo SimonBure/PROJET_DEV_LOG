@@ -1,6 +1,6 @@
 from tkinter import *
 import tkinter as tk
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageFilter
 from tkinter.messagebox import *
 from tkinter import ttk
 import os
@@ -24,20 +24,20 @@ def f1(env_path):
         Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
         showinfo('Aide', """Bienvenue dans Idkit, le logiciel de génération de
-portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. 
-\n\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner 
-les attributs que présente le suspect. \n\nVeillez à  séléctionner 
+portrait robot ! \nAfin de lancer le programme, appuyer sur Commencer. 
+\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner 
+les attributs que présente le suspect. \nVeillez à  séléctionner 
 judicieusement ces attributs car ils permettront de choisir les images 
-ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs 
+ressemblant le plus à la personne souhaitée. \nUne fois les attributs 
 sélectionnés, plusieurs images vous seront présentées et vous devrez 
 sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une 
 des images présentée vous semble convenable, vous pouvez arrêter la 
 recherche en séléctionnant une unique photo et en sélectionnnant 
-'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant 
-le menu déroulant en haut à gauche, vous pourrez:\n\n
-    - Exporter la photo à l'endroit de votre choix\n\n
-    - Recommencer une nouvelle recherche\n\n
-    - Quitter le programme""")
+'Image finale'. \nAinsi la fenêtre d'export apparaitra et en utilisant 
+le menu déroulant en haut à gauche, vous pourrez:\n
+-Exporter la photo à l'endroit de votre choix\n
+-Recommencer une nouvelle recherche\n
+-Quitter le programme""")
 
     def openf2():
         """
@@ -508,10 +508,10 @@ def f3(env_path, img_list):
         the user clicks on the button
         """
         showinfo('Aide', """Veuillez choisir les images correspondant le mieux
-                au suspect parmi les images proposées. Choisissez les 3 images
-                les plus exactes jusqu'à ce que l'une d'elles vous satisfasse.
-                Pour sélectionner l'image finale, veuillez cocher la case
-                "Finale" pour confirmer votre choix.""")
+au suspect parmi les images proposées. Choisissez les 3 images
+les plus exactes jusqu'à ce que l'une d'elles vous satisfasse.
+Pour sélectionner l'image finale, veuillez cocher la case
+"Finale" pour confirmer votre choix.""")
 
     # creation of the 3rd window
     f3_img = Tk()
@@ -544,7 +544,7 @@ def f3(env_path, img_list):
     frame.place(anchor='center', relx=0.10, rely=0.4)
     img = Image.open(img_list[0])
     resized_image = img.resize((200, 200), Image.ANTIALIAS)
-    new_image = ImageTk.PhotoImage(resized_image)
+    new_image = ImageTk.PhotoImage(resized_image.filter(ImageFilter.SHARPEN).filter(ImageFilter.SMOOTH))
     label = Label(frame, image=new_image)
     label.pack()
 
@@ -552,7 +552,7 @@ def f3(env_path, img_list):
     frame2.place(anchor='center', relx=0.3, rely=0.4)
     img2 = Image.open(img_list[1])
     resized_image2 = img2.resize((200, 200), Image.ANTIALIAS)
-    new_image2 = ImageTk.PhotoImage(resized_image2)
+    new_image2 = ImageTk.PhotoImage(resized_image2.filter(ImageFilter.SHARPEN).filter(ImageFilter.SMOOTH))
     label2 = Label(frame2, image=new_image2)
     label2.pack()
 
@@ -560,7 +560,7 @@ def f3(env_path, img_list):
     frame3.place(anchor='center', relx=0.5, rely=0.4)
     img3 = Image.open(img_list[2])
     resized_image3 = img3.resize((200, 200), Image.ANTIALIAS)
-    new_image3 = ImageTk.PhotoImage(resized_image3)
+    new_image3 = ImageTk.PhotoImage(resized_image3.filter(ImageFilter.SHARPEN).filter(ImageFilter.SMOOTH))
     label3 = Label(frame3, image=new_image3)
     label3.pack()
 
@@ -568,7 +568,7 @@ def f3(env_path, img_list):
     frame4.place(anchor='center', relx=0.7, rely=0.4)
     img4 = Image.open(img_list[3])
     resized_image4 = img4.resize((200, 200), Image.ANTIALIAS)
-    new_image4 = ImageTk.PhotoImage(resized_image4)
+    new_image4 = ImageTk.PhotoImage(resized_image4.filter(ImageFilter.SHARPEN).filter(ImageFilter.SMOOTH))
     label4 = Label(frame4, image=new_image4)
     label4.pack()
 
@@ -576,7 +576,7 @@ def f3(env_path, img_list):
     frame5.place(anchor='center', relx=0.9, rely=0.4)
     img5 = Image.open(img_list[4])
     resized_image5 = img5.resize((200, 200), Image.ANTIALIAS)
-    new_image5 = ImageTk.PhotoImage(resized_image5)
+    new_image5 = ImageTk.PhotoImage(resized_image5.filter(ImageFilter.SHARPEN).filter(ImageFilter.SMOOTH))
     label5 = Label(frame5, image=new_image5)
     label5.pack()
 
