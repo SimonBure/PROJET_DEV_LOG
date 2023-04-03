@@ -192,7 +192,21 @@ added to it.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="idkit.algen.remove_worst_tensor">
 <span class="sig-prename descclassname"><span class="pre">idkit.algen.</span></span><span class="sig-name descname"><span class="pre">remove_worst_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#idkit.algen.remove_worst_tensor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a truncated version of the input_tensor where the tensor
+that has the greatest euclidian distance with the other is removed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_tensor</strong> (<em>Tensor</em>) – Tensor object with 3 dimensions</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>good_tensors</strong> – Tensor object with 3 dimensions as well but where the tensor
+with the greatest euclidian distance was removed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-idkit.autoencoder_deploy">
@@ -205,11 +219,6 @@ added to it.</p>
 <p>The autoencoder has two main components: an encoder and a decoder. The encoder consists of a sequence of
 convolutional layers that encode the input image into a lower-dimensional latent space. The decoder takes the
 encoded representation and reconstructs the original image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>None</strong> – </p>
-</dd>
-</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="idkit.autoencoder_deploy.Autoencoder.encoder">
 <span class="sig-name descname"><span class="pre">encoder</span></span><a class="headerlink" href="#idkit.autoencoder_deploy.Autoencoder.encoder" title="Permalink to this definition">¶</a></dt>
@@ -469,10 +478,12 @@ Filename to load the model from.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>array</strong> – metadata array of 0 and 1</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>1D array</p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>array</strong> (<em>1D array</em>) – metadata array of 0 and 1</p></li>
+<li><p><em>&gt;&gt; create_querry_array()</em></p></li>
+<li><p><em>[“0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “-1”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”]</em></p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -555,10 +566,15 @@ considering the attributes, else choose randomly.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Number of image</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>len(resp)</p>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>len(resp)</em> – Number of image</p></li>
+<li><p><em>&gt;&gt; get_numb_response(“../”, [“0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”,</em> – “0”, “0”, “0”, “1”, “0”, “0”, “0”, “0”,
+“0”, “0”, “0”,”0”, “0”, “0”, “0”, “0”,
+“0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”,
+“0”, “0”, “0”, “0”, “0”, “0”, “0”, “1”])</p></li>
+<li><p><em>59</em></p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -598,10 +614,11 @@ considering the attributes, else choose randomly.</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>query</strong> – All rows and lines of the dataset</p>
-</dd>
-<dt class="field-even">rtype<span class="colon">:</span></dt>
-<dd class="field-even"><p>list of str</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> (<em>list of str</em>) – All rows and lines of the dataset</p></li>
+<li><p><em>&gt;&gt; len(print_database(“../”))</em></p></li>
+<li><p><em>634</em></p></li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -644,12 +661,21 @@ considering the attributes, else choose randomly.</p>
 <dt>array<span class="classifier">1D array</span></dt><dd><p>metadata array of 0 and 1</p>
 </dd>
 </dl>
-<dl class="field-list simple">
+<dl class="field-list">
 <dt class="field-odd">returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>query</strong> – filename of possible img according to metadata gave</p>
+<dd class="field-odd"><ul>
+<li><p><strong>query</strong> (<em>str, list of str</em>) – filename of possible img according to metadata gave</p></li>
+<li><p><em>&gt;&gt; request_data_by_metadata(“../”,</em> –</p>
+<dl class="simple">
+<dt>[“0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”,</dt><dd><p>“0”, “0”, “0”, “1”, “0”, “0”, “0”, “0”,
+“0”, “0”, “0”,”0”, “0”, “0”, “0”, “0”,
+“0”, “0”, “0”, “0”, “0”, “0”, “0”, “0”,
+“0”, “0”, “0”, “0”, “0”, “0”, “0”, “1”])[0][-10:]</p>
 </dd>
-<dt class="field-even">rtype<span class="colon">:</span></dt>
-<dd class="field-even"><p>str, list of str</p>
+</dl>
+</li>
+<li><p><em>007612.jpg</em></p></li>
+</ul>
 </dd>
 </dl>
 </section>
