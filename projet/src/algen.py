@@ -9,8 +9,8 @@ from torch import Tensor
 from torchvision import transforms
 
 from database import request_data_by_id
-from projet.src_deploy import autoencoder_deploy as ae
-from projet import utils
+import src_deploy.autoencoder_deploy as ae
+import utils
 
 
 def flatten_img(img_path, env_path):
@@ -46,7 +46,7 @@ def flatten_img(img_path, env_path):
     """
     # Path where to find a trained autoencoder
     model_path = os.path.join(utils.get_path(env_path, "Encoder"),
-                              "model40k.pt")
+                              "model.pt")
     autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
 
     # To transform a PIL image to a torch Tensor
@@ -131,7 +131,7 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
     (160, 160)
     """
     # Path where to find a trained autoencoder
-    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model40k.pt")
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     autoencoder = ae.load_model(model_path)  # Loading the trained autoencoder
 
     if flat_tensor.dim() == 2:
@@ -538,7 +538,7 @@ if __name__ == "__main__":
 
     # Load an autoencoder and encode an img
     # pic.show("Image de base")
-    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model40k.pt")
+    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
     pic_cropped = ae.crop_image_tensor(pic_tensor)
     print(f"Base size: {pic_tensor.size()}")
     print(f"Cropped size: {pic_cropped.size()}")
