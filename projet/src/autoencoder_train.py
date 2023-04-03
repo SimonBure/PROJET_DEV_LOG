@@ -7,7 +7,6 @@ import torch.optim
 from torchsummary import summary
 from torch.utils.data import TensorDataset, Dataset, DataLoader
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 import os
 from PIL import Image
 import database
