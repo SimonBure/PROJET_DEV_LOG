@@ -7,6 +7,7 @@ import os
 import utils
 import database
 import algen
+import logging
 
 
 def f1(env_path):
@@ -23,18 +24,18 @@ def f1(env_path):
         """
         Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
-        showinfo('Aide', """Bienvenue dans Idkit, le logiciel de génération de
-portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. 
-\n\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner 
-les attributs que présente le suspect. \n\nVeillez à  séléctionner 
-judicieusement ces attributs car ils permettront de choisir les images 
-ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs 
-sélectionnés, plusieurs images vous seront présentées et vous devrez 
-sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une 
-des images présentée vous semble convenable, vous pouvez arrêter la 
-recherche en séléctionnant une unique photo et en sélectionnnant 
-'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant 
-le menu déroulant en haut à gauche, vous pourrez:\n\n
+        showinfo('Aide', """Bienvenue dans Idkit, le logiciel de génération de\
+ portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer.\
+ \n\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner\
+ les attributs que présente le suspect. \n\nVeillez à  séléctionner\
+ judicieusement ces attributs car ils permettront de choisir les images\
+ ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs\
+ sélectionnés, plusieurs images vous seront présentées et vous devrez\
+ sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une\
+ des images présentée vous semble convenable, vous pouvez arrêter la\
+ recherche en séléctionnant une unique photo et en sélectionnnant\
+ 'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant\
+ le menu déroulant en haut à gauche, vous pourrez:\n\n\
     - Exporter la photo à l'endroit de votre choix\n\n
     - Recommencer une nouvelle recherche\n\n
     - Quitter le programme""")
@@ -227,6 +228,7 @@ def f2(env_path):
 
         test = verif_reponses()
         ans_user = liste_db()
+        logging.info('Metadata summitted')
 
         # if some questions were not answered, an error pops up and the
         # user must complete the questions
@@ -259,9 +261,9 @@ def f2(env_path):
     boutSend.place(anchor=tk.N, relheight=0.07,
                    relwidth=0.10, relx=0.5, rely=0.8)
 
-    labelT = Label(f2_flr, text="""Ce formulaire vise à affiner la base de
-    données pour vous présenter les solutions les plus pertinentes dans un
-    temps minimal.""", bg="white", font="Arial 14 italic")
+    labelT = Label(f2_flr, text="""Ce formulaire vise à affiner la base de\
+ données pour vous présenter les solutions les plus pertinentes dans un\
+ temps minimal.""", bg="white", font="Arial 14 italic")
     labelT.pack()
 
     labelSEXE = Label(f2_flr, text="Quel est le genre de l'individu ?",
@@ -479,6 +481,7 @@ def f3(env_path, img_list):
             img_ready = algen.create_new_images(img_path, env_path)
             
             if (img_ready==TRUE):
+                logging.info('Creating 5 new images')
                 chemin_dossier = utils.get_path(env_path, 'gen_img')
                 # replace the old paths by the new
                 for i in range(len(img_list)):
@@ -507,11 +510,11 @@ def f3(env_path, img_list):
         Event linked to the "Aide" button : display an "Aide" pannel when
         the user clicks on the button
         """
-        showinfo('Aide', """Veuillez choisir les images correspondant le mieux
-                au suspect parmi les images proposées. Choisissez les 3 images
-                les plus exactes jusqu'à ce que l'une d'elles vous satisfasse.
-                Pour sélectionner l'image finale, veuillez cocher la case
-                "Finale" pour confirmer votre choix.""")
+        showinfo('Aide', """Veuillez choisir les images correspondant le mieux\
+ au suspect parmi les images proposées. Choisissez les 3 images\
+ les plus exactes jusqu'à ce que l'une d'elles vous satisfasse.\
+ Pour sélectionner l'image finale, veuillez cocher la case\
+ "Finale" pour confirmer votre choix.""")
 
     # creation of the 3rd window
     f3_img = Tk()
@@ -533,10 +536,10 @@ def f3(env_path, img_list):
 
     # Creation of an error message if less than 5 images can fit the user's criteres
     if img_list == 0:
-        showinfo('ATTENTION', """Il n'existe pas assez d'images correspondantes
-                à cette sélection dans la base de données. Veuillez élargir
-                vos critères en sélectionnant "ne sais pas" pour certains
-                attributs.""")
+        showinfo('ATTENTION', """Il n'existe pas assez d'images correspondantes\
+ à cette sélection dans la base de données. Veuillez élargir\
+ vos critères en sélectionnant "ne sais pas" pour certains\
+ attributs.""")
         f3_img.destroy()
         f2(env_path)
 
@@ -581,8 +584,8 @@ def f3(env_path, img_list):
     label5.pack()
 
     labelChoix = tk.Label(f3_img,
-                          text=""" Veuillez choisir la ou les images correspondant le mieux 
-                          au suspect. Pour plus de détails, cliquez sur le bouton Aide.""",
+                          text=""" Veuillez choisir la ou les images correspondant le mieux\ 
+ au suspect. Pour plus de détails, cliquez sur le bouton Aide.""",
                           font='Helvetica 16 bold', bg='white')
     labelChoix.pack()
 
@@ -665,9 +668,9 @@ def f4(env_path, path_final_img):
     f4_final.geometry("%dx%d" % (w, h))
     f4_final.configure(bg='white')
 
-    labelexpl = Label(f4_final, text="""Voici l'image finale. Vous pouvez utiliser 
-                      le menu en onglet pour l'exporter, recommencer une session 
-                      ou quitter l'application.""",
+    labelexpl = Label(f4_final, text="""Voici l'image finale. Vous pouvez utiliser\
+ le menu en onglet pour l'exporter, recommencer une session\
+ ou quitter l'application.""",
                       bg="white", font="Arial 14 italic")
     labelexpl.pack()
 
@@ -712,8 +715,8 @@ def f5(env_path, img_f5):
         and how to write a valid name for the image. 
         """
         format_path = utils.get_sub_sys()
-        showinfo('Aide', """ Vous opérez sous %s .
-                 Voici les formats de chemin approriés pour chaque système d'exploitation : 
+        showinfo('Aide', """ Vous opérez sous %s .\
+ Voici les formats de chemin approriés pour chaque système d'exploitation : 
                      
                      - Windows : C:\Repertoire\dossierfinal
                          
@@ -737,6 +740,7 @@ def f5(env_path, img_f5):
         """
         chemin = T1.get("1.0", "end-1c")
         nom = T2.get("1.0", "end-1c")
+        logging.info('Exporting image')
 
         if nom != '':
             jpg = '.jpg'
@@ -753,12 +757,12 @@ def f5(env_path, img_f5):
         # export if possible
         try:
             img_save.save(os.path.join(path_defaut, nom_final), "JPEG")
-            showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou
-                     fermer le logiciel à partir de l'onglet menu de la 
-                     fenêtre précédente.""")
+            showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou\
+ fermer le logiciel à partir de l'onglet menu de la\
+ fenêtre précédente.""")
         except:
-            showinfo('Attention', """Le chemin ou le nom de l'image ne sont pas
-                     au bon format.""")
+            showinfo('Attention', """Le chemin ou le nom de l'image ne sont pas\
+ au bon format.""")
 
         f5_xprt.destroy()
         
