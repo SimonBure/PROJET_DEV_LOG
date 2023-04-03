@@ -1,13 +1,29 @@
 projet package
 ==============
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   projet.src
+
 Submodules
 ----------
 
-projet.main module
-------------------
+projet.Setup\_dev module
+------------------------
 
-.. automodule:: projet.main
+.. automodule:: projet.Setup_dev
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+projet.utils module
+-------------------
+
+.. automodule:: projet.utils
    :members:
    :undoc-members:
    :show-inheritance:

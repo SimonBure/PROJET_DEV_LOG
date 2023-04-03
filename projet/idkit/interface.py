@@ -9,7 +9,6 @@ import database
 import algen
 
 
-
 def f1(env_path):
     """
     Creates the window 1 from the execution of main.py 
@@ -25,20 +24,20 @@ def f1(env_path):
         Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
         showinfo('Aide', """Bienvenue dans Idkit, le logiciel de génération de
-        portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. 
-        \n\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner 
-        les attributs que présente le suspect. \n\nVeillez à  séléctionner 
-        judicieusement ces attributs car ils permettront de choisir les images 
-        ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs 
-        sélectionnés, plusieurs images vous seront présentées et vous devrez 
-        sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une 
-        des images présentée vous semble convenable, vous pouvez arrêter la 
-        recherche en séléctionnant une unique photo et en sélectionnnant 
-        'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant 
-        le menu déroulant en haut à gauche, vous pourrez:\n\n
-            - Exporter la photo à l'endroit de votre choix\n\n
-            - Recommencer une nouvelle recherche\n\n
-            - Quitter le programme""")
+portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. 
+\n\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner 
+les attributs que présente le suspect. \n\nVeillez à  séléctionner 
+judicieusement ces attributs car ils permettront de choisir les images 
+ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs 
+sélectionnés, plusieurs images vous seront présentées et vous devrez 
+sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une 
+des images présentée vous semble convenable, vous pouvez arrêter la 
+recherche en séléctionnant une unique photo et en sélectionnnant 
+'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant 
+le menu déroulant en haut à gauche, vous pourrez:\n\n
+    - Exporter la photo à l'endroit de votre choix\n\n
+    - Recommencer une nouvelle recherche\n\n
+    - Quitter le programme""")
 
     def openf2():
         """

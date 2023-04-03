@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import src.database as db
-import src.interface as main
+import src_deploy.interface as main
 import utils
 import shutil
 import sys
@@ -58,30 +57,6 @@ if test == "Y" or test == "y":
     add_path = os.path.join(path, "model.pt")
     url4 = "https://filesender.renater.fr/download.php?token=376da0cb-3715-41be-9851-fb27af1aba89&files_ids=23539804"
     wget.download(url4, out=add_path)
-    
-    # Temp as no option for downloading dataset exist
-    path = os.path.join(env_path, "temp", "list_attr_celeba.txt")
-    dst = utils.get_path(env_path, "Img_base")
-    dst = os.path.join(dst, "celeba", "list_attr_celeba.txt")
-    shutil.copy(path, dst)
-    path = os.path.join(env_path, "temp", "img_align_celeba.zip")
-    dst = utils.get_path(env_path, "Img_base")
-    dst = os.path.join(dst, "celeba")
-    with zipfile.ZipFile(path, 'r') as zip_ref:
-        zip_ref.extractall(dst)
-
-    path = os.path.join(env_path, "temp", "idkit.png")
-    dst = utils.get_path(env_path, "Interface")
-    dst = os.path.join(dst, "idkit.png")
-    shutil.copy(path, dst)
-
-    test = input("Créer database ? (Y/N)")
-    if test == "Y" or test == "y":
-        db.create_database(env_path, "Project")
-        logging.info('Creating database')
-
-        img = db.request_data_by_id(env_path, 1)
-        print(img)
     
 test = input("Lancer programme ? (Y/N)")
 

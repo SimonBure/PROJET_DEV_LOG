@@ -10,12 +10,10 @@ import sys
 import os
 
 # Specify the path where the file that need to be documented are located
-sys.path.insert(0, os.path.abspath(
-    os.path.join('..', '..', 'projet')))
-sys.path.insert(0, os.path.abspath(
-    os.path.join('..', '..', 'projet', 'src')))
+sys.path.insert(0, '/home/fallog/Bureau/BIOSCIENCES/4A/S2/DEV_LOG/PROJET_DEV_LOG')
+sys.path.insert(0, '/home/fallog/Bureau/BIOSCIENCES/4A/S2/DEV_LOG/PROJET_DEV_LOG/projet')
 
-project = 'projet'
+project = 'IdKit'
 copyright = '2023'
 author = """Simon Buré, Lionel Dalmau, Mayoran Raveendran, Olivia Seffacene, Jesus Uxue Mendez"""
 release = '0'

@@ -1,9 +1,9 @@
-.. projet documentation master file, created by
+.. IdKit documentation master file, created by
    sphinx-quickstart on Thu Mar  2 15:44:34 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to projet's documentation!
+Welcome to IdKit's documentation!
 ==================================
 
 .. toctree::

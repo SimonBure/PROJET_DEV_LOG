@@ -8,9 +8,9 @@ from PIL import ImageFilter
 from torch import Tensor
 from torchvision import transforms
 
-from database import request_data_by_id
-import src_deploy.autoencoder_deploy as ae
 import utils
+from database import request_data_by_id
+import autoencoder_deploy as ae
 
 
 def flatten_img(img_path, env_path):
@@ -77,7 +77,6 @@ def flatten_img(img_path, env_path):
                 else:
                     img_tensor_crop = img_tensor
 
-                # print(img_tensor_crop.size())
                 encoded_tensor = ae.encode(autoencoder, img_tensor_crop)
 
                 flat_img_tensor[i]: Tensor = flatten(encoded_tensor)
@@ -152,12 +151,7 @@ def deflatten_img(flat_tensor, base_encoded_dim, env_path):
 
             decoded_img = ae.decode(autoencoder, unflat_img)
 
-            # Reducing the noise with a filter
-            filter = ImageFilter.EDGE_ENHANCE
-            enhanced_img = decoded_img.filter(filter)
-            enhanced_img = enhanced_img.filter(ImageFilter.SMOOTH)
-
-            img_list[i] = enhanced_img
+            img_list[i] = decoded_img
 
         return img_list
 
@@ -360,7 +354,6 @@ def chose_closest_tensor(input_tensor, other_tensors):
     # Computing euclidian distance between input and the other tensors
     dist_list = [torch.dist(input_tensor, t, p=2) for t in other_tensors]
     dist_tensor = Tensor(dist_list)
-    # print(dist_tensor)
     # Choosing the tensor that has the closest distance to input_tensor
     closest_tensor = other_tensors[torch.argmin(dist_tensor)]
     return closest_tensor
@@ -419,7 +412,6 @@ def crossing_over(tensor_encoded, crossing_rate):
         bool_tensor = ~Tensor(is_tensor_used).bool()
         # Only tensor remaining to be swapped
         remaining_tensor = tensor_encoded[bool_tensor][0]
-        print(remaining_tensor.size())
         last_cross_tens = torch.rand(size=remaining_tensor.size())
         last_chosen_tens = chose_closest_tensor(remaining_tensor,
                                                 tensor_encoded[~bool_tensor])
@@ -431,23 +423,6 @@ def crossing_over(tensor_encoded, crossing_rate):
         global_tensor[0] = new_tensor
         global_tensor[1] = chosen_tensor
         global_tensor[2] = final_tensor
-
-        # for i, tensor in enumerate(tensor_encoded):
-        #     crossing_tensor = torch.rand(size=tensor.size())
-        #     # Swap with the closest image between the two others
-        #     other_ind = [k for k in range(tensor_encoded.size()[0]) if k != i]
-        #     chosen_tensor = chose_closest_tensor(tensor, tensor_encoded[other_ind])
-        #
-        #     equal_tensor_list = [torch.equal(chosen_tensor, t) for t in tensor_encoded]
-        #     bool_tensor = Tensor(equal_tensor_list).bool()
-        #     print(bool_tensor)
-        #     tensor_encoded = tensor_encoded[bool_tensor]
-        #     print(tensor_encoded.size())
-        #     # Swapping pixels between tensors
-        #     new_tensor = torch.where(crossing_tensor < crossing_rate,
-        #                              chosen_tensor, tensor)
-        #
-        #     global_tensor[i] = new_tensor
 
         return global_tensor
 
@@ -470,13 +445,13 @@ def create_new_images(img_path, env_path):
     """Generates 5 new images based on the 3 given with img_path.
     It uses the crossing_over function to generate 6 new images by
     swapping the values between the encoded tensors and then remove the
-    worst one in terms of standard deviation
+    worst one in terms of euclidian distance with the others
 
     Parameters
     ----------
     img_path: list of str
         Path where to retrieve the selected images. These images are
-        used to create 5 new images.
+        used to create 5 new images with crossing-overs
     env_path: str
         Path of the current environment, used to save the generated
         images at the correct place
@@ -487,9 +462,9 @@ def create_new_images(img_path, env_path):
     """
     img_encoded_tensor = flatten_img(img_path, env_path)
     # Create 3 new images with crossing-overs
-    crossed_img = crossing_over(img_encoded_tensor, crossing_rate=0.35)
+    crossed_img = crossing_over(img_encoded_tensor, crossing_rate=0.5)
     # Create 3 more images with crossing-overs
-    more_crossing = crossing_over(img_encoded_tensor, crossing_rate=0.35)
+    more_crossing = crossing_over(img_encoded_tensor, crossing_rate=0.5)
     # Concatenation of the 6 tensors
     new_tensors = torch.cat((crossed_img, more_crossing), dim=0)
     # Keep the 5 best images in terms of deviation
@@ -508,119 +483,6 @@ def create_new_images(img_path, env_path):
 if __name__ == "__main__":
     env_path = "./projet"
 
-    id_nb = 20
-    # Path of the 20th image
-    pic_path = request_data_by_id(env_path, id_nb, who='idkit')
-    # print(f"Path for the picture(s): {pic_path}")
-
-    # Path of the 3 images
-    id_array = np.arange(start=3, stop=6, step=1)
-    pic_path_list = request_data_by_id(env_path, id_array, who='idkit')
-    # print(f"Path list: {pic_path_list}")
-
-    # Open the image with PIL
-    pic = Image.open(pic_path)
-
-    # Converting the image to a Tensor
-    tf_tensor = transforms.ToTensor()
-    pic_tensor = tf_tensor(pic)
-
-    # Testing mutation on all pixels
-    # some_tensor = torch.randn(size=(3, 3))
-    # print(f"Base tensor: {some_tensor}")
-    # print(f"Mutated tensor: {mutate_img(some_tensor, mut_type='uniform')}")
-
-    # Testing mutation on random pixels
-    # mut_tensor_rdm = mutate_img(some_tensor, mutation_rate=0.2)
-    # print(f"Mutated tensor (random): {mut_tensor_rdm}")
-    # mut_arr_rdm = mutate_img(some_array, mutation_rate=0.2)
-    # print(f"Mutated array (random): {mut_arr_rdm}")
-
-    # Load an autoencoder and encode an img
-    # pic.show("Image de base")
-    model_path = os.path.join(utils.get_path(env_path, "Encoder"), "model.pt")
-    pic_cropped = ae.crop_image_tensor(pic_tensor)
-    print(f"Base size: {pic_tensor.size()}")
-    print(f"Cropped size: {pic_cropped.size()}")
-    autoencoder = ae.load_model(model_path)  # Loading the trained model
-    encoded_img = ae.encode(autoencoder, pic_cropped)  # Encoding the tensor
-    print(f"Image tensor : {encoded_img.size()}")
-    decoded = ae.decode(autoencoder, encoded_img)  # Decoding the tensor
-    # decoded.show("Image décodée")
-
-    # Testing flatten on an image
-    flat_encoded_tensor = flatten_img(pic_path, env_path)
-    print(f"Flat encoded size: {flat_encoded_tensor.size()}")
-
-    # Testing flatten on several images
-    flat_several = flatten_img(pic_path_list, env_path)
-    print(f"Several image tensor size: {flat_several.size()}")
-    print(f"Dim of the tensor: {flat_several.dim()}")
-
-    # Testing deflatten
-    # deflat_img = deflatten_img(flat_encoded_tensor, encoded_img.size())
-    # deflat_img.show()
-
-    # Testing deflatten on several images
-    # deflat_several = deflatten_img(flat_several, encoded_img.size())
-    # for img in deflat_several:
-    #     img.show()
-
-    # Testing mutations on one flat encoded tensor
-    # Adding white noise on every pixel
-    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.01, noise=0.5, scale='total', mode='add')
-    # deflat_img = deflatten_img(mut_img, encoded_img.size())
-    # deflat_img.show()
-    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.7, noise=0.5, scale='total', mode='add')
-    # deflat_img = deflatten_img(mut_img, encoded_img.size())
-    # deflat_img.show()
-
-    # Adding white noise on some pixel
-    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.01, noise=0.8, scale='partial', mode='add')
-    # deflat_img = deflatten_img(mut_img, encoded_img.size())
-    # deflat_img.show()
-    # mut_img = mutate_img(flat_encoded_tensor, mutation_rate=0.5, noise=0.8, scale='partial', mode='add')
-    # deflat_img = deflatten_img(mut_img, encoded_img.size())
-    # deflat_img.show()
-
-    # Reconstructing tensor
-    # Totally
-    # mut_img = mutate_img(flat_encoded_tensor, mode='reconstruct', scale='total')
-    # deflat_img = deflatten_img(mut_img, encoded_img.size())
-    # deflat_img.show()
-
-    # Partially
-    # mut_img = mutate_img(flat_encoded_tensor, mode='reconstruct', scale='partial')
-    # deflat_img = deflatten_img(mut_img, encoded_img.size())
-    # deflat_img.show()
-
-    # Testing mutations on several flat encoded tensors
-    # Adding white noise on some pixel
-    # print("Partial mutation on images")
-    # mut_several = mutate_img(flat_several, mutation_rate=0.1, mode='add', scale='partial')
-    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
-    # for img in deflat_sev:
-    #     img.show()
-
-    # Adding white noise on some pixel
-    # mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='total')
-    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
-    # for img in deflat_sev:
-    #     img.show()
-
-    # Reconstructing tensor
-    # Totally
-    # mut_several = mutate_img(flat_several, mode='reconstruct', scale='total')
-    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
-    # for img in deflat_sev:
-    #     img.show()
-
-    # Partially
-    # mut_several = mutate_img(flat_several, mutation_rate=0.2, mode='add', scale='total')
-    # deflat_sev = deflatten_img(mut_several, encoded_img.size())
-    # for img in deflat_sev:
-    #     img.show()
-
     # Choosing 3 random images in the database
     random_id = np.random.randint(low=0, high=600, size=(3,))
     # print(random_id)
@@ -628,18 +490,16 @@ if __name__ == "__main__":
     print(random_img_path)
     random_img_tensor = flatten_img(random_img_path, env_path)
 
-    # chose_closest_tensor(random_img_tensor[0], random_img_tensor[1:])
-
     # Showing the 3 selected images
     for path in random_img_path:
         img = Image.open(path)
         img.show()
 
     # Mutating the images
-    mut_rand_tensor = mutate_img(random_img_tensor, mutation_rate=0.1,
-                                 mode='reconstruct', scale='partial')
+    # mut_rand_tensor = mutate_img(random_img_tensor, mutation_rate=0.1,
+    #                              mode='reconstruct', scale='partial')
 
-    # Testing crossing-overs
+    # Crossing-overs between the pictures
     # crossed_tensors = crossing_over(random_img_tensor, crossing_rate=0.3)
     # crossed_tensors_mut = crossing_over(mut_rand_tensor, crossing_rate=0.4)
     # deflat_sev = deflatten_img(crossed_tensors, encoded_img.size())
@@ -656,12 +516,3 @@ if __name__ == "__main__":
     #     img.show()
 
     create_new_images(random_img_path, env_path)
-
-    # Regenerating based on already generated images
-    # path_gen_img = utils.get_path(env_path, 'gen_img')
-    # path_img = [path_gen_img + "/" + f"image{i}.png" for i in range(3)]
-    # tensor_regen = flatten_img(path_img, env_path)
-    # crossing_over(tensor_regen, crossing_rate=0.5)
-    # img_regen = deflatten_img(tensor_regen, encoded_img.size(), env_path)
-    # for img in img_regen:
-    #     img.show()
