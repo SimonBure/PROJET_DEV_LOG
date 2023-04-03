@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import src_deploy.interface as main
+import idkit.interface as main
 import utils
 import shutil
 import sys
