@@ -173,11 +173,15 @@ def load_dataset(width, height, nb_samples=-1, crop_images=False):
 
 def crop_image_tensor(tensor):
     """
-    Crops a tensor to the right shape
+    Crops an image tensor to a fixed size.
+
     Parameters:
-        tensor (torch.Tensor): Tensor
+        tensor (torch.Tensor): A 3D tensor of shape (height, width, channels) representing an RGB image.
+
     Returns:
-        cropped_tensor (torch.Tensor): Cropped tensor"""
+        torch.Tensor: A 3D tensor of shape (crop_height, crop_width, channels) representing the cropped image.
+
+    """
     top = 40
     left = 18
     crop_height = 160
