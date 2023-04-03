@@ -1,0 +1,53 @@
+idkit package
+=============
+
+Submodules
+----------
+
+idkit.algen module
+------------------
+
+.. automodule:: idkit.algen
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+idkit.autoencoder\_deploy module
+--------------------------------
+
+.. automodule:: idkit.autoencoder_deploy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+idkit.database module
+---------------------
+
+.. automodule:: idkit.database
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+idkit.interface module
+----------------------
+
+.. automodule:: idkit.interface
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+idkit.utils module
+------------------
+
+.. automodule:: idkit.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: idkit
+   :members:
+   :undoc-members:
+   :show-inheritance:

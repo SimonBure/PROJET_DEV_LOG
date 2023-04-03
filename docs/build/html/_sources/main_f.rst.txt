@@ -1,7 +1,0 @@
-main\_f module
-==============
-
-.. automodule:: main_f
-   :members:
-   :undoc-members:
-   :show-inheritance:
