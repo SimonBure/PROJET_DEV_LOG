@@ -16,7 +16,7 @@ import torchvision.transforms.functional as TF
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
 
-from projet import utils                   # Mathematical functions
+from projet import utils                   
 
 class Autoencoder(nn.Module):
     """
@@ -172,6 +172,12 @@ def load_dataset(width, height, nb_samples=-1, crop_images=False):
     return dataset
 
 def crop_image_tensor(tensor):
+    """
+    Crops a tensor to the right shape
+    Parameters:
+        tensor (torch.Tensor): Tensor
+    Returns:
+        cropped_tensor (torch.Tensor): Cropped tensor"""
     top = 40
     left = 18
     crop_height = 160
@@ -183,7 +189,13 @@ def crop_image_tensor(tensor):
     return cropped_tensor
 
 def plot_5_images(dataset, width, height):
-
+    """
+    Plots the 5 first images of the dataset
+    Parameters:
+        dataset (Dataloader): dataset
+        width (int): width of the images
+        height (int): height of the images
+    """
     samples = dataset.samples
 
     fig, axs = plt.subplots(1, 5, figsize=(20,20))
@@ -203,13 +215,20 @@ def plot_5_images(dataset, width, height):
 
 ################### Data spliting  ##################
 def split_train_valid_test_set(dataset, p_train, p_valid):
+    """
+    Splits the dataset into a training set and a validation 
+    Parameters:
+        dataset (Dataloader) : Dataset to be splited
+        p_train (float) : Proportion of the total dataset for the training
+        p_valid (float) : Proportion of the total dataset for the validation
+    Returns:
+    
+    """
     samples = dataset.samples
     nb_samples = samples.shape[0]
-    p_test = 1 - p_train - p_valid
-
+    
     nb_test = (int) (nb_samples * (1-p_train))
-    nb_valid = (int) ((nb_samples - nb_test) * p_valid)
-
+    
     sample_train, sample_test = train_test_split(samples, test_size=nb_test)
     sample_train, sample_valid = train_test_split(sample_train, test_size=p_valid)
 
@@ -224,6 +243,16 @@ def split_train_valid_test_set(dataset, p_train, p_valid):
     return train_ds.tensors[0], valid_ds.tensors[0], test_ds.tensors[0]
 
 def test_train_model(model, train_loader, val_loader, nb_epochs, learning_rate):
+    """
+    Trains the autoencoder and plots the loss as a function of the numbers of epochs for 
+    the validation and the training set
+    Parameters:
+        model (nn.Module): model to be trained
+        train_loader (Dataloader): trainnig dataset 
+        valid_loader (Dataloader): validation dataset 
+    Returns:
+        model (nn.Module): Trained Autoencoder model.
+    """
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = torch.nn.MSELoss()
     train_losses, val_losses = [], []
@@ -268,7 +297,16 @@ def test_train_model(model, train_loader, val_loader, nb_epochs, learning_rate):
     return(model)
 
 def train_autoencoder(autoencoder, train_dl, nb_epochs, learning_rate):
-
+    """
+    Trains an Autoencoder model on the provided dataset for a specified number of epochs and learning rate.
+    Parameters:
+        autoencoder (nn.Module) : Model to be trained
+        train_dl(Dataloader) : Dataset containing the images to be used for training.
+        nb_epochs (int): The number of epochs to train the model for.
+        learning_rate (float): learning rate parameters to chose for the training. 
+    Returns:
+        Autoencoder (nn.Module): Trained Autoencoder model.
+    """
     # Define the loss function and optimizer
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(autoencoder.parameters(), lr=learning_rate)
