@@ -3,10 +3,8 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
+import torch.optim 
 from torchsummary import summary
-from torchvision import datasets, transforms
 from torch.utils.data import TensorDataset, Dataset, DataLoader
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -17,8 +15,7 @@ import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split
-import time                      # Allow to compute runtime
-import math
+
 from projet import utils                   # Mathematical functions
 
 class Autoencoder(nn.Module):
