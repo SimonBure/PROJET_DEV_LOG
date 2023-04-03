@@ -9,6 +9,7 @@ import database
 import algen
 
 
+
 def f1(env_path):
     """
     Creates the window 1 from the execution of main.py 
@@ -23,21 +24,21 @@ def f1(env_path):
         """
         Event linked to the "Aide" button : displays a pannel "Aide" when the user clicks on the button 
         """
-        showinfo('Aide', "Bienvenue dans Idkit, le logiciel de génération de \
-    portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. \
-    \nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner \
-    les attributs que présente le suspect. \nVeillez à  séléctionner \
-    judicieusement ces attributs car ils permettront de choisir les images \
-    ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs \
-    sélectionnés, plusieurs images vous seront présentées et vous devrez \
-    sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une \
-    des images présentée vous semble convenable, vous pouvez arrêter la \
-    recherche en séléctionnant une unique photo et en sélectionnnant \
-    'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant \
-    le menu déroulant en haut à gauche, vous pourrez:\n\
-        - Exporter la photo à l'endroit de votre choix\n\
-        - Recommencer une nouvelle recherche\n\
-        - Quitter le programme")
+        showinfo('Aide', """Bienvenue dans Idkit, le logiciel de génération de
+        portrait robot ! \n\nAfin de lancer le programme, appuyer sur Commencer. 
+        \n\nUne nouvelle fenêtre apparaitra afin de vous permettre de sélectionner 
+        les attributs que présente le suspect. \n\nVeillez à  séléctionner 
+        judicieusement ces attributs car ils permettront de choisir les images 
+        ressemblant le plus à la personne souhaitée. \n\nUne fois les attributs 
+        sélectionnés, plusieurs images vous seront présentées et vous devrez 
+        sélectionner les 3 images les plus pertinentes à chaque fois. \nSi une 
+        des images présentée vous semble convenable, vous pouvez arrêter la 
+        recherche en séléctionnant une unique photo et en sélectionnnant 
+        'Image finale'. \n\nAinsi la fenêtre d'export apparaitra et en utilisant 
+        le menu déroulant en haut à gauche, vous pourrez:\n\n
+            - Exporter la photo à l'endroit de votre choix\n\n
+            - Recommencer une nouvelle recherche\n\n
+            - Quitter le programme""")
 
     def openf2():
         """
@@ -82,6 +83,7 @@ def f1(env_path):
     boutH.place(anchor=tk.E, relheight=0.1, relwidth=0.15, relx=0.7, rely=0.8)
 
     f1_acc.mainloop()
+
 
 
 def f2(env_path):
@@ -184,35 +186,34 @@ def f2(env_path):
         liste_acc = [['Genre', 'Age', "Cheveux", "Lunettes",
                       "Moustache", "Barbe"], [0, 0, 0, 0, 0, 0]]
 
-        # test sexe
-        if (g == '1'):  # 0 : nsp, 1 : femme, 2 : homme
+        # test for the genre
+        if (g == '1'):  
             liste_acc[1][0] = 1
         elif (g == '2'):
             liste_acc[1][0] = 2
 
-        # test âge
-        if (a == '3'):  # 0 : nsp, 1 : jeune, 2 : vieux
+        # test for the age
+        if (a == '3'):  
             liste_acc[1][1] = 1
         elif (a == '4'):
             liste_acc[1][1] = 2
 
-        # test cheveux
+        # test for the hair
         list_cheveux = ["Noirs", "Blonds", "Bruns", "Gris", "Chauve", "Autre"]
-        # 0 : ne sait pas, noirs : 1, blonds : 2, bruns : 3, gris : 4, chauve : 5, Autre : 6
         for i in range(len(list_cheveux)):
             if (list_cheveux[i] == c):
                 liste_acc[1][2] = i+1
 
-        # test accessoires : dans l'ordre des cases 3 à 6; 0 : ne sait pas ou non présent, 1 : présent
+        # test for the accessoiries
         for i in range(3, 5):
-            if (acc[i-3] == 1):  # Si acc est choisi on le met dans la requête
+            if (acc[i-3] == 1): 
                 liste_acc[1][i] = 1
             else:
-                if acc[4] == 1:  # Si pas choisi + pas sur on ne sait pas donc 0
+                if acc[4] == 1:
                     liste_acc[1][i] = 0
-                else:  # Si pas choisi + on est sur, donc 2 : pas l'attribut
+                else:  
                     liste_acc[1][i] = 2
-        if acc[3] == 1:  # Si Aucun alors peut importe les précédants choix on met tout à 2
+        if acc[3] == 1: 
             liste_acc[1][3] = 2
             liste_acc[1][4] = 2
             liste_acc[1][5] = 2
@@ -238,12 +239,13 @@ def f2(env_path):
                                                          ans_user[1][3],
                                                          ans_user[1][4],
                                                          ans_user[1][5])
-            # Liste de path
+            
             img_list = database.get_5_img(env_path, array_metadata)
             f2_flr.destroy()
             f3(env_path, img_list)
         elif test == TRUE:
             showinfo('ATTENTION', 'Veuillez remplir tous les champs.')
+
 
     # creation of the window
 
@@ -256,11 +258,11 @@ def f2(env_path):
                       width=20, borderwidth=4, bg='#BDECB6',
                       command=lambda: openf3(env_path))
     boutSend.place(anchor=tk.N, relheight=0.07,
-                   relwidth=0.10, relx=0.5, rely=0.7)
+                   relwidth=0.10, relx=0.5, rely=0.8)
 
-    labelT = Label(f2_flr, text="Ce formulaire vise à affiner la base de \
-    données pour vous présenter les solutions les plus pertinentes dans un \
-    temps minimal.", bg="white", font="Arial 14 italic")
+    labelT = Label(f2_flr, text="""Ce formulaire vise à affiner la base de
+    données pour vous présenter les solutions les plus pertinentes dans un
+    temps minimal.""", bg="white", font="Arial 14 italic")
     labelT.pack()
 
     labelSEXE = Label(f2_flr, text="Quel est le genre de l'individu ?",
@@ -274,7 +276,6 @@ def f2(env_path):
     bH = Radiobutton(f2_flr, text="Homme", font='Helvetica 12',
                      variable=vari, value=2, command=recup_RB_genre,
                      bg='white')
-    # À laisser pour qu'on puisse être sûrs qu'on a tout rempli
     bg_nsp = Radiobutton(f2_flr, text="Ne sais pas", font='Helvetica 12',
                          variable=vari, value=0, command=recup_RB_genre,
                          bg='white')
@@ -293,7 +294,6 @@ def f2(env_path):
     bA = Radiobutton(f2_flr, text="Âgé", font='Helvetica 12',
                      variable=valeur, value=4, command=recup_RB_age,
                      bg='white')
-    # À laisser pour qu'on puisse être sûrs qu'on a tout rempli
     bA_nsp = Radiobutton(f2_flr, text="Ne sais pas", font='Helvetica 12',
                          variable=valeur, value=0,
                          command=recup_RB_age, bg='white')
@@ -341,6 +341,8 @@ def f2(env_path):
     boutnsp.pack()
 
     f2_flr.mainloop()
+
+
 
 
 def f3(env_path, img_list):
@@ -459,7 +461,7 @@ def f3(env_path, img_list):
     def openf4(env_path):
         """
         Event  linked to the "Valider" button : depending on the number
-        of images the user selected, refreshes the window 3 or opens
+        of images the user selected, refresh the window 3 or opens
         the window 4
         """
         refresh_3 = verif_rep_3()
@@ -467,7 +469,8 @@ def f3(env_path, img_list):
         i_fin = pass_4[2]
         
 
-        # if 3 images were selected : open f3 and display the new images produced by the genetic algorithm
+        # if 3 images were selected : open f3 and display the new images 
+        # produced by the genetic algorithm
         if (refresh_3[0] == TRUE and pass_4[1] == FALSE):
             
             idx_chx = verif_rep_3()
@@ -476,7 +479,7 @@ def f3(env_path, img_list):
             # wait for the new images to be created and stored
             img_ready = algen.create_new_images(img_path, env_path)
             
-            if img_ready == TRUE:
+            if (img_ready==TRUE):
                 chemin_dossier = utils.get_path(env_path, 'gen_img')
                 # replace the old paths by the new
                 for i in range(len(img_list)):
@@ -505,10 +508,10 @@ def f3(env_path, img_list):
         Event linked to the "Aide" button : display an "Aide" pannel when
         the user clicks on the button
         """
-        showinfo('Aide', """Veuillez choisir les images correspondant le mieux\
-                au suspect parmi les images proposées. Choisissez les 3 images\
-                les plus exactes jusqu'à ce que l'une d'elles vous satisfasse.\
-                Pour sélectionner l'image finale, veuillez cocher la case \
+        showinfo('Aide', """Veuillez choisir les images correspondant le mieux
+                au suspect parmi les images proposées. Choisissez les 3 images
+                les plus exactes jusqu'à ce que l'une d'elles vous satisfasse.
+                Pour sélectionner l'image finale, veuillez cocher la case
                 "Finale" pour confirmer votre choix.""")
 
     # creation of the 3rd window
@@ -531,10 +534,10 @@ def f3(env_path, img_list):
 
     # Creation of an error message if less than 5 images can fit the user's criteres
     if img_list == 0:
-        showinfo('ATTENTION', '''Il n'existe pas assez d'images correspondantes\
-                à cette sélection dans la base de données. Veuillez élargir\
-                 vos critères en sélectionnant "ne sais pas" pour certains \
-                attributs.''')
+        showinfo('ATTENTION', """Il n'existe pas assez d'images correspondantes
+                à cette sélection dans la base de données. Veuillez élargir
+                vos critères en sélectionnant "ne sais pas" pour certains
+                attributs.""")
         f3_img.destroy()
         f2(env_path)
 
@@ -579,9 +582,8 @@ def f3(env_path, img_list):
     label5.pack()
 
     labelChoix = tk.Label(f3_img,
-                          text=" Veuillez choisir la ou les images \
-                          correspondant le mieux au suspect. Pour plus de \
-                          détails, cliquez sur le bouton Aide.",
+                          text=""" Veuillez choisir la ou les images correspondant le mieux 
+                          au suspect. Pour plus de détails, cliquez sur le bouton Aide.""",
                           font='Helvetica 16 bold', bg='white')
     labelChoix.pack()
 
@@ -607,11 +609,11 @@ def f3(env_path, img_list):
                      variable=vb5, onvalue=1, offvalue=0,
                      command=recup_valCheckB)
 
-    b1.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.10, rely=0.05)
-    b2.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.30, rely=0.05)
-    b3.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.50, rely=0.05)
-    b4.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.70, rely=0.05)
-    b5.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.90, rely=0.05)
+    b1.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.10, rely=0.08)
+    b2.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.30, rely=0.08)
+    b3.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.50, rely=0.08)
+    b4.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.70, rely=0.08)
+    b5.place(anchor=tk.N, relheight=0.1, relwidth=0.1, relx=0.90, rely=0.08)
 
     boutVal = Button(f3_img, text="Valider", font='Arial 12', height=2,
                      width=20, borderwidth=4, bg='#BDECB6',
@@ -664,9 +666,9 @@ def f4(env_path, path_final_img):
     f4_final.geometry("%dx%d" % (w, h))
     f4_final.configure(bg='white')
 
-    labelexpl = Label(f4_final, text="Voici l'image finale. Vous pouvez \
-                      utiliser le menu en onglet pour l'exporter, \
-                      recommencer une session ou quitter l'application.",
+    labelexpl = Label(f4_final, text="""Voici l'image finale. Vous pouvez utiliser 
+                      le menu en onglet pour l'exporter, recommencer une session 
+                      ou quitter l'application.""",
                       bg="white", font="Arial 14 italic")
     labelexpl.pack()
 
@@ -679,14 +681,6 @@ def f4(env_path, path_final_img):
     menu1.add_command(label="Quitter", command=quitter)
     menubar.add_cascade(label="Fichier", menu=menu1)
 
-    '''
-    frame_final = Frame(f4_final, width=400, height=400)
-    frame_final.place(anchor='center', relx=0.5, rely=0.45)
-    img_f5 = Image.open(path_final_img)
-    image_finale = ImageTk.PhotoImage(img_f5)
-    label_final = Label(frame_final, image = image_finale)
-    label_final.pack()
-    '''
     frame_final = Frame(f4_final, width=400, height=400)
     frame_final.place(anchor='center', relx=0.5, rely=0.45)
     img_f5 = Image.open(path_final_img)
@@ -701,19 +695,44 @@ def f4(env_path, path_final_img):
 
 
 def f5(env_path, img_f5):
+    """
+    Creates the window 5 from the execution of openf5
 
-    f5_xprt = Tk()
-    f5_xprt.geometry("500x300")
-    f5_xprt.configure(bg='white')
-
+    Parameters : 
+    ------------
+    env_path : str
+        The relative path to file Setup_dev
+    img_f5 : PIL image 
+        The final image chosen by the user
+    """
+    
+    def aide():
+        """
+        Event linked to the 'Aide' button.
+        Displays a message explaning which format to use for the path,
+        and how to write a valid name for the image. 
+        """
+        format_path = utils.get_sub_sys()
+        showinfo('Aide', """ Vous opérez sous %s .
+                 Voici les formats de chemin approriés pour chaque système d'exploitation : 
+                     
+                     - Windows : C:\Repertoire\dossierfinal
+                         
+                     - Linux : /home/utilisateur/dossierfinal
+                         
+                     - MacOS : /Repertoire/dossierfinal         
+                 
+                 """ % format_path)
+        
     def export():
         """
         Exports the final image selected by the user. The images is
         exported in the directory "Result" under the name "image_finale".
+        
         If the user enters a specific path or name, it is taken into
         account for the export. If the path or the name are incorrect, a
-         message of error pops up. The image can only be exported in
-         ".jpg" format
+        message of error pops up. The image can only be exported in
+        ".jpg" format
         """
         chemin = T1.get("1.0", "end-1c")
         nom = T2.get("1.0", "end-1c")
@@ -733,16 +752,23 @@ def f5(env_path, img_f5):
         # export if possible
         try:
             img_save.save(os.path.join(path_defaut, nom_final), "JPEG")
-            showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou\
-                     fermer le logiciel à partir de l'onglet menu de la \
+            showinfo('Info', """Image enregistrée. Vous pouvez recommencer ou
+                     fermer le logiciel à partir de l'onglet menu de la 
                      fenêtre précédente.""")
         except:
-            showinfo('Attention', "Le chemin ou le nom de l'image ne sont pas\
-                     au bon format.")
+            showinfo('Attention', """Le chemin ou le nom de l'image ne sont pas
+                     au bon format.""")
 
         f5_xprt.destroy()
+        
+        
+    
+    # creation of the 5th window
+    
+    f5_xprt = Tk()
+    f5_xprt.geometry("500x300")
+    f5_xprt.configure(bg='white')
 
-    # /!\/!\/!\ préciser le format à l'utilisateur (mettre un exemple...)
     txt1 = Label(f5_xprt, text="Chemin de sauvegarde",
                  bg="white", font="Arial 14 italic")
     txt1.pack()
@@ -755,10 +781,15 @@ def f5(env_path, img_f5):
     T2 = Text(f5_xprt, height=2, width=52)
     T2.pack()
 
-    boutSend = Button(f5_xprt, text="OK", font='Arial 12', height=2,
+    boutSend = Button(f5_xprt, text="OK", font='Arial 10', height=2,
                       width=20, borderwidth=4, bg='#BDECB6', command=export)
     boutSend.place(anchor=tk.N, relheight=0.3,
-                   relwidth=0.3, relx=0.5, rely=0.7)
+                   relwidth=0.2, relx=0.4, rely=0.7)
+    
+    boutAide = Button(f5_xprt, text="Aide", font='Arial 10', height=2,
+                      width=20, borderwidth=4, bg='#D2B48C', command=aide)
+    boutAide.place(anchor=tk.N, relheight=0.3,
+                   relwidth=0.2, relx=0.6, rely=0.7)
 
     f5_xprt.mainloop()
 
