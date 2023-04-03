@@ -722,7 +722,10 @@ def f5(env_path, img_f5):
                          
                      - Linux : /home/utilisateur/dossierfinal
                          
-                     - MacOS : /Repertoire/dossierfinal         
+                     - MacOS : /Repertoire/dossierfinal       
+                     
+                Par défaut, le nom de l'image enregistrée est 'image_finale'
+                et elle est enregistrée dans le dossier Result.
                  
                  """ % format_path)
         

@@ -1,6 +1,5 @@
 .idea/
 projet/src_deploy/__pycache__/
-docs/build
 Idkit.log
 docs/source/_static
 docs/source/_templates
@@ -9,3 +8,4 @@ projet/__pycache__/
 projet/src/__pycache__
 projet/tests/__pycache__
 env/
+projet/idkit/__pycache__
