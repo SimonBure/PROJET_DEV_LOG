@@ -15,7 +15,7 @@ IDKIT a été conçu avec **python 3.10.6**, il est donc garanti de fonctionner 
  - Pillow 9.4.0
  - numpy 1.24.2
  - setuptools 67.6.0 
- - PyTorch 1.13.1
+ - PyTorch 2.0.0
  - Torchvision 0.15.1
  - Tkinter 0.1.0
  - wget 3.2
@@ -28,7 +28,7 @@ Si ce n'est pas déja le cas, il est nécessaire d'installer pip pour installer 
 
 Linux : `sudo apt-get install python3-pip `
 
-`pip install pillow==9.4.0 numpy==1.24.2 torch==1.13.1 tk==0.1.0 torchvision==0.15.1 wget==3.2`
+`pip install pillow==9.4.0 numpy==1.24.2 torch==2.0.0 tk==0.1.0 torchvision==0.15.1 wget==3.2`
 
 
 ## Comment installer et utiliser IDKIT ?
